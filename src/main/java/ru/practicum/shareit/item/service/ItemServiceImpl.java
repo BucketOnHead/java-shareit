@@ -49,11 +49,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getItemById(Long itemId, Long ownerId) {
+    public ItemDto getItemById(Long itemId) {
         checkItemExistsById(itemId);
-        checkUserExistsById(ownerId);
         Item item = itemRepository.getItemById(itemId);
-        checkOwnerItem(item, ownerId);
         ItemDto itemDto = itemDtoMapper.toItemDto(item);
         log.debug("Item with ID_{} returned.", itemId);
         return itemDto;
