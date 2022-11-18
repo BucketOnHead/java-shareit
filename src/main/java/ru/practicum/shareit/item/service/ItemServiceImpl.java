@@ -69,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsByNameOrDescription(String text, Long ownerId) {
+    public List<ItemDto> searchItemsByNameOrDescription(String text) {
         if (StringUtils.isEmpty(text)) {
             return new ArrayList<>();
         }
