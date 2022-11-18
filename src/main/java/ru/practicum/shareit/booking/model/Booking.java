@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class Booking {
-    public enum Status {WAITING, APPROVED, REJECTED, CANCELED}
+    public enum Status {
+        WAITING, APPROVED, REJECTED, CANCELED
+    }
 
     private Long id;
     private LocalDateTime startTime;
