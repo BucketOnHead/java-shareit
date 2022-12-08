@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.dto.in.ItemCreationRequestDto;
 import ru.practicum.shareit.item.dto.in.ItemUpdateRequestDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -20,8 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.service.ItemService.checkItemExistsById;
-import static ru.practicum.shareit.item.service.ItemService.checkOwnerOfItemByItemIdAndUserId;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
 @Service
@@ -34,6 +33,20 @@ public class ItemServiceImpl implements ItemService {
     private final ItemDtoMapper itemDtoMapper;
     private final BookingDtoMapper bookingDtoMapper;
     private final CommentDtoMapper commentDtoMapper;
+
+    public static void checkItemExistsById(ItemRepository itemRepository, Long itemId) {
+        if (!itemRepository.existsById(itemId)) {
+            throw ItemNotFoundException.getFromItemId(itemId);
+        }
+    }
+
+    public static void checkOwnerOfItemByItemIdAndUserId(ItemRepository itemRepository,
+                                                         Long itemId, Long userId) {
+        Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
+        if (!ownerId.equals(userId)) {
+            throw ItemNotFoundException.getFromItemIdAndUserId(itemId, userId);
+        }
+    }
 
     @Override
     public ItemDto addItem(ItemCreationRequestDto itemDto, Long ownerId) {

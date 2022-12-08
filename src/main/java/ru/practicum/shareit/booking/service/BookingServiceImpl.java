@@ -21,8 +21,8 @@ import java.util.List;
 
 import static java.time.LocalDateTime.now;
 import static ru.practicum.shareit.booking.service.BookingService.*;
-import static ru.practicum.shareit.item.service.ItemService.checkItemExistsById;
-import static ru.practicum.shareit.item.service.ItemService.checkOwnerOfItemByItemIdAndUserId;
+import static ru.practicum.shareit.item.service.ItemServiceImpl.checkItemExistsById;
+import static ru.practicum.shareit.item.service.ItemServiceImpl.checkOwnerOfItemByItemIdAndUserId;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
 @Service
