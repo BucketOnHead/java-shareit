@@ -7,15 +7,17 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.in.comment.RequestCommentDto;
 import ru.practicum.shareit.item.dto.out.comment.CommentDto;
+import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
 import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.comment.Comment;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
+
 import static java.time.LocalDateTime.now;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.checkItemExistsById;
-import static ru.practicum.shareit.item.service.comment.CommentService.checkUserBookingByUserIdAndItemId;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
 @Service
@@ -28,6 +30,14 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentDtoMapper commentDtoMapper;
+
+    static void checkUserBookingByUserIdAndItemId(BookingRepository bookingRepository,
+                                                  Long userId, Long itemId,
+                                                  LocalDateTime time) {
+        if (!bookingRepository.existsByBookerIdAndItemIdAndEndTimeIsBefore(userId, itemId, time)) {
+            throw IncorrectCommentException.getFromUserIdAndItemIdAndTime(userId, itemId, time);
+        }
+    }
 
     @Override
     public CommentDto addComment(RequestCommentDto requestCommentDto, Long authorId, Long itemId) {
