@@ -16,7 +16,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import static java.time.LocalDateTime.now;
 import static ru.practicum.shareit.item.service.ItemService.checkItemExistsById;
 import static ru.practicum.shareit.item.service.comment.CommentService.checkUserBookingByUserIdAndItemId;
-import static ru.practicum.shareit.user.service.UserService.checkUserExistsById;
+import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
 @Service
 @RequiredArgsConstructor

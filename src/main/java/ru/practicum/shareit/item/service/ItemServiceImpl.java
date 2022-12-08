@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.service.ItemService.checkItemExistsById;
 import static ru.practicum.shareit.item.service.ItemService.checkOwnerOfItemByItemIdAndUserId;
-import static ru.practicum.shareit.user.service.UserService.checkUserExistsById;
+import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
 @Service
 @RequiredArgsConstructor

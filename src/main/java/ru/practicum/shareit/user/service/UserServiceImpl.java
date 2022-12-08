@@ -7,13 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.in.UserCreationRequestDto;
 import ru.practicum.shareit.user.dto.in.UserUpdateRequestDto;
 import ru.practicum.shareit.user.dto.out.UserDto;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-
-import static ru.practicum.shareit.user.service.UserService.checkUserExistsById;
 
 
 @Service
@@ -23,6 +22,12 @@ import static ru.practicum.shareit.user.service.UserService.checkUserExistsById;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
+
+    public static void checkUserExistsById(UserRepository userRepository, Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw UserNotFoundException.getFromUserId(userId);
+        }
+    }
 
     @Override
     public UserDto addUser(UserCreationRequestDto userDto) {
