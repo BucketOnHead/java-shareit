@@ -4,125 +4,96 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.IncorrectParameterException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
+import ru.practicum.shareit.item.dto.in.ItemCreationRequestDto;
+import ru.practicum.shareit.item.dto.in.ItemUpdateRequestDto;
+import ru.practicum.shareit.item.dto.out.DetailedItemDto;
+import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
+import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.item.service.ItemService.checkItemExistsById;
+import static ru.practicum.shareit.item.service.ItemService.checkOwnerOfItemByItemIdAndUserId;
+import static ru.practicum.shareit.user.service.UserService.checkUserExistsById;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final ItemDtoMapper itemDtoMapper;
+    private final BookingDtoMapper bookingDtoMapper;
+    private final CommentDtoMapper commentDtoMapper;
 
     @Override
-    public ItemDto addItem(ItemDto itemDto, Long ownerId) {
-        checkUserExistsById(ownerId);
+    public ItemDto addItem(ItemCreationRequestDto itemDto, Long ownerId) {
+        checkUserExistsById(userRepository, ownerId);
         Item item = itemDtoMapper.toItem(itemDto, ownerId);
-        Item addedItem = itemRepository.addItem(item);
-        ItemDto addedItemDto = itemDtoMapper.toItemDto(addedItem);
-        log.debug("Item with ID_{} added.", addedItem.getId());
-        return addedItemDto;
+        Item addedItem = itemRepository.save(item);
+        log.debug("Item ID_{} added.", addedItem.getId());
+        return itemDtoMapper.toItemDto(addedItem);
     }
 
     @Override
-    public ItemDto updateItem(ItemDto itemDto, Long itemId, Long ownerId) {
-        checkItemExistsById(itemId);
-        checkUserExistsById(ownerId);
-        Item item = itemRepository.getItemById(itemId);
-        checkOwnerItem(item, ownerId);
-        fillItemFromItemDto(item, itemDto);
-        Item updatedItem = itemRepository.updateItem(item);
-        ItemDto updatedItemDto = itemDtoMapper.toItemDto(updatedItem);
-        log.debug("Item with ID_{} updated.", itemId);
-        return updatedItemDto;
+    public ItemDto updateItem(ItemUpdateRequestDto itemDto, Long itemId, Long userId) {
+        checkItemExistsById(itemRepository, itemId);
+        checkUserExistsById(userRepository, userId);
+        checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, userId);
+        Item item = itemDtoMapper.toItem(itemDto, itemId, userId);
+        Item updatedItem = itemRepository.save(item);
+        log.debug("Item ID_{} updated.", itemId);
+        return itemDtoMapper.toItemDto(updatedItem);
     }
 
     @Override
-    public ItemDto getItemById(Long itemId) {
-        checkItemExistsById(itemId);
-        Item item = itemRepository.getItemById(itemId);
-        ItemDto itemDto = itemDtoMapper.toItemDto(item);
-        log.debug("Item with ID_{} returned.", itemId);
-        return itemDto;
+    @Transactional(readOnly = true)
+    public DetailedItemDto getItemByItemId(Long itemId, Long userId) {
+        checkItemExistsById(itemRepository, itemId);
+        Item item = itemRepository.getReferenceById(itemId);
+        log.debug("Item ID_{} returned.", item.getId());
+        if (isOwner(item, userId)) {
+            return itemDtoMapper.toDetailedItemDto(item, commentDtoMapper, bookingDtoMapper);
+        }
+        return itemDtoMapper.toDetailedItemDto(item, commentDtoMapper);
     }
 
     @Override
-    public List<ItemDto> getItemsByOwnerId(Long ownerId) {
-        List<ItemDto> items = itemRepository.getAllItems()
-                .stream()
-                .filter(item -> item.getOwner().getId().equals(ownerId))
-                .map(itemDtoMapper::toItemDto)
-                .collect(Collectors.toList());
-        log.debug("Returned a list of all items.");
-        return items;
+    @Transactional(readOnly = true)
+    public List<DetailedItemDto> getItemsByOwnerId(Long ownerId) {
+        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        log.debug("All items have been returned, {} in total.", items.size());
+        return itemDtoMapper.toDetailedItemDto(items, commentDtoMapper, bookingDtoMapper);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> searchItemsByNameOrDescription(String text) {
         if (StringUtils.isEmpty(text)) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
-        List<ItemDto> foundItems = itemRepository.getAllItems()
+        List<Item> foundItems = itemRepository.findByIsAvailableIsTrue()
                 .stream()
-                .filter(Item::getIsAvailable)
                 .filter(itemDto -> StringUtils.containsIgnoreCase(itemDto.getName(), text)
                         || StringUtils.containsIgnoreCase(itemDto.getDescription(), text))
-                .map(itemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
-        log.debug("{} things were found for the query '{}'.", foundItems.size(), text);
-        return foundItems;
+        log.debug("Returned items containing '{}', {} in total.", text, foundItems.size());
+
+        return itemDtoMapper.toItemDto(foundItems);
     }
 
-    private static void fillItemFromItemDto(Item item, ItemDto itemDto) {
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            item.setIsAvailable(itemDto.getAvailable());
-        }
-    }
-
-    private void checkItemExistsById(Long itemId) {
-        log.debug("Search item with ID_{}.", itemId);
-        if (!itemRepository.containsById(itemId)) {
-            log.trace("Item with ID_{} not found ❌.", itemId);
-            throw new ItemNotFoundException(itemId);
-        }
-        log.trace("Item with ID_{} has been found ✔.", itemId);
-    }
-
-    private void checkUserExistsById(Long userId) {
-        log.debug("Search user with ID_{}.", userId);
-        if (!userRepository.containsById(userId)) {
-            log.trace("User with ID_{} not found ❌.", userId);
-            throw new UserNotFoundException(userId);
-        }
-        log.trace("User with ID_{} has been found ✔.", userId);
-    }
-
-    private void checkOwnerItem(Item item, Long ownerId) {
-        log.debug("Checking owner with ID_{} of the item with ID_{}.", ownerId, item.getId());
-        if (!item.getOwner().getId().equals(ownerId)) {
-            log.trace("User with ID_{} is not the owner of the item with ID_{} ❌.", ownerId, item.getId());
-            throw new IncorrectParameterException(
-                    String.format("User with ID_%d is not the owner of the item with ID_%d",
-                            ownerId, item.getId()));
-        }
-        log.trace("User with ID_{} is the owner of the item with ID_{} ✔.", ownerId, item.getId());
+    private static boolean isOwner(Item item, Long userId) {
+        Long ownerId = item.getOwner().getId();
+        return ownerId.equals(userId);
     }
 }
