@@ -1,11 +1,55 @@
 package ru.practicum.shareit.user.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.in.UserCreationRequestDto;
+import ru.practicum.shareit.user.dto.in.UserUpdateRequestDto;
+import ru.practicum.shareit.user.dto.out.ShortUserDto;
+import ru.practicum.shareit.user.dto.out.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UserDtoMapper {
+    private final UserRepository userRepository;
+
+    // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
+    // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
+    // ║╚═╗───║╚═╝║───║║║║───║╚╗╔╝║──────║║╚╗║─────║║─────║║║║
+    // ║╔═╝───║╔╗╔╝───║║║║───║╔╗╔╗║──────║║─║║─────║║─────║║║║
+    // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
+    // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
+
+    public User toUser(UserCreationRequestDto userDto) {
+        User user = new User();
+
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+
+        return user;
+    }
+
+    public User toUser(UserUpdateRequestDto userDto, Long userId) {
+        User user = userRepository.getReferenceById(userId);
+
+        userDto.getName().ifPresent(user::setName);
+        userDto.getEmail().ifPresent(user::setEmail);
+
+        return user;
+    }
+
+    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗
+    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
+    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║
+    // ──║║─────║║║║──────║║─║║─────║║─────║║║║
+    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
+    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
+
     public UserDto toUserDto(User user) {
         UserDto userDto = new UserDto();
 
@@ -16,13 +60,17 @@ public class UserDtoMapper {
         return userDto;
     }
 
-    public User toUser(UserDto userDto) {
-        User user = new User();
+    public ShortUserDto toShortUserDto(User user) {
+        ShortUserDto userDto = new ShortUserDto();
 
-        user.setId(userDto.getId());
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
+        userDto.setId(user.getId());
 
-        return user;
+        return userDto;
+    }
+
+    public List<UserDto> toUserDto(Collection<User> users) {
+        return users.stream()
+                .map(this::toUserDto)
+                .collect(Collectors.toList());
     }
 }
