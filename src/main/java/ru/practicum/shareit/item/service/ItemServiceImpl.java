@@ -5,13 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
-import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -30,8 +28,6 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final ItemDtoMapper itemDtoMapper;
-    private final BookingDtoMapper bookingDtoMapper;
-    private final CommentDtoMapper commentDtoMapper;
 
     public static void checkItemExistsById(ItemRepository itemRepository, Long itemId) {
         if (!itemRepository.existsById(itemId)) {
@@ -75,16 +71,16 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getReferenceById(itemId);
         log.debug("Item ID_{} returned.", item.getId());
         if (isOwner(item, userId)) {
-            return itemDtoMapper.toDetailedItemDto(item, commentDtoMapper, bookingDtoMapper);
+            return itemDtoMapper.toDetailedItemDto(item);
         }
-        return itemDtoMapper.toDetailedItemDto(item, commentDtoMapper);
+        return itemDtoMapper.toDetailedItemDtoWithoutBookings(item);
     }
 
     @Override
     public List<DetailedItemDto> getItemsByOwnerId(Long ownerId) {
         List<Item> items = itemRepository.findByOwnerId(ownerId);
         log.debug("All items have been returned, {} in total.", items.size());
-        return itemDtoMapper.toDetailedItemDto(items, commentDtoMapper, bookingDtoMapper);
+        return itemDtoMapper.toDetailedItemDto(items);
     }
 
     @Override

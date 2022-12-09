@@ -11,9 +11,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -58,11 +55,5 @@ public class CommentDtoMapper {
         commentDto.setCreated(comment.getCreated());
 
         return commentDto;
-    }
-
-    public List<CommentDto> toCommentDto(Collection<Comment> comments) {
-        return comments.stream()
-                .map(this::toCommentDto)
-                .collect(Collectors.toList());
     }
 }

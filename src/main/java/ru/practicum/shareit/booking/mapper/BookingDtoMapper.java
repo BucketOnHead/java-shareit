@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto.BookingItemDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto.BookingUserDto;
-import ru.practicum.shareit.booking.dto.out.ShortBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -62,15 +61,6 @@ public class BookingDtoMapper {
         bookingDto.setItem(toBookingItemDto(booking.getItem()));
 
         return bookingDto;
-    }
-
-    public ShortBookingDto toShortBookingDto(Booking booking) {
-        ShortBookingDto shortBookingDto = new ShortBookingDto();
-
-        shortBookingDto.setId(booking.getId());
-        shortBookingDto.setBookerId(booking.getBooker().getId());
-
-        return shortBookingDto;
     }
 
     public List<BookingDto> toBookingDto(Collection<Booking> bookings) {
