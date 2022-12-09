@@ -98,12 +98,12 @@ public class ItemDtoMapper {
     }
 
     private static ItemBookingDto toItemBookingDto(Booking booking) {
-        ItemBookingDto shortBookingDto = new ItemBookingDto();
+        ItemBookingDto bookingDto = new ItemBookingDto();
 
-        shortBookingDto.setId(booking.getId());
-        shortBookingDto.setBookerId(booking.getBooker().getId());
+        bookingDto.setId(booking.getId());
+        bookingDto.setBookerId(booking.getBooker().getId());
 
-        return shortBookingDto;
+        return bookingDto;
     }
 
     private static ItemCommentDto toItemCommentDto(Comment comment) {
