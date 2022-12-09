@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.in.BookingCreationRequestDto;
+import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto addBooking(BookingCreationRequestDto bookingDto, Long userId) {
+    public BookingDto addBooking(RequestBookingDto bookingDto, Long userId) {
         checkUserExistsById(userRepository, userId);
         checkItemExistsById(itemRepository, bookingDto.getItemId());
         checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);

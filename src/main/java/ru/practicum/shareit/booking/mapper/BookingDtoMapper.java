@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.in.BookingCreationRequestDto;
+import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
 import ru.practicum.shareit.booking.dto.out.ShortBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -30,7 +30,7 @@ public class BookingDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public Booking toBooking(BookingCreationRequestDto bookingDto, Long userId) {
+    public Booking toBooking(RequestBookingDto bookingDto, Long userId) {
         Booking booking = new Booking();
 
         User booker = userRepository.getReferenceById(userId);
