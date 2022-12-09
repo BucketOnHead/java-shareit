@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.user.dto.in.UserRequestDto;
+import ru.practicum.shareit.user.dto.in.RequestUserDto;
 import ru.practicum.shareit.user.dto.out.UserDto;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto addUser(UserRequestDto userDto) {
+    public UserDto addUser(RequestUserDto userDto) {
         User user = userDtoMapper.toUser(userDto);
         User addedUser = userRepository.save(user);
         log.debug("User ID_{} added.", addedUser.getId());
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto updateUser(UserRequestDto userDto, Long userId) {
+    public UserDto updateUser(RequestUserDto userDto, Long userId) {
         checkUserExistsById(userRepository, userId);
         User user = userDtoMapper.toUser(userDto, userId);
         User updatedUser = userRepository.save(user);

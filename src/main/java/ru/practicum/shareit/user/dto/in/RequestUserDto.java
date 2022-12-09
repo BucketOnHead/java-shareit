@@ -13,7 +13,7 @@ import java.util.Optional;
 @Setter
 @Getter
 @NoArgsConstructor
-public class UserRequestDto {
+public class RequestUserDto {
     @NotNull(groups = {CreationInfo.class})
     private String name;
 

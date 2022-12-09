@@ -28,13 +28,13 @@ public class CommentDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public Comment toComment(RequestCommentDto requestCommentDto, Long authorId, Long itemId) {
+    public Comment toComment(RequestCommentDto commentDto, Long authorId, Long itemId) {
         Comment comment = new Comment();
 
         User author = userRepository.getReferenceById(authorId);
         Item item = itemRepository.getReferenceById(itemId);
 
-        comment.setText(requestCommentDto.getText());
+        comment.setText(commentDto.getText());
         comment.setAuthor(author);
         comment.setItem(item);
         comment.setCreated(LocalDateTime.now());
