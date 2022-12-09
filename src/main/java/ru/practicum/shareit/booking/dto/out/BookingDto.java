@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.model.Booking.Status;
-import ru.practicum.shareit.item.dto.out.ShortItemDto;
-import ru.practicum.shareit.user.dto.out.ShortUserDto;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +17,21 @@ public class BookingDto {
     private LocalDateTime start;
     private LocalDateTime end;
     private Status status = DEFAULT_STATUS;
-    private ShortUserDto booker;
-    private ShortItemDto item;
+    private BookingUserDto booker;
+    private BookingItemDto item;
+
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    public static class BookingItemDto {
+        private Long id;
+        private String name;
+    }
+
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    public static class BookingUserDto {
+        private Long id;
+    }
 }

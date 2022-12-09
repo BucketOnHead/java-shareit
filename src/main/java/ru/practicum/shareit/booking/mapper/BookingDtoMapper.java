@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
+import ru.practicum.shareit.booking.dto.out.BookingDto.BookingItemDto;
+import ru.practicum.shareit.booking.dto.out.BookingDto.BookingUserDto;
 import ru.practicum.shareit.booking.dto.out.ShortBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -51,17 +51,15 @@ public class BookingDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
 
-    public BookingDto toBookingDto(Booking booking,
-                                   UserDtoMapper userDtoMapper,
-                                   ItemDtoMapper itemDtoMapper) {
+    public BookingDto toBookingDto(Booking booking) {
         BookingDto bookingDto = new BookingDto();
 
         bookingDto.setStart(booking.getStartTime());
         bookingDto.setEnd(booking.getEndTime());
         bookingDto.setId(booking.getId());
         bookingDto.setStatus(booking.getStatus());
-        bookingDto.setBooker(userDtoMapper.toShortUserDto(booking.getBooker()));
-        bookingDto.setItem(itemDtoMapper.toShortItemDto(booking.getItem()));
+        bookingDto.setBooker(toBookingUserDto(booking.getBooker()));
+        bookingDto.setItem(toBookingItemDto(booking.getItem()));
 
         return bookingDto;
     }
@@ -75,11 +73,26 @@ public class BookingDtoMapper {
         return shortBookingDto;
     }
 
-    public List<BookingDto> toBookingDto(Collection<Booking> bookings,
-                                         UserDtoMapper userDtoMapper,
-                                         ItemDtoMapper itemDtoMapper) {
+    public List<BookingDto> toBookingDto(Collection<Booking> bookings) {
         return bookings.stream()
-                .map(booking -> toBookingDto(booking, userDtoMapper, itemDtoMapper))
+                .map(this::toBookingDto)
                 .collect(Collectors.toList());
+    }
+
+    private BookingItemDto toBookingItemDto(Item item) {
+        BookingItemDto itemDto = new BookingItemDto();
+
+        itemDto.setId(item.getId());
+        itemDto.setName(item.getName());
+
+        return itemDto;
+    }
+
+    private BookingUserDto toBookingUserDto(User user) {
+        BookingUserDto userDto = new BookingUserDto();
+
+        userDto.setId(user.getId());
+
+        return userDto;
     }
 }

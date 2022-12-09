@@ -11,10 +11,8 @@ import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -34,8 +32,6 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingDtoMapper bookingDtoMapper;
-    private final UserDtoMapper userDtoMapper;
-    private final ItemDtoMapper itemDtoMapper;
 
     public static void checkBookingExistsById(BookingRepository bookingRepository, Long bookingId) {
         if (!bookingRepository.existsById(bookingId)) {
@@ -57,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
         Booking savedBooking = bookingRepository.save(booking);
         log.debug("Booking ID_{} added.", savedBooking.getId());
 
-        return bookingDtoMapper.toBookingDto(savedBooking, userDtoMapper, itemDtoMapper);
+        return bookingDtoMapper.toBookingDto(savedBooking);
     }
 
     @Override
@@ -75,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
         log.debug("Booking ID_{} updated.", bookingId);
         Booking updatedBooking = bookingRepository.save(booking);
 
-        return bookingDtoMapper.toBookingDto(updatedBooking, userDtoMapper, itemDtoMapper);
+        return bookingDtoMapper.toBookingDto(updatedBooking);
     }
 
     @Override
@@ -87,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
         checkOwnerOrBooker(booking, userId);
 
         log.debug("Booking ID_{} returned.", booking.getId());
-        return bookingDtoMapper.toBookingDto(booking, userDtoMapper, itemDtoMapper);
+        return bookingDtoMapper.toBookingDto(booking);
     }
 
     @Override
@@ -96,35 +92,17 @@ public class BookingServiceImpl implements BookingService {
         State state = checkState(possibleState);
         switch (state) {
             case ALL:
-                return bookingDtoMapper.toBookingDto(
-                        getAllBookingsByBookerId(bookerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getAllBookingsByBookerId(bookerId));
             case CURRENT:
-                return bookingDtoMapper.toBookingDto(
-                        getCurrentBookingsByBookerId(bookerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getCurrentBookingsByBookerId(bookerId));
             case PAST:
-                return bookingDtoMapper.toBookingDto(
-                        getPastBookingsByBookerId(bookerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getPastBookingsByBookerId(bookerId));
             case FUTURE:
-                return bookingDtoMapper.toBookingDto(
-                        getFutureBookingsByBookerId(bookerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getFutureBookingsByBookerId(bookerId));
             case WAITING:
-                return bookingDtoMapper.toBookingDto(
-                        getWaitingBookingsByBookerId(bookerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getWaitingBookingsByBookerId(bookerId));
             case REJECTED:
-                return bookingDtoMapper.toBookingDto(
-                        getRejectedBookingsByBookerId(bookerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getRejectedBookingsByBookerId(bookerId));
             default:
                 throw StateNotImplementedException.getFromState(state);
         }
@@ -136,35 +114,17 @@ public class BookingServiceImpl implements BookingService {
         State state = checkState(possibleState);
         switch (state) {
             case ALL:
-                return bookingDtoMapper.toBookingDto(
-                        getAllBookingsByOwnerId(ownerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getAllBookingsByOwnerId(ownerId));
             case CURRENT:
-                return bookingDtoMapper.toBookingDto(
-                        getCurrentBookingsByOwnerId(ownerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getCurrentBookingsByOwnerId(ownerId));
             case PAST:
-                return bookingDtoMapper.toBookingDto(
-                        getPastBookingsByOwnerId(ownerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getPastBookingsByOwnerId(ownerId));
             case FUTURE:
-                return bookingDtoMapper.toBookingDto(
-                        getFutureBookingsByOwnerId(ownerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getFutureBookingsByOwnerId(ownerId));
             case WAITING:
-                return bookingDtoMapper.toBookingDto(
-                        getWaitingBookingsByOwnerId(ownerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getWaitingBookingsByOwnerId(ownerId));
             case REJECTED:
-                return bookingDtoMapper.toBookingDto(
-                        getRejectedBookingsByOwnerId(ownerId),
-                        userDtoMapper,
-                        itemDtoMapper);
+                return bookingDtoMapper.toBookingDto(getRejectedBookingsByOwnerId(ownerId));
             default:
                 throw StateNotImplementedException.getFromState(state);
         }

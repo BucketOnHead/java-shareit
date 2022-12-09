@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
-import ru.practicum.shareit.item.dto.out.ShortItemDto;
 import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -79,15 +78,6 @@ public class ItemDtoMapper {
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getIsAvailable());
-
-        return itemDto;
-    }
-
-    public ShortItemDto toShortItemDto(Item item) {
-        ShortItemDto itemDto = new ShortItemDto();
-
-        itemDto.setId(item.getId());
-        itemDto.setName(item.getName());
 
         return itemDto;
     }
