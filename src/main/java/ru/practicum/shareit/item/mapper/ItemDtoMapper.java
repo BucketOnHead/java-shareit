@@ -1,9 +1,7 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto.ItemBookingDto;
@@ -11,25 +9,16 @@ import ru.practicum.shareit.item.dto.out.DetailedItemDto.ItemCommentDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class ItemDtoMapper {
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final BookingRepository bookingRepository;
-    private final CommentRepository commentRepository;
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -38,10 +27,8 @@ public class ItemDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public Item toItem(RequestItemDto itemDto, Long ownerId) {
+    public static Item toItem(RequestItemDto itemDto, User owner) {
         Item item = new Item();
-
-        User owner = userRepository.getReferenceById(ownerId);
 
         itemDto.getName().ifPresent(item::setName);
         itemDto.getDescription().ifPresent(item::setDescription);
@@ -51,11 +38,7 @@ public class ItemDtoMapper {
         return item;
     }
 
-    public Item toItem(RequestItemDto itemDto, Long itemId, Long ownerId) {
-        Item item = itemRepository.getReferenceById(itemId);
-
-        User owner = userRepository.getReferenceById(ownerId);
-
+    public static Item toItem(RequestItemDto itemDto, Item item, User owner) {
         itemDto.getName().ifPresent(item::setName);
         itemDto.getDescription().ifPresent(item::setDescription);
         itemDto.getAvailable().ifPresent(item::setIsAvailable);
@@ -71,7 +54,7 @@ public class ItemDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
 
-    public ItemDto toItemDto(Item item) {
+    public static ItemDto toItemDto(Item item) {
         ItemDto itemDto = new ItemDto();
 
         itemDto.setId(item.getId());
@@ -82,10 +65,8 @@ public class ItemDtoMapper {
         return itemDto;
     }
 
-    public DetailedItemDto toDetailedItemDtoWithoutBookings(Item item) {
+    public static DetailedItemDto toDetailedItemDtoWithoutBookings(Item item, List<Comment> comments) {
         DetailedItemDto itemDto = new DetailedItemDto();
-
-        List<Comment> comments = commentRepository.findCommentsByItemId(item.getId());
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
@@ -96,41 +77,27 @@ public class ItemDtoMapper {
         return itemDto;
     }
 
-    public DetailedItemDto toDetailedItemDto(Item item) {
-        DetailedItemDto itemDto = toDetailedItemDtoWithoutBookings(item);
+    public static DetailedItemDto toDetailedItemDto(Item item, List<Comment> comments,
+                                                    Booking lastBooking, Booking nextBooking) {
+        DetailedItemDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
 
-        LocalDateTime time = LocalDateTime.now();
-        getLastBooking(item.getId(), time).ifPresent(itemDto::setLastBooking);
-        getNextBooking(item.getId(), time).ifPresent(itemDto::setNextBooking);
+        Optional.ofNullable(lastBooking)
+                .map(ItemDtoMapper::toItemBookingDto)
+                .ifPresent(itemDto::setLastBooking);
+        Optional.ofNullable(nextBooking)
+                .map(ItemDtoMapper::toItemBookingDto)
+                .ifPresent(itemDto::setNextBooking);
 
         return itemDto;
     }
 
-    public List<ItemDto> toItemDto(Collection<Item> items) {
+    public static List<ItemDto> toItemDto(Collection<Item> items) {
         return items.stream()
-                .map(this::toItemDto)
+                .map(ItemDtoMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
-    public List<DetailedItemDto> toDetailedItemDto(Collection<Item> items) {
-        return items.stream()
-                .map(this::toDetailedItemDto)
-                .collect(Collectors.toList());
-    }
-
-    private Optional<ItemBookingDto> getLastBooking(Long itemId, LocalDateTime time) {
-        var lastBooking =
-                bookingRepository.findFirstByItemIdAndEndTimeIsBeforeOrderByEndTimeDesc(itemId, time);
-        return lastBooking.map(this::toItemBookingDto);
-    }
-
-    private Optional<ItemBookingDto> getNextBooking(Long itemId, LocalDateTime time) {
-        var lastBooking =
-                bookingRepository.findFirstByItemIdAndStartTimeIsAfter(itemId, time);
-        return lastBooking.map(this::toItemBookingDto);
-    }
-
-    private ItemBookingDto toItemBookingDto(Booking booking) {
+    private static ItemBookingDto toItemBookingDto(Booking booking) {
         ItemBookingDto shortBookingDto = new ItemBookingDto();
 
         shortBookingDto.setId(booking.getId());
@@ -139,7 +106,7 @@ public class ItemDtoMapper {
         return shortBookingDto;
     }
 
-    private ItemCommentDto toItemCommentDto(Comment comment) {
+    private static ItemCommentDto toItemCommentDto(Comment comment) {
         ItemCommentDto commentDto = new ItemCommentDto();
 
         commentDto.setId(comment.getId());
@@ -150,9 +117,9 @@ public class ItemDtoMapper {
         return commentDto;
     }
 
-    private List<ItemCommentDto> toItemCommentDto(Collection<Comment> comments) {
+    private static List<ItemCommentDto> toItemCommentDto(Collection<Comment> comments) {
         return comments.stream()
-                .map(this::toItemCommentDto)
+                .map(ItemDtoMapper::toItemCommentDto)
                 .collect(Collectors.toList());
     }
 }

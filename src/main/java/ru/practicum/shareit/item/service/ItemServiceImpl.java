@@ -5,19 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.mapper.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.repository.comment.CommentRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.item.mapper.ItemDtoMapper.*;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
 @Service
@@ -27,7 +33,8 @@ import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsB
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final ItemDtoMapper itemDtoMapper;
+    private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
 
     public static void checkItemExistsById(ItemRepository itemRepository, Long itemId) {
         if (!itemRepository.existsById(itemId)) {
@@ -47,10 +54,10 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto addItem(RequestItemDto itemDto, Long ownerId) {
         checkUserExistsById(userRepository, ownerId);
-        Item item = itemDtoMapper.toItem(itemDto, ownerId);
+        Item item = getItem(itemDto, ownerId);
         Item addedItem = itemRepository.save(item);
         log.debug("Item ID_{} added.", addedItem.getId());
-        return itemDtoMapper.toItemDto(addedItem);
+        return toItemDto(addedItem);
     }
 
     @Override
@@ -59,10 +66,10 @@ public class ItemServiceImpl implements ItemService {
         checkItemExistsById(itemRepository, itemId);
         checkUserExistsById(userRepository, userId);
         checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, userId);
-        Item item = itemDtoMapper.toItem(itemDto, itemId, userId);
+        Item item = getItem(itemDto, itemId, userId);
         Item updatedItem = itemRepository.save(item);
         log.debug("Item ID_{} updated.", itemId);
-        return itemDtoMapper.toItemDto(updatedItem);
+        return toItemDto(updatedItem);
     }
 
     @Override
@@ -71,16 +78,18 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getReferenceById(itemId);
         log.debug("Item ID_{} returned.", item.getId());
         if (isOwner(item, userId)) {
-            return itemDtoMapper.toDetailedItemDto(item);
+            return getDetailedItemDto(item);
         }
-        return itemDtoMapper.toDetailedItemDtoWithoutBookings(item);
+        return getDetailedItemDtoWithoutBookings(item);
     }
 
     @Override
     public List<DetailedItemDto> getItemsByOwnerId(Long ownerId) {
         List<Item> items = itemRepository.findByOwnerId(ownerId);
         log.debug("All items have been returned, {} in total.", items.size());
-        return itemDtoMapper.toDetailedItemDto(items);
+        return items.stream()
+                .map(this::getDetailedItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -96,7 +105,37 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
         log.debug("Returned items containing '{}', {} in total.", text, foundItems.size());
 
-        return itemDtoMapper.toItemDto(foundItems);
+        return toItemDto(foundItems);
+    }
+
+    private Item getItem(RequestItemDto itemDto, Long itemId, Long ownerId) {
+        Item item = itemRepository.getReferenceById(itemId);
+        User owner = userRepository.getReferenceById(ownerId);
+        return toItem(itemDto, item, owner);
+    }
+
+    private Item getItem(RequestItemDto itemDto, Long ownerId) {
+        User owner = userRepository.getReferenceById(ownerId);
+        return toItem(itemDto, owner);
+    }
+
+    private DetailedItemDto getDetailedItemDtoWithoutBookings(Item item) {
+        List<Comment> comments = commentRepository.findCommentsByItemId(item.getId());
+        return toDetailedItemDtoWithoutBookings(item, comments);
+    }
+
+    private DetailedItemDto getDetailedItemDto(Item item) {
+        List<Comment> comments = commentRepository.findCommentsByItemId(item.getId());
+
+        LocalDateTime time = LocalDateTime.now();
+        Booking lastBooking = bookingRepository
+                .findFirstByItemIdAndEndTimeIsBeforeOrderByEndTimeDesc(item.getId(), time)
+                .orElse(null);
+        Booking nextBooking = bookingRepository
+                .findFirstByItemIdAndStartTimeIsAfter(item.getId(), time)
+                .orElse(null);
+
+        return toDetailedItemDto(item, comments, lastBooking, nextBooking);
     }
 
     private static boolean isOwner(Item item, Long userId) {
