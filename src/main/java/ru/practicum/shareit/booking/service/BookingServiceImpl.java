@@ -53,7 +53,6 @@ public class BookingServiceImpl implements BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
         log.debug("Booking ID_{} added.", savedBooking.getId());
-
         return BookingDtoMapper.toBookingDto(savedBooking);
     }
 
@@ -71,7 +70,6 @@ public class BookingServiceImpl implements BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
         log.debug("Booking ID_{} updated.", updatedBooking.getId());
-
         return BookingDtoMapper.toBookingDto(updatedBooking);
     }
 

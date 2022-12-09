@@ -15,7 +15,6 @@ import java.util.List;
 
 import static ru.practicum.shareit.user.mapper.UserDtoMapper.toUser;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j

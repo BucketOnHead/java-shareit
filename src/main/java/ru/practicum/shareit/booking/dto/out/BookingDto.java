@@ -11,12 +11,10 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class BookingDto {
-    public static final Status DEFAULT_STATUS = Status.WAITING;
-
     private Long id;
     private LocalDateTime start;
     private LocalDateTime end;
-    private Status status = DEFAULT_STATUS;
+    private Status status;
     private BookingUserDto booker;
     private BookingItemDto item;
 

@@ -104,7 +104,6 @@ public class ItemServiceImpl implements ItemService {
                         || StringUtils.containsIgnoreCase(itemDto.getDescription(), text))
                 .collect(Collectors.toList());
         log.debug("Returned items containing '{}', {} in total.", text, foundItems.size());
-
         return toItemDto(foundItems);
     }
 
