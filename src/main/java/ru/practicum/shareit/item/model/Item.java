@@ -30,4 +30,7 @@ public class Item {
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    public interface CreationInfo {
+    }
 }

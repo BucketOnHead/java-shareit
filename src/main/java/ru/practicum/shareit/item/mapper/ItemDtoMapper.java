@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.out.ShortBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.in.ItemCreationRequestDto;
-import ru.practicum.shareit.item.dto.in.ItemUpdateRequestDto;
+import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.dto.out.ShortItemDto;
@@ -40,20 +39,20 @@ public class ItemDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public Item toItem(ItemCreationRequestDto itemDto, Long ownerId) {
+    public Item toItem(RequestItemDto itemDto, Long ownerId) {
         Item item = new Item();
 
         User owner = userRepository.getReferenceById(ownerId);
 
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setIsAvailable(itemDto.getAvailable());
+        itemDto.getName().ifPresent(item::setName);
+        itemDto.getDescription().ifPresent(item::setDescription);
+        itemDto.getAvailable().ifPresent(item::setIsAvailable);
         item.setOwner(owner);
 
         return item;
     }
 
-    public Item toItem(ItemUpdateRequestDto itemDto, Long itemId, Long ownerId) {
+    public Item toItem(RequestItemDto itemDto, Long itemId, Long ownerId) {
         Item item = itemRepository.getReferenceById(itemId);
 
         User owner = userRepository.getReferenceById(ownerId);

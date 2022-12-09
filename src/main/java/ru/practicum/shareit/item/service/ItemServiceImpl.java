@@ -6,8 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
-import ru.practicum.shareit.item.dto.in.ItemCreationRequestDto;
-import ru.practicum.shareit.item.dto.in.ItemUpdateRequestDto;
+import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
@@ -50,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto addItem(ItemCreationRequestDto itemDto, Long ownerId) {
+    public ItemDto addItem(RequestItemDto itemDto, Long ownerId) {
         checkUserExistsById(userRepository, ownerId);
         Item item = itemDtoMapper.toItem(itemDto, ownerId);
         Item addedItem = itemRepository.save(item);
@@ -60,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto updateItem(ItemUpdateRequestDto itemDto, Long itemId, Long userId) {
+    public ItemDto updateItem(RequestItemDto itemDto, Long itemId, Long userId) {
         checkItemExistsById(itemRepository, itemId);
         checkUserExistsById(userRepository, userId);
         checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, userId);
