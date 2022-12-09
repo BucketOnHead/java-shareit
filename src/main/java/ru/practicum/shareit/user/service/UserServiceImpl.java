@@ -13,6 +13,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
+import static ru.practicum.shareit.user.mapper.UserDtoMapper.toUser;
+
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserDtoMapper userDtoMapper;
 
     public static void checkUserExistsById(UserRepository userRepository, Long userId) {
         if (!userRepository.existsById(userId)) {
@@ -31,20 +32,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto addUser(RequestUserDto userDto) {
-        User user = userDtoMapper.toUser(userDto);
+        User user = toUser(userDto);
         User addedUser = userRepository.save(user);
         log.debug("User ID_{} added.", addedUser.getId());
-        return userDtoMapper.toUserDto(addedUser);
+        return UserDtoMapper.toUserDto(addedUser);
     }
 
     @Override
     @Transactional
     public UserDto updateUser(RequestUserDto userDto, Long userId) {
         checkUserExistsById(userRepository, userId);
-        User user = userDtoMapper.toUser(userDto, userId);
+        User user = getUser(userDto, userId);
         User updatedUser = userRepository.save(user);
         log.debug("User ID_{} updated.", updatedUser.getId());
-        return userDtoMapper.toUserDto(updatedUser);
+        return UserDtoMapper.toUserDto(updatedUser);
     }
 
     @Override
@@ -52,14 +53,14 @@ public class UserServiceImpl implements UserService {
         checkUserExistsById(userRepository, userId);
         User user = userRepository.getReferenceById(userId);
         log.debug("User ID_{} returned.", user.getId());
-        return userDtoMapper.toUserDto(user);
+        return UserDtoMapper.toUserDto(user);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         log.debug("All users returned, {} in total.", users.size());
-        return userDtoMapper.toUserDto(users);
+        return UserDtoMapper.toUserDto(users);
     }
 
     @Override
@@ -68,5 +69,10 @@ public class UserServiceImpl implements UserService {
         checkUserExistsById(userRepository, userId);
         log.debug("User ID_{} deleted.", userId);
         userRepository.deleteById(userId);
+    }
+
+    private User getUser(RequestUserDto userDto, Long userId) {
+        User user = userRepository.getReferenceById(userId);
+        return toUser(userDto, user);
     }
 }
