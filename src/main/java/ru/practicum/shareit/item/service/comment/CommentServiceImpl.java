@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.dto.in.comment.RequestCommentDto;
 import ru.practicum.shareit.item.dto.out.comment.CommentDto;
 import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
 import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
-import ru.practicum.shareit.item.model.comment.Comment;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
