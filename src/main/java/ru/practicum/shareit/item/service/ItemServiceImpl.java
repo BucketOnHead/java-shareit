@@ -26,7 +26,7 @@ import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsB
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -49,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto addItem(ItemCreationRequestDto itemDto, Long ownerId) {
         checkUserExistsById(userRepository, ownerId);
         Item item = itemDtoMapper.toItem(itemDto, ownerId);
@@ -58,6 +59,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(ItemUpdateRequestDto itemDto, Long itemId, Long userId) {
         checkItemExistsById(itemRepository, itemId);
         checkUserExistsById(userRepository, userId);
@@ -69,7 +71,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public DetailedItemDto getItemByItemId(Long itemId, Long userId) {
         checkItemExistsById(itemRepository, itemId);
         Item item = itemRepository.getReferenceById(itemId);
@@ -81,7 +82,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<DetailedItemDto> getItemsByOwnerId(Long ownerId) {
         List<Item> items = itemRepository.findByOwnerId(ownerId);
         log.debug("All items have been returned, {} in total.", items.size());
@@ -89,7 +89,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDto> searchItemsByNameOrDescription(String text) {
         if (StringUtils.isEmpty(text)) {
             return Collections.emptyList();

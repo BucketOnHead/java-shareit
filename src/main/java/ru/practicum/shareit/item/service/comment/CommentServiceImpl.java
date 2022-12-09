@@ -23,7 +23,7 @@ import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsB
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final ItemRepository itemRepository;
@@ -40,6 +40,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public CommentDto addComment(RequestCommentDto requestCommentDto, Long authorId, Long itemId) {
         checkUserExistsById(userRepository, authorId);
         checkItemExistsById(itemRepository, itemId);

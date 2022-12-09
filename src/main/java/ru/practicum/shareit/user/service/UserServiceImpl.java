@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto addUser(UserCreationRequestDto userDto) {
         User user = userDtoMapper.toUser(userDto);
         User addedUser = userRepository.save(user);
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(UserUpdateRequestDto userDto, Long userId) {
         checkUserExistsById(userRepository, userId);
         User user = userDtoMapper.toUser(userDto, userId);
@@ -47,7 +49,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto getUserById(Long userId) {
         checkUserExistsById(userRepository, userId);
         User user = userRepository.getReferenceById(userId);
@@ -56,7 +57,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         log.debug("All users returned, {} in total.", users.size());
@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUserById(Long userId) {
         checkUserExistsById(userRepository, userId);
         log.debug("User ID_{} deleted.", userId);

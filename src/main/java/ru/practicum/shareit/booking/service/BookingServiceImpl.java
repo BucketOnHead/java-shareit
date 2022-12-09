@@ -28,7 +28,7 @@ import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsB
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
@@ -44,6 +44,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto addBooking(BookingCreationRequestDto bookingDto, Long userId) {
         checkUserExistsById(userRepository, userId);
         checkItemExistsById(itemRepository, bookingDto.getItemId());
@@ -60,6 +61,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
         checkUserExistsById(userRepository, userId);
@@ -77,7 +79,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BookingDto getBooking(Long bookingId, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
         checkUserExistsById(userRepository, userId);
@@ -90,7 +91,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> getAllByBookerId(Long bookerId, String possibleState) {
         checkUserExistsById(userRepository, bookerId);
         State state = checkState(possibleState);
@@ -131,7 +131,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> getAllByBookerItems(Long ownerId, String possibleState) {
         checkUserExistsById(userRepository, ownerId);
         State state = checkState(possibleState);
