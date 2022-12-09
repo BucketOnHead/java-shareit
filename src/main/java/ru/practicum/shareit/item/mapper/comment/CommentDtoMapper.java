@@ -1,22 +1,16 @@
 package ru.practicum.shareit.item.mapper.comment;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.in.comment.RequestCommentDto;
 import ru.practicum.shareit.item.dto.out.comment.CommentDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class CommentDtoMapper {
-    private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -25,11 +19,8 @@ public class CommentDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public Comment toComment(RequestCommentDto commentDto, Long authorId, Long itemId) {
+    public static Comment toComment(RequestCommentDto commentDto, User author, Item item) {
         Comment comment = new Comment();
-
-        User author = userRepository.getReferenceById(authorId);
-        Item item = itemRepository.getReferenceById(itemId);
 
         comment.setText(commentDto.getText());
         comment.setAuthor(author);
@@ -46,7 +37,7 @@ public class CommentDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
 
-    public CommentDto toCommentDto(Comment comment) {
+    public static CommentDto toCommentDto(Comment comment) {
         CommentDto commentDto = new CommentDto();
 
         commentDto.setId(comment.getId());
