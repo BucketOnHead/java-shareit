@@ -1,26 +1,20 @@
 package ru.practicum.shareit.booking.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto.BookingItemDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto.BookingUserDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class BookingDtoMapper {
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -29,11 +23,8 @@ public class BookingDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public Booking toBooking(RequestBookingDto bookingDto, Long userId) {
+    public static Booking toBooking(RequestBookingDto bookingDto, User booker, Item item) {
         Booking booking = new Booking();
-
-        User booker = userRepository.getReferenceById(userId);
-        Item item = itemRepository.getReferenceById(bookingDto.getItemId());
 
         booking.setStartTime(bookingDto.getStart());
         booking.setEndTime(bookingDto.getEnd());
@@ -50,7 +41,7 @@ public class BookingDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
 
-    public BookingDto toBookingDto(Booking booking) {
+    public static BookingDto toBookingDto(Booking booking) {
         BookingDto bookingDto = new BookingDto();
 
         bookingDto.setStart(booking.getStartTime());
@@ -63,13 +54,13 @@ public class BookingDtoMapper {
         return bookingDto;
     }
 
-    public List<BookingDto> toBookingDto(Collection<Booking> bookings) {
+    public static List<BookingDto> toBookingDto(Collection<Booking> bookings) {
         return bookings.stream()
-                .map(this::toBookingDto)
+                .map(BookingDtoMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
-    private BookingItemDto toBookingItemDto(Item item) {
+    private static BookingItemDto toBookingItemDto(Item item) {
         BookingItemDto itemDto = new BookingItemDto();
 
         itemDto.setId(item.getId());
@@ -78,7 +69,7 @@ public class BookingDtoMapper {
         return itemDto;
     }
 
-    private BookingUserDto toBookingUserDto(User user) {
+    private static BookingUserDto toBookingUserDto(User user) {
         BookingUserDto userDto = new BookingUserDto();
 
         userDto.setId(user.getId());
