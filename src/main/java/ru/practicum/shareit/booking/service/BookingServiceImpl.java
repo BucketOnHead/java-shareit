@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.in.BookingCreationRequestDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
-import ru.practicum.shareit.booking.exception.StateNotImplementedException;
+import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -20,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
-import static ru.practicum.shareit.booking.service.BookingService.*;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.checkItemExistsById;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.checkOwnerOfItemByItemIdAndUserId;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
@@ -37,11 +37,17 @@ public class BookingServiceImpl implements BookingService {
     private final UserDtoMapper userDtoMapper;
     private final ItemDtoMapper itemDtoMapper;
 
+    public static void checkBookingExistsById(BookingRepository bookingRepository, Long bookingId) {
+        if (!bookingRepository.existsById(bookingId)) {
+            throw BookingNotFoundException.getFromBookingId(bookingId);
+        }
+    }
+
     @Override
     public BookingDto addBooking(BookingCreationRequestDto bookingDto, Long userId) {
         checkUserExistsById(userRepository, userId);
         checkItemExistsById(itemRepository, bookingDto.getItemId());
-        checkUserNotOwnerByItemIdAndUserId(itemRepository, bookingDto.getItemId(), userId);
+        checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
         checkBookingTimePeriod(bookingDto.getStart(), bookingDto.getEnd());
 
         Booking booking = bookingDtoMapper.toBooking(bookingDto, userId);
@@ -162,6 +168,51 @@ public class BookingServiceImpl implements BookingService {
                         itemDtoMapper);
             default:
                 throw StateNotImplementedException.getFromState(state);
+        }
+    }
+
+    private void checkUserNotOwnerByItemIdAndUserId(Long itemId, Long userId) {
+        Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
+        if (ownerId.equals(userId)) {
+            throw BookingLogicException.getFromOwnerIdAndItemId(ownerId, itemId);
+        }
+    }
+
+    private void checkOwnerOrBooker(Booking booking, Long userId) {
+        Long ownerId = booking.getItem().getOwner().getId();
+        Long bookerId = booking.getBooker().getId();
+
+        boolean isOwner = ownerId.equals(userId);
+        boolean isBooker = bookerId.equals(userId);
+
+        if (!isOwner && !isBooker) {
+            throw BookingNotFoundException.getFromBookingIdAndUserId(booking.getId(), userId);
+        }
+    }
+
+    private void checkBookingTimePeriod(LocalDateTime start, LocalDateTime end) {
+        if (start.isAfter(end)) {
+            throw IncorrectBookingDatesException.getFromDates(start, end);
+        }
+    }
+
+    private void checkBookingStatusNotApprove(Booking booking) {
+        if (booking.getStatus() == Booking.Status.APPROVED) {
+            throw BookingAlreadyApprovedException.getFromBookingId(booking.getId());
+        }
+    }
+
+    private State checkState(String possibleState) {
+        try {
+            return State.valueOf(possibleState);
+        } catch (IllegalArgumentException ex) {
+            throw IncorrectStateException.getFromIncorrectState(possibleState);
+        }
+    }
+
+    private void checkItemAvailableForBooking(Item item) {
+        if (item.getIsAvailable() == Boolean.FALSE) {
+            throw ItemNotAvailableForBookingException.getFromItemId(item.getId());
         }
     }
 
