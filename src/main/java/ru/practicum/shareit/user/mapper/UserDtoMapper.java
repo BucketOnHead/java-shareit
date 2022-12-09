@@ -2,8 +2,7 @@ package ru.practicum.shareit.user.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.dto.in.UserCreationRequestDto;
-import ru.practicum.shareit.user.dto.in.UserUpdateRequestDto;
+import ru.practicum.shareit.user.dto.in.UserRequestDto;
 import ru.practicum.shareit.user.dto.out.ShortUserDto;
 import ru.practicum.shareit.user.dto.out.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -25,16 +24,16 @@ public class UserDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public User toUser(UserCreationRequestDto userDto) {
+    public User toUser(UserRequestDto userDto) {
         User user = new User();
 
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
+        userDto.getName().ifPresent(user::setName);
+        userDto.getEmail().ifPresent(user::setEmail);
 
         return user;
     }
 
-    public User toUser(UserUpdateRequestDto userDto, Long userId) {
+    public User toUser(UserRequestDto userDto, Long userId) {
         User user = userRepository.getReferenceById(userId);
 
         userDto.getName().ifPresent(user::setName);

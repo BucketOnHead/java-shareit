@@ -22,4 +22,10 @@ public class User {
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
+
+    public interface CreationInfo {
+    }
+
+    public interface UpdateInfo {
+    }
 }
