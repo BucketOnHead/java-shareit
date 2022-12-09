@@ -22,6 +22,7 @@
         <java.version>11</java.version>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <spotbugs-maven-plugin.version>4.7.0.0</spotbugs-maven-plugin.version>
+        <spring-boot-starter-data-jpa.version>2.7.5</spring-boot-starter-data-jpa.version>
     </properties>
 
     <dependencies>
@@ -49,6 +50,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring-boot-starter-data-jpa.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
