@@ -12,8 +12,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-
-import static ru.practicum.shareit.user.mapper.UserDtoMapper.toUser;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,47 +30,53 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto addUser(RequestUserDto userDto) {
-        User user = toUser(userDto);
-        User addedUser = userRepository.save(user);
-        log.debug("User ID_{} added.", addedUser.getId());
-        return UserDtoMapper.toUserDto(addedUser);
+        User user = UserDtoMapper.toUser(userDto);
+        User savedUser = userRepository.save(user);
+        log.debug("USER[ID_{}] added.", savedUser.getId());
+        return UserDtoMapper.toUserDto(savedUser);
     }
 
     @Override
     @Transactional
     public UserDto updateUser(RequestUserDto userDto, Long userId) {
         checkUserExistsById(userRepository, userId);
-        User user = getUser(userDto, userId);
-        User updatedUser = userRepository.save(user);
-        log.debug("User ID_{} updated.", updatedUser.getId());
-        return UserDtoMapper.toUserDto(updatedUser);
+        User updatedUser = getUpdatedUser(userId, userDto);
+        User savedUser = userRepository.save(updatedUser);
+        log.debug("USER[ID_{}] updated.", savedUser.getId());
+        return UserDtoMapper.toUserDto(savedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) {
         checkUserExistsById(userRepository, userId);
         User user = userRepository.getReferenceById(userId);
-        log.debug("User ID_{} returned.", user.getId());
-        return UserDtoMapper.toUserDto(user);
+        UserDto userDto = UserDtoMapper.toUserDto(user);
+        log.debug("USER[ID_{}]<DTO> returned.", userDto.getId());
+        return userDto;
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
-        log.debug("All users returned, {} in total.", users.size());
-        return UserDtoMapper.toUserDto(users);
+        List<UserDto> usersDto = UserDtoMapper.toUserDto(users);
+        log.debug("All USER<DTO> returned, {} in total.", usersDto.size());
+        return usersDto;
     }
 
     @Override
     @Transactional
     public void deleteUserById(Long userId) {
         checkUserExistsById(userRepository, userId);
-        log.debug("User ID_{} deleted.", userId);
         userRepository.deleteById(userId);
+        log.debug("USER[ID_{}] deleted.", userId);
     }
 
-    private User getUser(RequestUserDto userDto, Long userId) {
+    private User getUpdatedUser(Long userId, RequestUserDto userDto) {
         User user = userRepository.getReferenceById(userId);
-        return toUser(userDto, user);
+
+        Optional.ofNullable(userDto.getName()).ifPresent(user::setName);
+        Optional.ofNullable(userDto.getEmail()).ifPresent(user::setEmail);
+
+        return user;
     }
 }

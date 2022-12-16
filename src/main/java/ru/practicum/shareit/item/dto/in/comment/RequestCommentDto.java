@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dto.in.comment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.validation.group.CreationGroup;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -10,6 +11,6 @@ import javax.validation.constraints.NotEmpty;
 @Getter
 @NoArgsConstructor
 public class RequestCommentDto {
-    @NotEmpty
+    @NotEmpty(groups = {CreationGroup.class})
     private String text;
 }

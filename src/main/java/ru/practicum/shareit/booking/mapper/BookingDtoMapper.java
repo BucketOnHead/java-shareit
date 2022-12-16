@@ -1,10 +1,8 @@
 package ru.practicum.shareit.booking.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.springframework.data.domain.Page;
 import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
-import ru.practicum.shareit.booking.dto.out.BookingDto.BookingItemDto;
-import ru.practicum.shareit.booking.dto.out.BookingDto.BookingUserDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -13,8 +11,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@UtilityClass
-public class BookingDtoMapper {
+public final class BookingDtoMapper {
+    private BookingDtoMapper() {
+        throw new AssertionError("This is a utility class and cannot be instantiated");
+    }
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -48,11 +48,18 @@ public class BookingDtoMapper {
         bookingDto.setEnd(booking.getEndTime());
         bookingDto.setId(booking.getId());
         bookingDto.setStatus(booking.getStatus());
-        bookingDto.setBooker(toBookingUserDto(booking.getBooker()));
-        bookingDto.setItem(toBookingItemDto(booking.getItem()));
+        bookingDto.setBooker(toUserDtoForBookingDto(booking.getBooker()));
+        bookingDto.setItem(toItemDtoForBookingDto(booking.getItem()));
 
         return bookingDto;
     }
+
+    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗──────╔╗─────╔══╗───╔══╗───╔════╗
+    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║──────║║─────╚╗╔╝───║╔═╝───╚═╗╔═╝
+    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║──────║║──────║║────║╚═╗─────║║──
+    // ──║║─────║║║║──────║║─║║─────║║─────║║║║──────║║──────║║────╚═╗║─────║║──
+    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║──────║╚═╗───╔╝╚╗───╔═╝║─────║║──
+    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝──────╚══╝───╚══╝───╚══╝─────╚╝──
 
     public static List<BookingDto> toBookingDto(Collection<Booking> bookings) {
         return bookings.stream()
@@ -60,8 +67,12 @@ public class BookingDtoMapper {
                 .collect(Collectors.toList());
     }
 
-    private static BookingItemDto toBookingItemDto(Item item) {
-        BookingItemDto itemDto = new BookingItemDto();
+    public static List<BookingDto> toBookingDto(Page<Booking> bookings) {
+        return toBookingDto(bookings.toList());
+    }
+
+    private static BookingDto.ItemDto toItemDtoForBookingDto(Item item) {
+        BookingDto.ItemDto itemDto = new BookingDto.ItemDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
@@ -69,8 +80,8 @@ public class BookingDtoMapper {
         return itemDto;
     }
 
-    private static BookingUserDto toBookingUserDto(User user) {
-        BookingUserDto userDto = new BookingUserDto();
+    private static BookingDto.UserDto toUserDtoForBookingDto(User user) {
+        BookingDto.UserDto userDto = new BookingDto.UserDto();
 
         userDto.setId(user.getId());
 

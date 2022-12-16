@@ -15,14 +15,14 @@ public class DetailedItemDto {
     private String name;
     private String description;
     private Boolean available;
-    private ItemBookingDto lastBooking;
-    private ItemBookingDto nextBooking;
-    private List<ItemCommentDto> comments;
+    private BookingDto lastBooking;
+    private BookingDto nextBooking;
+    private List<CommentDto> comments;
 
     @Setter
     @Getter
     @NoArgsConstructor
-    public static class ItemBookingDto {
+    public static class BookingDto {
         private Long id;
         private Long bookerId;
     }
@@ -30,7 +30,7 @@ public class DetailedItemDto {
     @Setter
     @Getter
     @NoArgsConstructor
-    public static class ItemCommentDto {
+    public static class CommentDto {
         private Long id;
         private String text;
         private String authorName;

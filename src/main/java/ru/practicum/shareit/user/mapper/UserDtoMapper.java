@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.mapper;
 
-import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.user.dto.in.RequestUserDto;
 import ru.practicum.shareit.user.dto.out.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -9,8 +8,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@UtilityClass
-public class UserDtoMapper {
+public final class UserDtoMapper {
+    private UserDtoMapper() {
+        throw new AssertionError("This is a utility class and cannot be instantiated");
+    }
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -22,15 +23,8 @@ public class UserDtoMapper {
     public static User toUser(RequestUserDto userDto) {
         User user = new User();
 
-        userDto.getName().ifPresent(user::setName);
-        userDto.getEmail().ifPresent(user::setEmail);
-
-        return user;
-    }
-
-    public static User toUser(RequestUserDto userDto, User user) {
-        userDto.getName().ifPresent(user::setName);
-        userDto.getEmail().ifPresent(user::setEmail);
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
 
         return user;
     }
@@ -51,6 +45,13 @@ public class UserDtoMapper {
 
         return userDto;
     }
+
+    // ╔════╗───╔══╗──────╔╗─────╔══╗───╔══╗───╔════╗──────╔══╗────╔════╗───╔══╗
+    // ╚═╗╔═╝───║╔╗║──────║║─────╚╗╔╝───║╔═╝───╚═╗╔═╝──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
+    // ──║║─────║║║║──────║║──────║║────║╚═╗─────║║────────║║╚╗║─────║║─────║║║║
+    // ──║║─────║║║║──────║║──────║║────╚═╗║─────║║────────║║─║║─────║║─────║║║║
+    // ──║║─────║╚╝║──────║╚═╗───╔╝╚╗───╔═╝║─────║║────────║╚═╝║─────║║─────║╚╝║
+    // ──╚╝─────╚══╝──────╚══╝───╚══╝───╚══╝─────╚╝────────╚═══╝─────╚╝─────╚══╝
 
     public static List<UserDto> toUserDto(Collection<User> users) {
         return users.stream()

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.mapper.comment;
 
-import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.in.comment.RequestCommentDto;
 import ru.practicum.shareit.item.dto.out.comment.CommentDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -9,8 +8,10 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-@UtilityClass
-public class CommentDtoMapper {
+public final class CommentDtoMapper {
+    private CommentDtoMapper() {
+        throw new AssertionError("This is a utility class and cannot be instantiated");
+    }
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -19,13 +20,15 @@ public class CommentDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public static Comment toComment(RequestCommentDto commentDto, User author, Item item) {
+    public static Comment toComment(RequestCommentDto commentDto,
+                                    User author, Item item,
+                                    LocalDateTime time) {
         Comment comment = new Comment();
 
         comment.setText(commentDto.getText());
         comment.setAuthor(author);
         comment.setItem(item);
-        comment.setCreated(LocalDateTime.now());
+        comment.setCreated(time);
 
         return comment;
     }

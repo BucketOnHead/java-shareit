@@ -1,24 +1,23 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
-import ru.practicum.shareit.item.dto.out.DetailedItemDto.ItemBookingDto;
-import ru.practicum.shareit.item.dto.out.DetailedItemDto.ItemCommentDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@UtilityClass
-public class ItemDtoMapper {
+public final class ItemDtoMapper {
+    private ItemDtoMapper() {
+        throw new AssertionError("This is a utility class and cannot be instantiated");
+    }
 
     // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
     // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
@@ -27,22 +26,21 @@ public class ItemDtoMapper {
     // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
     // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
-    public static Item toItem(RequestItemDto itemDto, User owner) {
+    public static Item toItemWithoutItemRequest(RequestItemDto itemDto, User owner) {
         Item item = new Item();
 
-        itemDto.getName().ifPresent(item::setName);
-        itemDto.getDescription().ifPresent(item::setDescription);
-        itemDto.getAvailable().ifPresent(item::setIsAvailable);
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setIsAvailable(itemDto.getAvailable());
         item.setOwner(owner);
 
         return item;
     }
 
-    public static Item toItem(RequestItemDto itemDto, Item item, User owner) {
-        itemDto.getName().ifPresent(item::setName);
-        itemDto.getDescription().ifPresent(item::setDescription);
-        itemDto.getAvailable().ifPresent(item::setIsAvailable);
-        item.setOwner(owner);
+    public static Item toItem(RequestItemDto itemDto, User owner, ItemRequest itemRequest) {
+        Item item = toItemWithoutItemRequest(itemDto, owner);
+
+        item.setItemRequest(itemRequest);
 
         return item;
     }
@@ -54,13 +52,31 @@ public class ItemDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
 
-    public static ItemDto toItemDto(Item item) {
+    public static ItemDto toItemDto(Item item, Long requestId) {
+        ItemDto itemDto = toItemDtoWithoutItemRequestId(item);
+
+        itemDto.setRequestId(requestId);
+
+        return itemDto;
+    }
+
+    public static ItemDto toItemDtoWithoutItemRequestId(Item item) {
         ItemDto itemDto = new ItemDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getIsAvailable());
+
+        return itemDto;
+    }
+
+    public static DetailedItemDto toDetailedItemDto(Item item, List<Comment> comments,
+                                                    Booking lastBooking, Booking nextBooking) {
+        DetailedItemDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
+
+        itemDto.setLastBooking(toBookingDtoForDetailedItemDto(lastBooking));
+        itemDto.setNextBooking(toBookingDtoForDetailedItemDto(nextBooking));
 
         return itemDto;
     }
@@ -72,33 +88,44 @@ public class ItemDtoMapper {
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getIsAvailable());
-        itemDto.setComments(toItemCommentDto(comments));
+        itemDto.setComments(toCommentDtoForDetailedItemDto(comments));
 
         return itemDto;
     }
 
-    public static DetailedItemDto toDetailedItemDto(Item item, List<Comment> comments,
-                                                    Booking lastBooking, Booking nextBooking) {
+    public static DetailedItemDto toDetailedItemDtoWithoutLastBooking(Item item, List<Comment> comments,
+                                                                      Booking nextBooking) {
         DetailedItemDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
 
-        Optional.ofNullable(lastBooking)
-                .map(ItemDtoMapper::toItemBookingDto)
-                .ifPresent(itemDto::setLastBooking);
-        Optional.ofNullable(nextBooking)
-                .map(ItemDtoMapper::toItemBookingDto)
-                .ifPresent(itemDto::setNextBooking);
+        itemDto.setNextBooking(toBookingDtoForDetailedItemDto(nextBooking));
 
         return itemDto;
     }
+
+    public static DetailedItemDto toDetailedItemDtoWithoutNextBooking(Item item, List<Comment> comments,
+                                                                      Booking lastBooking) {
+        DetailedItemDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
+
+        itemDto.setLastBooking(toBookingDtoForDetailedItemDto(lastBooking));
+
+        return itemDto;
+    }
+
+    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗──────╔╗─────╔══╗───╔══╗───╔════╗
+    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║──────║║─────╚╗╔╝───║╔═╝───╚═╗╔═╝
+    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║──────║║──────║║────║╚═╗─────║║──
+    // ──║║─────║║║║──────║║─║║─────║║─────║║║║──────║║──────║║────╚═╗║─────║║──
+    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║──────║╚═╗───╔╝╚╗───╔═╝║─────║║──
+    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝──────╚══╝───╚══╝───╚══╝─────╚╝──
 
     public static List<ItemDto> toItemDto(Collection<Item> items) {
         return items.stream()
-                .map(ItemDtoMapper::toItemDto)
+                .map(ItemDtoMapper::toItemDtoWithoutItemRequestId)
                 .collect(Collectors.toList());
     }
 
-    private static ItemBookingDto toItemBookingDto(Booking booking) {
-        ItemBookingDto bookingDto = new ItemBookingDto();
+    private static DetailedItemDto.BookingDto toBookingDtoForDetailedItemDto(Booking booking) {
+        DetailedItemDto.BookingDto bookingDto = new DetailedItemDto.BookingDto();
 
         bookingDto.setId(booking.getId());
         bookingDto.setBookerId(booking.getBooker().getId());
@@ -106,8 +133,8 @@ public class ItemDtoMapper {
         return bookingDto;
     }
 
-    private static ItemCommentDto toItemCommentDto(Comment comment) {
-        ItemCommentDto commentDto = new ItemCommentDto();
+    private static DetailedItemDto.CommentDto toCommentDtoForDetailedItemDto(Comment comment) {
+        DetailedItemDto.CommentDto commentDto = new DetailedItemDto.CommentDto();
 
         commentDto.setId(comment.getId());
         commentDto.setText(comment.getText());
@@ -117,9 +144,9 @@ public class ItemDtoMapper {
         return commentDto;
     }
 
-    private static List<ItemCommentDto> toItemCommentDto(Collection<Comment> comments) {
+    private static List<DetailedItemDto.CommentDto> toCommentDtoForDetailedItemDto(Collection<Comment> comments) {
         return comments.stream()
-                .map(ItemDtoMapper::toItemCommentDto)
+                .map(ItemDtoMapper::toCommentDtoForDetailedItemDto)
                 .collect(Collectors.toList());
     }
 }
