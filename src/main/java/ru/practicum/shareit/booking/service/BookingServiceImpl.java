@@ -23,6 +23,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.shareit.booking.service.BookingService.State.checkState;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.checkItemExistsById;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.checkOwnerOfItemByItemIdAndUserId;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
@@ -148,14 +149,6 @@ public class BookingServiceImpl implements BookingService {
     private static void checkBookingStatusNotApprove(Booking booking) {
         if (booking.getStatus() == Booking.Status.APPROVED) {
             throw BookingAlreadyApprovedException.getFromBookingId(booking.getId());
-        }
-    }
-
-    private static State checkState(String possibleState) {
-        try {
-            return State.valueOf(possibleState);
-        } catch (IllegalArgumentException ex) {
-            throw IncorrectStateException.getFromString(possibleState);
         }
     }
 
