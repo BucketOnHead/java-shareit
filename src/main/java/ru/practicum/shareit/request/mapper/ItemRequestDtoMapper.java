@@ -61,32 +61,17 @@ public final class ItemRequestDtoMapper {
 
     private static List<ItemRequestDto.ItemDto> toItemDtoForItemRequestDto(Collection<Item> items) {
         return items.stream()
-                .map(ItemRequestDtoMapper::getItemDtoForItemRequestDto)
+                .map(ItemRequestDtoMapper::toItemDtoForItemRequestDto)
                 .collect(Collectors.toList());
     }
 
-    private static ItemRequestDto.ItemDto getItemDtoForItemRequestDto(Item item) {
-        if (item.getItemRequest() == null) {
-            return toItemDtoWithoutItemRequestIdForItemRequestDto(item);
-        } else {
-            return toItemDtoForItemRequestDto(item);
-        }
-    }
-
-    private static ItemRequestDto.ItemDto toItemDtoWithoutItemRequestIdForItemRequestDto(Item item) {
+    private static ItemRequestDto.ItemDto toItemDtoForItemRequestDto(Item item) {
         ItemRequestDto.ItemDto itemDto = new ItemRequestDto.ItemDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getIsAvailable());
-
-        return itemDto;
-    }
-
-    private static ItemRequestDto.ItemDto toItemDtoForItemRequestDto(Item item) {
-        ItemRequestDto.ItemDto itemDto = toItemDtoWithoutItemRequestIdForItemRequestDto(item);
-
         itemDto.setRequestId(item.getItemRequest().getId());
 
         return itemDto;

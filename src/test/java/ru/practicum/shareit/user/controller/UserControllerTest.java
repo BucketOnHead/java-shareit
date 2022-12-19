@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,52 +9,75 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.user.dto.in.RequestUserDto;
 import ru.practicum.shareit.user.dto.out.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {UserController.class})
 @ExtendWith(SpringExtension.class)
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class UserControllerTest {
-    @Autowired
-    private UserController userController;
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final UserController userController;
     @MockBean
     private UserService userService;
+
+    /**
+     * Method under test: {@link UserController#addUser(RequestUserDto)}
+     */
+    @Test
+    void testAddUser() throws Exception {
+        // test parameters
+        final Long userDtoId = 1L;
+        // test context
+        final RequestUserDto requestUserDto = getRequestUserDto(userDtoId);
+        final UserDto        userDto        = getUserDto(userDtoId, requestUserDto);
+        when(userService.addUser(any(RequestUserDto.class))).thenReturn(userDto);
+
+        var requestBuilder = post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestUserDto));
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(userDto)));
+    }
 
     /**
      * Method under test: {@link UserController#updateUser(RequestUserDto, Long)}
      */
     @Test
     void testUpdateUser() throws Exception {
-        UserDto userDto = new UserDto();
-        userDto.setEmail("jane.doe@example.org");
-        userDto.setId(123L);
-        userDto.setName("Name");
-        when(userService.updateUser((RequestUserDto) any(), (Long) any())).thenReturn(userDto);
+        // test parameters
+        final Long userDtoId = 1L;
+        // test context
+        final RequestUserDto requestUserDto = getRequestUserDto(userDtoId);
+        final UserDto        userDto        = getUserDto(userDtoId, requestUserDto);
+        when(userService.updateUser(any(RequestUserDto.class), anyLong())).thenReturn(userDto);
 
-        RequestUserDto requestUserDto = new RequestUserDto();
-        requestUserDto.setEmail("jane.doe@example.org");
-        requestUserDto.setName("Name");
-        String content = (new ObjectMapper()).writeValueAsString(requestUserDto);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.patch("/users/{userId}", 123L)
+        var requestBuilder = patch("/users/{userId}", userDtoId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
+                .content(objectMapper.writeValueAsString(requestUserDto));
+
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"id\":123,\"name\":\"Name\",\"email\":\"jane.doe@example.org\"}"));
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(userDto)));
     }
 
     /**
@@ -61,72 +85,40 @@ class UserControllerTest {
      */
     @Test
     void testGetUserById() throws Exception {
-        UserDto userDto = new UserDto();
-        userDto.setEmail("jane.doe@example.org");
-        userDto.setId(123L);
-        userDto.setName("Name");
-        when(userService.getUserById((Long) any())).thenReturn(userDto);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/users/{userId}", 123L);
+        // test parameters
+        final Long userDtoId = 1L;
+        // test context
+        final UserDto userDto = getUserDto(userDtoId);
+        when(userService.getUserById(anyLong())).thenReturn(userDto);
+
+        var requestBuilder = get("/users/{userId}", userDtoId);
+
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"id\":123,\"name\":\"Name\",\"email\":\"jane.doe@example.org\"}"));
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(userDto)));
     }
 
     /**
      * Method under test: {@link UserController#getAllUsers()}
      */
     @Test
-    void testGetAllUsers() throws Exception {
-        when(userService.getAllUsers()).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/users");
+    void testGetAllUsers_WithEmptyUserRepository() throws Exception {
+        // test parameters
+        final List<UserDto> usersDto = new ArrayList<>();
+        // test context
+        when(userService.getAllUsers()).thenReturn(usersDto);
+
+        var requestBuilder = get("/users");
+
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
-    }
-
-    /**
-     * Method under test: {@link UserController#getAllUsers()}
-     */
-    @Test
-    void testGetAllUsers2() throws Exception {
-        when(userService.getAllUsers()).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder getResult = MockMvcRequestBuilders.get("/users");
-        getResult.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(getResult)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
-    }
-
-    /**
-     * Method under test: {@link UserController#addUser(RequestUserDto)}
-     */
-    @Test
-    void testAddUser() throws Exception {
-        when(userService.getAllUsers()).thenReturn(new ArrayList<>());
-
-        RequestUserDto requestUserDto = new RequestUserDto();
-        requestUserDto.setEmail("jane.doe@example.org");
-        requestUserDto.setName("Name");
-        String content = (new ObjectMapper()).writeValueAsString(requestUserDto);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().json(objectMapper.writeValueAsString(usersDto)));
     }
 
     /**
@@ -134,26 +126,49 @@ class UserControllerTest {
      */
     @Test
     void testDeleteUserById() throws Exception {
-        doNothing().when(userService).deleteUserById((Long) any());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/users/{userId}", 123L);
+        // test parameters
+        final Long userId = 1L;
+        // test context
+        doNothing().when(userService).deleteUserById(anyLong());
+
+        var requestBuilder = delete("/users/{userId}", userId);
+
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(status().isOk());
     }
 
-    /**
-     * Method under test: {@link UserController#deleteUserById(Long)}
-     */
-    @Test
-    void testDeleteUserById2() throws Exception {
-        doNothing().when(userService).deleteUserById((Long) any());
-        MockHttpServletRequestBuilder deleteResult = MockMvcRequestBuilders.delete("/users/{userId}", 123L);
-        deleteResult.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(deleteResult)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+    private RequestUserDto getRequestUserDto(Long n) {
+        final String         name    = String.format("RequestUserDtoName%d", n);
+        final String         email   = String.format("request_user.dto%d@example.org", n);
+        final RequestUserDto userDto = new RequestUserDto();
+
+        userDto.setName(name);
+        userDto.setEmail(email);
+
+        return userDto;
+    }
+
+    private UserDto getUserDto(Long userDtoId, RequestUserDto requestUserDto) {
+        final UserDto userDto = new UserDto();
+
+        userDto.setId(userDtoId);
+        userDto.setName(requestUserDto.getName());
+        userDto.setEmail(requestUserDto.getEmail());
+
+        return userDto;
+    }
+
+    private UserDto getUserDto(Long userDtoId) {
+        final String  name    = String.format("UserDtoName%d", userDtoId);
+        final String  email   = String.format("user.dto%d@example.com", userDtoId);
+        final UserDto userDto = new UserDto();
+
+        userDto.setId(userDtoId);
+        userDto.setName(name);
+        userDto.setEmail(email);
+
+        return userDto;
     }
 }
-

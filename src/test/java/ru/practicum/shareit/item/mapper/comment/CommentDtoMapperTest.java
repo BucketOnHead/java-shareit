@@ -8,10 +8,10 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CommentDtoMapperTest {
     /**
@@ -19,43 +19,53 @@ class CommentDtoMapperTest {
      */
     @Test
     void testToComment() {
-        RequestCommentDto requestCommentDto = new RequestCommentDto();
-        requestCommentDto.setText("Text");
+        // test parameters
+        final Long authorId      = 1L;
+        final Long requesterId   = 2L;
+        final Long ownerId       = 3L;
+        final Long itemRequestId = 1L;
+        final Long itemId        = 1L;
+        // test context
+        Long              requestCommentDtoId = 1L;
+        User              author              = getAuthor(authorId);
+        User              requester           = getRequester(requesterId);
+        User              owner               = getOwner(ownerId);
+        RequestCommentDto requestCommentDto   = getRequestCommentDto(requestCommentDtoId);
+        ItemRequest       itemRequest         = getItemRequest(itemRequestId, requester);
+        Item              item                = getItem(itemId, Boolean.TRUE, owner, itemRequest);
+        LocalDateTime     time                = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
 
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        Comment comment = CommentDtoMapper.toComment(requestCommentDto, author, item, time);
 
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
+        author      = getAuthor(authorId);
+        requester   = getRequester(requesterId);
+        owner       = getOwner(ownerId);
+        itemRequest = getItemRequest(itemRequestId, requester);
+        item        = getItem(itemId, Boolean.TRUE, owner, itemRequest);
+        assertEquals(requestCommentDto.getText(), comment.getText());
+        assertEquals(time,                        comment.getCreated());
 
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
+        assertEquals(author.getId(),    comment.getAuthor().getId());
+        assertEquals(author.getName(),  comment.getAuthor().getName());
+        assertEquals(author.getEmail(), comment.getAuthor().getEmail());
 
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-        Comment actualToCommentResult = CommentDtoMapper.toComment(requestCommentDto, user, item,
-                LocalDateTime.of(1, 1, 1, 1, 1));
-        assertSame(user, actualToCommentResult.getAuthor());
-        assertEquals("Text", actualToCommentResult.getText());
-        assertSame(item, actualToCommentResult.getItem());
-        assertEquals("01:01", actualToCommentResult.getCreated().toLocalTime().toString());
+        assertEquals(item.getId(),          comment.getItem().getId());
+        assertEquals(item.getName(),        comment.getItem().getName());
+        assertEquals(item.getDescription(), comment.getItem().getDescription());
+        assertEquals(item.getIsAvailable(), comment.getItem().getIsAvailable());
+
+        assertEquals(owner.getId(),    comment.getItem().getOwner().getId());
+        assertEquals(owner.getName(),  comment.getItem().getOwner().getName());
+        assertEquals(owner.getEmail(), comment.getItem().getOwner().getEmail());
+
+        assertEquals(itemRequest.getId(),           comment.getItem().getItemRequest().getId());
+        assertEquals(itemRequest.getDescription(),  comment.getItem().getItemRequest().getDescription());
+        assertEquals(itemRequest.getCreationTime(), comment.getItem().getItemRequest().getCreationTime());
+
+        assertEquals(requester.getId(),    comment.getItem().getItemRequest().getRequester().getId());
+        assertEquals(requester.getName(),  comment.getItem().getItemRequest().getRequester().getName());
+        assertEquals(requester.getEmail(), comment.getItem().getItemRequest().getRequester().getEmail());
     }
 
     /**
@@ -63,46 +73,134 @@ class CommentDtoMapperTest {
      */
     @Test
     void testToCommentDto() {
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
+        // test parameters
+        final Long authorId = 1L;
+        final Long ownerId = 2L;
+        final Long requesterId = 3L;
+        final Long itemRequestId = 1L;
+        final Long itemId = 1L;
+        final Long commentId = 1L;
+        // test context
+        User        author      = getAuthor(authorId);
+        User        requester   = getRequester(requesterId);
+        ItemRequest itemRequest = getItemRequest(itemRequestId, requester);
+        User        owner       = getOwner(ownerId);
+        Item        item        = getItem(itemId, Boolean.TRUE, owner, itemRequest);
+        Comment     comment     = getComment(commentId, author, item);
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        CommentDto commentDto = CommentDtoMapper.toCommentDto(comment);
+
+        author      = getAuthor(authorId);
+        itemRequest = getItemRequest(itemRequestId, requester);
+        owner       = getOwner(ownerId);
+        item        = getItem(itemId, Boolean.TRUE, owner, itemRequest);
+        comment     = getComment(commentId, author, item);
+        assertEquals(comment.getId(), commentDto.getId());
+        assertEquals(comment.getText(), commentDto.getText());
+        assertEquals(comment.getAuthor().getName(), commentDto.getAuthorName());
+        assertEquals(comment.getCreated(), commentDto.getCreated());
+    }
+
+    /**
+     * Method under test: {@link CommentDtoMapper#CommentDtoMapper()}
+     */
+    @Test
+    void testConstructor() throws NoSuchMethodException {
+        // test context
+        var constructor = CommentDtoMapper.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        var ex = assertThrows(InvocationTargetException.class, constructor::newInstance);
+
+        String message = "This is a utility class and cannot be instantiated";
+        assertTrue(ex.getCause() instanceof AssertionError);
+        assertEquals(message, ex.getCause().getMessage());
+    }
+
+    private User getAuthor(Long authorId) {
+        final String name  = String.format("Author%dName", authorId);
+        final String email = String.format("user.author%d@example.com", authorId);
+
+        User author = new User();
+        author.setId(authorId);
+        author.setName(name);
+        author.setEmail(email);
+
+        return author;
+    }
+
+    private User getRequester(Long requesterId) {
+        final String name  = String.format("Requester%dName", requesterId);
+        final String email = String.format("user.requester%d@example.com", requesterId);
+
+        User requester = new User();
+        requester.setId(requesterId);
+        requester.setName(name);
+        requester.setEmail(email);
+
+        return requester;
+    }
+
+    private User getOwner(Long ownerId) {
+        final String name  = String.format("Owner%dName", ownerId);
+        final String email = String.format("user.owner%d@example.com", ownerId);
+
+        User requester = new User();
+        requester.setId(ownerId);
+        requester.setName(name);
+        requester.setEmail(email);
+
+        return requester;
+    }
+
+    private ItemRequest getItemRequest(Long itemRequestId, User requester) {
+        final String        description = String.format("item request %d description", itemRequestId);
+        final LocalDateTime time        = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
 
         ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
+        itemRequest.setId(itemRequestId);
+        itemRequest.setDescription(description);
+        itemRequest.setCreationTime(time);
+        itemRequest.setRequester(requester);
 
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
+        return itemRequest;
+    }
+
+    private Item getItem(Long itemId, Boolean isAvailable, User owner, ItemRequest itemRequest) {
+        final String name        = String.format("Item%dName", itemId);
+        final String description = String.format("Item %d description", itemId);
 
         Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
+        item.setId(itemId);
+        item.setName(name);
+        item.setDescription(description);
+        item.setIsAvailable(isAvailable);
+        item.setOwner(owner);
         item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
+
+        return item;
+    }
+
+    private Comment getComment(Long commentId, User author, Item item) {
+        final String        text = String.format("Comment %d text", commentId);
+        final LocalDateTime time = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
 
         Comment comment = new Comment();
-        comment.setAuthor(user);
-        comment.setCreated(LocalDateTime.of(1, 1, 1, 1, 1));
-        comment.setId(123L);
+        comment.setId(commentId);
+        comment.setText(text);
+        comment.setCreated(time);
+        comment.setAuthor(author);
         comment.setItem(item);
-        comment.setText("Text");
-        CommentDto actualToCommentDtoResult = CommentDtoMapper.toCommentDto(comment);
-        assertEquals("Name", actualToCommentDtoResult.getAuthorName());
-        assertEquals("Text", actualToCommentDtoResult.getText());
-        assertEquals(123L, actualToCommentDtoResult.getId().longValue());
-        assertEquals("0001-01-01", actualToCommentDtoResult.getCreated().toLocalDate().toString());
+
+        return comment;
+    }
+
+    private RequestCommentDto getRequestCommentDto(Long requestCommentDtoId) {
+        final String text = String.format("Request comment dto %d text", requestCommentDtoId);
+
+        RequestCommentDto commentDto = new RequestCommentDto();
+        commentDto.setText(text);
+
+        return commentDto;
     }
 }
-

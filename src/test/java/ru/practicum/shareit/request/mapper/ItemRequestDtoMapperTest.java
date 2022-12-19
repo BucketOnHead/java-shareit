@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.in.RequestItemRequestDto;
 import ru.practicum.shareit.request.dto.out.ItemRequestDto;
-import ru.practicum.shareit.request.dto.out.ItemRequestDto.ItemDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
@@ -22,18 +21,23 @@ class ItemRequestDtoMapperTest {
      */
     @Test
     void testToItemRequest() {
-        RequestItemRequestDto itemRequestDto = getRequestItemRequestDto(1L);
-        User                  requester      = getRequester(1L);
-        LocalDateTime         time           = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
+        // test parameters
+        final Long          requestItemRequestId = 1L;
+        final Long          requesterId          = 1L;
+        final LocalDateTime time                 = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
+        // test context
+        User                  requester      = getRequester(requesterId);
+        RequestItemRequestDto itemRequestDto = getRequestItemRequestDto(requestItemRequestId);
 
         ItemRequest itemRequest = ItemRequestDtoMapper.toItemRequest(itemRequestDto, requester, time);
 
-        requester      = getRequester(1L);
-        itemRequestDto = getRequestItemRequestDto(1L);
-        assertEquals(time, itemRequest.getCreationTime());
-        assertItemRequestDtoEquals(itemRequestDto, itemRequest);
-        assertUserEquals(requester, itemRequest.getRequester());
-
+        requester      = getRequester(requesterId);
+        itemRequestDto = getRequestItemRequestDto(requestItemRequestId);
+        assertEquals(requester.getId(),               itemRequest.getRequester().getId());
+        assertEquals(requester.getName(),             itemRequest.getRequester().getName());
+        assertEquals(requester.getEmail(),            itemRequest.getRequester().getEmail());
+        assertEquals(time,                            itemRequest.getCreationTime());
+        assertEquals(itemRequestDto.getDescription(), itemRequest.getDescription());
     }
 
     /**
@@ -41,143 +45,187 @@ class ItemRequestDtoMapperTest {
      */
     @Test
     void testToItemRequestDtoWithoutItems() {
-        User        requester   = getRequester(1L);
-        ItemRequest itemRequest = getItemRequest(1L, requester);
+        // test parameters
+        final Long requesterId   = 1L;
+        final Long itemRequestId = 1L;
+        // test context
+        User        requester   = getRequester(requesterId);
+        ItemRequest itemRequest = getItemRequest(itemRequestId, requester);
 
         ItemRequestDto itemRequestDto = ItemRequestDtoMapper.toItemRequestDtoWithoutItems(itemRequest);
 
-        requester   = getRequester(1L);
-        itemRequest = getItemRequest(1L, requester);
-        assertItemRequestDtoWithoutItemsEquals(itemRequest, itemRequestDto);
+        requester   = getRequester(requesterId);
+        itemRequest = getItemRequest(itemRequestId, requester);
+        assertNull(itemRequestDto.getItems());
+        assertEquals(itemRequest.getId(),           itemRequestDto.getId());
+        assertEquals(itemRequest.getDescription(),  itemRequestDto.getDescription());
+        assertEquals(itemRequest.getCreationTime(), itemRequestDto.getCreated());
     }
 
     /**
      * Method under test: {@link ItemRequestDtoMapper#toItemRequestDto(ItemRequest, Collection)}
      */
     @Test
-    void testToItemRequestWithEmptyItems() {
-        User        requester   = getRequester(1L);
-        ItemRequest itemRequest = getItemRequest(1L, requester);
+    void testToItemRequestDto_WithEmptyItems() {
+        // test parameters
+        final Long requesterId   = 1L;
+        final Long itemRequestId = 1L;
+        // test context
+        User        requester   = getRequester(requesterId);
+        ItemRequest itemRequest = getItemRequest(itemRequestId, requester);
         List<Item>  items       = getItems();
 
         ItemRequestDto itemRequestDto = ItemRequestDtoMapper.toItemRequestDto(itemRequest, items);
 
-        requester   = getRequester(1L);
-        itemRequest = getItemRequest(1L, requester);
-        items       = getItems();
-        assertItemRequestDtoEquals(itemRequest, itemRequestDto, items);
+        assertNotNull(itemRequestDto.getItems());
+        assertTrue(itemRequestDto.getItems().isEmpty());
+        assertEquals(itemRequest.getId(),           itemRequestDto.getId());
+        assertEquals(itemRequest.getDescription(),  itemRequestDto.getDescription());
+        assertEquals(itemRequest.getCreationTime(), itemRequestDto.getCreated());
     }
 
     /**
      * Method under test: {@link ItemRequestDtoMapper#toItemRequestDto(ItemRequest, Collection)}
      */
     @Test
-    void testToItemRequestDtoWithOneItem() {
-        User        requester   = getRequester(1L);
-        User        owner       = getOwner(2L);
-        ItemRequest itemRequest = getItemRequest(1L, requester);
-        Item        item        = getItem(1L, Boolean.TRUE, owner, itemRequest);
+    void testToItemRequestDto2() {
+        // test parameters
+        final Long requesterId   = 1L;
+        final Long ownerId       = 2L;
+        final Long itemRequestId = 1L;
+        final Long itemId        = 1L;
+        // test context
+        User        requester   = getRequester(requesterId);
+        User        owner       = getOwner(ownerId);
+        ItemRequest itemRequest = getItemRequest(itemRequestId, requester);
+        Item        item        = getItem(itemId, Boolean.TRUE, owner, itemRequest);
         List<Item>  items       = getItems(item);
 
+
         ItemRequestDto itemRequestDto = ItemRequestDtoMapper.toItemRequestDto(itemRequest, items);
 
-        requester   = getRequester(1L);
-        owner       = getOwner(2L);
-        itemRequest = getItemRequest(1L, requester);
-        item        = getItem(1L, Boolean.TRUE, owner, itemRequest);
-        items       = getItems(item);
-        assertItemRequestDtoEquals(itemRequest, itemRequestDto, items);
+        requester   = getRequester(requesterId);
+        owner       = getOwner(ownerId);
+        itemRequest = getItemRequest(itemRequestId, requester);
+        item        = getItem(itemId, Boolean.TRUE, owner, itemRequest);
+        assertNotNull(itemRequestDto.getItems());
+        assertEquals(1,                    itemRequestDto.getItems().size());
+        assertEquals(itemRequest.getId(),           itemRequestDto.getId());
+        assertEquals(itemRequest.getDescription(),  itemRequestDto.getDescription());
+        assertEquals(itemRequest.getCreationTime(), itemRequestDto.getCreated());
+        ItemRequestDto.ItemDto itemDto = itemRequestDto.getItems().get(0);
+        assertEquals(item.getId(),                                 itemDto.getId());
+        assertEquals(item.getName(),                               itemDto.getName());
+        assertEquals(item.getDescription(),                        itemDto.getDescription());
+        assertEquals(item.getIsAvailable(),                        itemDto.getAvailable());
+        assertEquals(item.getItemRequest().getRequester().getId(), itemDto.getRequestId());
     }
 
     /**
      * Method under test: {@link ItemRequestDtoMapper#toItemRequestDto(ItemRequest, Collection)}
      */
     @Test
-    void testToItemRequestDtoWithTwoItems() {
-        User        requester    = getRequester(1L);
-        User        owner        = getOwner(2L);
-        User        owner2       = getOwner(3L);
-        ItemRequest itemRequest  = getItemRequest(1L, requester);
-        ItemRequest itemRequest2 = getItemRequest(1L, requester);
-        Item        item         = getItem(1L, Boolean.TRUE, owner, itemRequest);
-        Item        item2        = getItem(2L, Boolean.FALSE, owner2, itemRequest2);
-        List<Item>  items        = getItems(item, item2);
+    void testToItemRequestDto_WithTwoItems() {
+        // test parameters
+        final Long requesterId    = 1L;
+        final Long requesterId2   = 2L;
+        final Long requesterId3   = 3L;
+        final Long ownerId        = 3L;
+        final Long ownerId2       = 4L;
+        final Long itemRequestId  = 1L;
+        final Long itemRequestId2 = 2L;
+        final Long itemRequestId3 = 3L;
+        final Long itemId         = 1L;
+        // test context
+        User requester           = getRequester(requesterId);
+        User requester2          = getRequester(requesterId2);
+        User requester3          = getRequester(requesterId3);
+        User owner               = getOwner(ownerId);
+        User owner2              = getOwner(ownerId2);
+        ItemRequest itemRequest  = getItemRequest(itemRequestId, requester);
+        ItemRequest itemRequest2 = getItemRequest(itemRequestId2, requester2);
+        ItemRequest itemRequest3 = getItemRequest(itemRequestId3, requester3);
+        Item item                = getItem(itemId, Boolean.TRUE, owner, itemRequest2);
+        Item item2               = getItem(itemId, Boolean.FALSE, owner2, itemRequest3);
+        List<Item> items         = getItems(item, item2);
 
         ItemRequestDto itemRequestDto = ItemRequestDtoMapper.toItemRequestDto(itemRequest, items);
 
-        requester    = getRequester(1L);
-        owner        = getOwner(2L);
-        owner2       = getOwner(3L);
-        itemRequest  = getItemRequest(1L, requester);
-        itemRequest2 = getItemRequest(1L, requester);
-        item         = getItem(1L, Boolean.TRUE, owner, itemRequest);
-        item2        = getItem(2L, Boolean.FALSE, owner2, itemRequest2);
-        items        = getItems(item, item2);
-        assertItemRequestDtoEquals(itemRequest, itemRequestDto, items);
+        requester    = getRequester(requesterId);
+        requester2   = getRequester(requesterId2);
+        requester3   = getRequester(requesterId3);
+        owner        = getOwner(ownerId);
+        owner2       = getOwner(ownerId2);
+        itemRequest  = getItemRequest(itemRequestId, requester);
+        itemRequest2 = getItemRequest(itemRequestId2, requester2);
+        itemRequest3 = getItemRequest(itemRequestId3, requester3);
+        item         = getItem(itemId, Boolean.TRUE, owner, itemRequest2);
+        item2        = getItem(itemId, Boolean.FALSE, owner2, itemRequest3);
+        assertNotNull(itemRequestDto.getItems());
+        assertEquals(2,                    itemRequestDto.getItems().size());
+        assertEquals(itemRequest.getId(),           itemRequestDto.getId());
+        assertEquals(itemRequest.getDescription(),  itemRequestDto.getDescription());
+        assertEquals(itemRequest.getCreationTime(), itemRequestDto.getCreated());
+        ItemRequestDto.ItemDto itemDto = itemRequestDto.getItems().get(0);
+        assertEquals(item.getId(),                                 itemDto.getId());
+        assertEquals(item.getName(),                               itemDto.getName());
+        assertEquals(item.getDescription(),                        itemDto.getDescription());
+        assertEquals(item.getIsAvailable(),                        itemDto.getAvailable());
+        assertEquals(item.getItemRequest().getRequester().getId(), itemDto.getRequestId());
+        ItemRequestDto.ItemDto itemDto2 = itemRequestDto.getItems().get(1);
+        assertEquals(item2.getId(),                                 itemDto2.getId());
+        assertEquals(item2.getName(),                               itemDto2.getName());
+        assertEquals(item2.getDescription(),                        itemDto2.getDescription());
+        assertEquals(item2.getIsAvailable(),                        itemDto2.getAvailable());
+        assertEquals(item2.getItemRequest().getRequester().getId(), itemDto2.getRequestId());
     }
 
     /**
      * Method under test: {@link ItemRequestDtoMapper#ItemRequestDtoMapper()}
      */
     @Test
-    void testConstructor() {
-        var constructor = assertDoesNotThrow(() ->
-                ItemRequestDtoMapper.class.getDeclaredConstructor()
-        );
-
+    void testConstructor() throws NoSuchMethodException {
+        // test context
+        var constructor = ItemRequestDtoMapper.class.getDeclaredConstructor();
         constructor.setAccessible(true);
 
-        var ex = assertThrows(InvocationTargetException.class,
-                constructor::newInstance
-        );
+        var ex = assertThrows(InvocationTargetException.class, constructor::newInstance);
 
         String message = "This is a utility class and cannot be instantiated";
         assertTrue(ex.getCause() instanceof AssertionError);
         assertEquals(message, ex.getCause().getMessage());
     }
 
-    private static RequestItemRequestDto getRequestItemRequestDto(Long n) {
-        final String description = String.format("Item request dto description %d", n);
+    private User getRequester(Long requesterId) {
+        final String name       = String.format("RequesterName%d", requesterId);
+        final String email      = String.format("requester%d@example.org", requesterId);
+        final User   requester  = new User();
 
-        RequestItemRequestDto itemRequestDto = new RequestItemRequestDto();
+        requester.setId(requesterId);
+        requester.setName(name);
+        requester.setEmail(email);
 
-        itemRequestDto.setDescription(description);
-
-        return itemRequestDto;
+        return requester;
     }
 
-    private static User getRequester(Long requesterId) {
-        final String requesterName  = String.format("RequesterName%d", requesterId);
-        final String requesterEmail = String.format("requester%d@example.org", requesterId);
+    private User getOwner(Long ownerId) {
+        final String name   = String.format("OwnerName%d", ownerId);
+        final String email  = String.format("owner%d@example.org", ownerId);
+        final User   owner  = new User();
 
-        User user = new User();
+        owner.setId(ownerId);
+        owner.setName(name);
+        owner.setEmail(email);
 
-        user.setId(requesterId);
-        user.setName(requesterName);
-        user.setEmail(requesterEmail);
-
-        return user;
+        return owner;
     }
 
-    private User getOwner(long ownerId) {
-        final String ownerName  = String.format("OwnerName%d", ownerId);
-        final String ownerEmail = String.format("owner%d@example.org", ownerId);
+    private Item getItem(Long itemId, Boolean isAvailable, User owner, ItemRequest itemRequest) {
+        final String name        = String.format("Item%dName", itemId);
+        final String description = String.format("Item %d description", itemId);
+        final Item   item        = new Item();
 
-        User user = new User();
-
-        user.setId(ownerId);
-        user.setName(ownerName);
-        user.setEmail(ownerEmail);
-
-        return user;
-    }
-
-    private Item getItem(long itemId, Boolean isAvailable, User owner, ItemRequest itemRequest) {
-        final String name        = String.format("ItemName%d", itemId);
-        final String description = String.format("Item description %d", itemId);
-
-        Item item = new Item();
-
+        item.setId(itemId);
         item.setName(name);
         item.setDescription(description);
         item.setIsAvailable(isAvailable);
@@ -187,11 +235,10 @@ class ItemRequestDtoMapperTest {
         return item;
     }
 
-    private static ItemRequest getItemRequest(Long itemRequestId, User requester) {
-        final String        description = String.format("Item request description %d", itemRequestId);
+    private ItemRequest getItemRequest(Long itemRequestId, User requester) {
+        final String        description = String.format("Item request %d description", itemRequestId);
         final LocalDateTime time        = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
-
-        ItemRequest itemRequest = new ItemRequest();
+        final ItemRequest   itemRequest = new ItemRequest();
 
         itemRequest.setId(itemRequestId);
         itemRequest.setDescription(description);
@@ -201,53 +248,16 @@ class ItemRequestDtoMapperTest {
         return itemRequest;
     }
 
-    private static List<Item> getItems(Item... items) {
+    private RequestItemRequestDto getRequestItemRequestDto(Long id) {
+        final String                description    = String.format("Request item request dto description %d", id);
+        final RequestItemRequestDto itemRequestDto = new RequestItemRequestDto();
+
+        itemRequestDto.setDescription(description);
+
+        return itemRequestDto;
+    }
+
+    private List<Item> getItems(Item... items) {
         return Arrays.asList(items);
-    }
-
-    private static void assertUserEquals(User user1, User user2) {
-        assertEquals(user1.getId(),    user2.getId());
-        assertEquals(user1.getName(),  user2.getName());
-        assertEquals(user1.getEmail(), user2.getEmail());
-    }
-
-    private static void assertItemEquals(Item item, ItemDto itemDto) {
-        if (item.getItemRequest() != null) {
-            assertEquals(item.getItemRequest().getId(), itemDto.getRequestId());
-        }
-
-        assertEquals(item.getId(),          itemDto.getId());
-        assertEquals(item.getName(),        itemDto.getName());
-        assertEquals(item.getDescription(), itemDto.getDescription());
-        assertEquals(item.getIsAvailable(), itemDto.getAvailable());
-    }
-
-    private void assertItemRequestDtoEquals(RequestItemRequestDto dto, ItemRequest itemRequest) {
-        assertEquals(dto.getDescription(), itemRequest.getDescription());
-    }
-
-    private void assertItemRequestDtoWithoutItemsEquals(ItemRequest itemRequest, ItemRequestDto dto) {
-        assertNull(dto.getItems());
-        assertEquals(itemRequest.getId(),           dto.getId());
-        assertEquals(itemRequest.getDescription(),  dto.getDescription());
-        assertEquals(itemRequest.getCreationTime(), dto.getCreated());
-    }
-
-    private void assertItemRequestDtoEquals(ItemRequest itemRequest, ItemRequestDto dto, List<Item> items) {
-        assertNotNull(dto.getItems());
-        assertEquals(itemRequest.getId(),           dto.getId());
-        assertEquals(itemRequest.getDescription(),  dto.getDescription());
-        assertEquals(itemRequest.getCreationTime(), dto.getCreated());
-        assertItemEquals(items,                     dto.getItems());
-    }
-
-    private static void assertItemEquals(List<Item> items, List<ItemDto> itemsDto) {
-        if (items.size() != itemsDto.size()) {
-            throw new RuntimeException("Size of the lists should be the same");
-        }
-
-        for (int i = 0; i < items.size(); i++) {
-            assertItemEquals(items.get(i), itemsDto.get(i));
-        }
     }
 }

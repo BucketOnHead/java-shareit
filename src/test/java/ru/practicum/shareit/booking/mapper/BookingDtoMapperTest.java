@@ -8,8 +8,10 @@ import ru.practicum.shareit.booking.dto.out.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -400,5 +402,20 @@ class BookingDtoMapperTest {
         assertEquals(123L, item1.getId().longValue());
         assertEquals(123L, actualToBookingDtoResult.getBooker().getId().longValue());
     }
-}
 
+    /**
+     * Method under test: {@link UserDtoMapper#UserDtoMapper()}
+     */
+    @Test
+    void testConstructor() throws NoSuchMethodException {
+        // test context
+        var constructor = BookingDtoMapper.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        var ex = assertThrows(InvocationTargetException.class, constructor::newInstance);
+
+        String message = "This is a utility class and cannot be instantiated";
+        assertTrue(ex.getCause() instanceof AssertionError);
+        assertEquals(message, ex.getCause().getMessage());
+    }
+}

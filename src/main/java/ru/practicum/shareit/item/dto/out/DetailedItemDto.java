@@ -32,8 +32,8 @@ public class DetailedItemDto {
     @NoArgsConstructor
     public static class CommentDto {
         private Long id;
-        private String text;
         private String authorName;
+        private String text;
         private LocalDateTime created;
     }
 }

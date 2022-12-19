@@ -1,1274 +1,1253 @@
 package ru.practicum.shareit.booking.service;
 
-import org.junit.jupiter.api.Disabled;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.practicum.shareit.booking.dto.in.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.out.BookingDto;
-import ru.practicum.shareit.booking.exception.StateNotImplementedException;
+import ru.practicum.shareit.booking.exception.*;
+import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService.State;
 import ru.practicum.shareit.exception.IncorrectDataException;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ContextConfiguration(classes = {BookingServiceImpl.class})
+@SpringBootTest
 @ExtendWith(SpringExtension.class)
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class BookingServiceImplTest {
     @MockBean
     private BookingRepository bookingRepository;
-
-    @Autowired
-    private BookingServiceImpl bookingServiceImpl;
-
     @MockBean
     private ItemRepository itemRepository;
-
     @MockBean
     private UserRepository userRepository;
+    private final BookingServiceImpl bookingService;
 
     /**
      * Method under test: {@link BookingServiceImpl#checkBookingExistsById(BookingRepository, Long)}
      */
     @Test
     void testCheckBookingExistsById() {
-        BookingRepository bookingRepository1 = mock(BookingRepository.class);
-        when(bookingRepository1.existsById((Long) any())).thenReturn(true);
-        BookingServiceImpl.checkBookingExistsById(bookingRepository1, 123L);
-        verify(bookingRepository1).existsById((Long) any());
+        // test parameters
+        final Long bookingId = 1L;
+        // test context
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+
+        BookingServiceImpl.checkBookingExistsById(bookingRepository, bookingId);
+
+        verify(bookingRepository).existsById(bookingId);
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#checkBookingExistsById(BookingRepository, Long)}
      */
     @Test
-    @Disabled("TODO: Complete this test")
-    void testCheckBookingExistsById2() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.booking.exception.BookingNotFoundException: BOOKING[ID_123] not found
-        //       at ru.practicum.shareit.booking.exception.BookingNotFoundException.getFromBookingId(BookingNotFoundException.java:20)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.checkBookingExistsById(BookingServiceImpl.java:41)
-        //   See https://diff.blue/R013 to resolve this issue.
+    void testCheckBookingExistsById_NotExists() {
+        // test parameters
+        final Long bookingId = 1L;
+        // test context
+        when(bookingRepository.existsById(anyLong())).thenReturn(false);
 
-        BookingRepository bookingRepository1 = mock(BookingRepository.class);
-        when(bookingRepository1.existsById((Long) any())).thenReturn(false);
-        BookingServiceImpl.checkBookingExistsById(bookingRepository1, 123L);
-    }
+        assertThrows(BookingNotFoundException.class, () ->
+                BookingServiceImpl.checkBookingExistsById(bookingRepository, bookingId));
 
-    /**
-     * Method under test: {@link BookingServiceImpl#checkBookingExistsById(BookingRepository, Long)}
-     */
-    @Test
-    void testCheckBookingExistsById3() {
-        BookingRepository bookingRepository1 = mock(BookingRepository.class);
-        when(bookingRepository1.existsById((Long) any())).thenThrow(new IncorrectDataException("An error occurred"));
-        assertThrows(IncorrectDataException.class,
-                () -> BookingServiceImpl.checkBookingExistsById(bookingRepository1, 123L));
-        verify(bookingRepository1).existsById((Long) any());
+        verify(bookingRepository).existsById(bookingId);
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#addBooking(RequestBookingDto, Long)}
      */
     @Test
-    @Disabled("TODO: Complete this test")
     void testAddBooking() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.booking.exception.BookingLogicException: USER[ID_123] cannot book own ITEM[ID_123]
-        //       at ru.practicum.shareit.booking.exception.BookingLogicException.getFromOwnerIdAndItemId(BookingLogicException.java:18)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.checkUserNotOwnerByItemIdAndUserId(BookingServiceImpl.java:183)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.addBooking(BookingServiceImpl.java:50)
-        //   See https://diff.blue/R013 to resolve this issue.
+        // test parameters
+        final Long ownerId  = 1L;
+        final Long bookerId = 2L;
+        final Long itemId   = 1L;
+        // test context
+        final RequestBookingDto requestBookingDto = getRequestBookingDto(itemId);
+        final User              booker            = getBooker(bookerId);
+        final User              owner             = getOwner(ownerId);
+        final Item              item              = getItem(itemId, TRUE, owner, null);
+        final Booking           booking           = getBooking(requestBookingDto, booker, item);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.getReferenceById(anyLong())).thenReturn(booker);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
-        when(userRepository.existsById((Long) any())).thenReturn(true);
+        BookingDto bookingDto = bookingService.addBooking(requestBookingDto, bookerId);
 
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
-
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user);
-
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user1);
-        when(itemRepository.getReferenceById((Long) any())).thenReturn(item);
-        when(itemRepository.existsById((Long) any())).thenReturn(true);
-
-        RequestBookingDto requestBookingDto = new RequestBookingDto();
-        requestBookingDto.setEnd(LocalDateTime.of(1, 1, 1, 1, 1));
-        requestBookingDto.setItemId(123L);
-        requestBookingDto.setStart(LocalDateTime.of(1, 1, 1, 1, 1));
-        bookingServiceImpl.addBooking(requestBookingDto, 123L);
+        assertBookingEquals(booking, bookingDto);
+        verify(bookingRepository).save(any(Booking.class));
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#addBooking(RequestBookingDto, Long)}
      */
     @Test
-    void testAddBooking2() {
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        when(itemRepository.getReferenceById((Long) any())).thenThrow(new IncorrectDataException("An error occurred"));
-        when(itemRepository.existsById((Long) any())).thenReturn(true);
+    void testAddBooking_UserNotExists() {
+        // test parameters
+        final Long userId = 1L;
+        final Long itemId = 1L;
+        // test context
+        final RequestBookingDto requestBookingDto = getRequestBookingDto(itemId);
+        when(userRepository.existsById(anyLong())).thenReturn(false);
 
-        RequestBookingDto requestBookingDto = new RequestBookingDto();
-        requestBookingDto.setEnd(LocalDateTime.of(1, 1, 1, 1, 1));
-        requestBookingDto.setItemId(123L);
-        requestBookingDto.setStart(LocalDateTime.of(1, 1, 1, 1, 1));
-        assertThrows(IncorrectDataException.class, () -> bookingServiceImpl.addBooking(requestBookingDto, 123L));
-        verify(userRepository).existsById((Long) any());
-        verify(itemRepository).existsById((Long) any());
-        verify(itemRepository).getReferenceById((Long) any());
+        assertThrows(UserNotFoundException.class, () ->
+                bookingService.addBooking(requestBookingDto, userId));
+
+        verify(userRepository).existsById(userId);
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#addBooking(RequestBookingDto, Long)}
      */
     @Test
-    @Disabled("TODO: Complete this test")
-    void testAddBooking3() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.user.exception.UserNotFoundException: USER[ID_123] not found
-        //       at ru.practicum.shareit.user.exception.UserNotFoundException.getFromUserId(UserNotFoundException.java:18)
-        //       at ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById(UserServiceImpl.java:26)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.addBooking(BookingServiceImpl.java:48)
-        //   See https://diff.blue/R013 to resolve this issue.
+    void testAddBooking_ItemNotExists() {
+        // test parameters
+        final Long userId = 1L;
+        final Long itemId = 1L;
+        // test context
+        final RequestBookingDto requestBookingDto = getRequestBookingDto(itemId);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRepository.existsById(anyLong())).thenReturn(false);
 
-        when(userRepository.existsById((Long) any())).thenReturn(false);
+        assertThrows(ItemNotFoundException.class, () ->
+                bookingService.addBooking(requestBookingDto, userId));
 
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
+        verify(userRepository).existsById(userId);
+        verify(itemRepository).existsById(itemId);
+    }
 
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user);
+    /**
+     * Method under test: {@link BookingServiceImpl#addBooking(RequestBookingDto, Long)}
+     */
+    @Test
+    void testAddBooking_UserBookingHisItem() {
+        // test parameters
+        final Long userId = 1L;
+        final Long itemId = 1L;
+        // test context
+        final RequestBookingDto requestBookingDto = getRequestBookingDto(itemId);
+        final User              owner             = getOwner(userId);
+        final Item              item              = getItem(itemId, TRUE, owner, null);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        assertThrows(BookingLogicException.class, () ->
+                bookingService.addBooking(requestBookingDto, userId));
 
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user1);
-        when(itemRepository.getReferenceById((Long) any())).thenReturn(item);
-        when(itemRepository.existsById((Long) any())).thenReturn(true);
+        verify(userRepository).existsById(userId);
+        verify(itemRepository).existsById(itemId);
+    }
 
-        RequestBookingDto requestBookingDto = new RequestBookingDto();
-        requestBookingDto.setEnd(LocalDateTime.of(1, 1, 1, 1, 1));
-        requestBookingDto.setItemId(123L);
-        requestBookingDto.setStart(LocalDateTime.of(1, 1, 1, 1, 1));
-        bookingServiceImpl.addBooking(requestBookingDto, 123L);
+    /**
+     * Method under test: {@link BookingServiceImpl#addBooking(RequestBookingDto, Long)}
+     */
+    @Test
+    void testAddBooking_ItemNotAvailableForBooking() {
+        // test parameters
+        final Long ownerId  = 1L;
+        final Long bookerId = 2L;
+        final Long itemId   = 1L;
+        // test context
+        final RequestBookingDto requestBookingDto = getRequestBookingDto(itemId);
+        final User              booker            = getBooker(bookerId);
+        final User              owner             = getOwner(ownerId);
+        final Item              item              = getItem(itemId, Boolean.FALSE, owner, null);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.getReferenceById(anyLong())).thenReturn(booker);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
+
+        assertThrows(ItemNotAvailableForBookingException.class, () ->
+                bookingService.addBooking(requestBookingDto, bookerId));
+
+        verify(userRepository).existsById(bookerId);
+        verify(itemRepository).existsById(itemId);
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#updateBookingStatus(Long, Boolean, Long)}
      */
     @Test
-    void testUpdateBookingStatus() {
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
+    void testUpdateBookingStatus_Approved() {
+        // test parameters
+        final Long    bookerId  = 1L;
+        final Long    ownerId   = 2L;
+        final Long    itemId    = 1L;
+        final Long    bookingId = 1L;
+        final Status  status    = Status.WAITING;
+        // test context
+        final User    booker         = getBooker(bookerId);
+        final User    owner          = getOwner(ownerId);
+        final Item    item           = getItem(itemId, TRUE, owner, null);
+        final Booking booking        = getBooking(bookingId, status, booker, item);
+        final Booking updatedBooking = getBooking(booking.getId(), Status.APPROVED,
+                                                  booking.getBooker(), booking.getItem());
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
+        when(bookingRepository.save(any(Booking.class))).thenReturn(updatedBooking);
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        BookingDto bookingDto = bookingService.updateBookingStatus(bookingId, TRUE, ownerId);
 
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        Booking booking = new Booking();
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user4);
-
-        User user5 = new User();
-        user5.setEmail("jane.doe@example.org");
-        user5.setId(123L);
-        user5.setName("Name");
-
-        Item item1 = new Item();
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user5);
-
-        Booking booking1 = new Booking();
-        booking1.setBooker(user3);
-        booking1.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking1.setId(123L);
-        booking1.setItem(item1);
-        booking1.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking1.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.save((Booking) any())).thenReturn(booking1);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-
-        User user6 = new User();
-        user6.setEmail("jane.doe@example.org");
-        user6.setId(123L);
-        user6.setName("Name");
-
-        ItemRequest itemRequest2 = new ItemRequest();
-        itemRequest2.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest2.setDescription("The characteristics of someone or something");
-        itemRequest2.setId(123L);
-        itemRequest2.setRequester(user6);
-
-        User user7 = new User();
-        user7.setEmail("jane.doe@example.org");
-        user7.setId(123L);
-        user7.setName("Name");
-
-        Item item2 = new Item();
-        item2.setDescription("The characteristics of someone or something");
-        item2.setId(123L);
-        item2.setIsAvailable(true);
-        item2.setItemRequest(itemRequest2);
-        item2.setName("Name");
-        item2.setOwner(user7);
-        when(itemRepository.getReferenceById((Long) any())).thenReturn(item2);
-        BookingDto actualUpdateBookingStatusResult = bookingServiceImpl.updateBookingStatus(123L, true, 123L);
-        assertEquals(Booking.Status.WAITING, actualUpdateBookingStatusResult.getStatus());
-        assertEquals("01:01", actualUpdateBookingStatusResult.getEnd().toLocalTime().toString());
-        assertEquals("01:01", actualUpdateBookingStatusResult.getStart().toLocalTime().toString());
-        assertEquals(123L, actualUpdateBookingStatusResult.getId().longValue());
-        BookingDto.ItemDto item3 = actualUpdateBookingStatusResult.getItem();
-        assertEquals("Name", item3.getName());
-        assertEquals(123L, item3.getId().longValue());
-        assertEquals(123L, actualUpdateBookingStatusResult.getBooker().getId().longValue());
-        verify(bookingRepository).existsById((Long) any());
-        verify(bookingRepository).getReferenceById((Long) any());
-        verify(bookingRepository).save((Booking) any());
-        verify(userRepository).existsById((Long) any());
-        verify(itemRepository).getReferenceById((Long) any());
+        assertBookingEquals(updatedBooking, bookingDto);
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(ownerId);
+        verify(bookingRepository).getReferenceById(bookingId);
+        verify(itemRepository).getReferenceById(itemId);
+        verify(bookingRepository).save(any(Booking.class));
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#updateBookingStatus(Long, Boolean, Long)}
      */
     @Test
-    void testUpdateBookingStatus2() {
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
+    void testUpdateBookingStatus_Rejected() {
+        // test parameters
+        final Long    bookerId  = 1L;
+        final Long    ownerId   = 2L;
+        final Long    itemId    = 1L;
+        final Long    bookingId = 1L;
+        final Status  status    = Status.WAITING;
+        // test context
+        final User    booker         = getBooker(bookerId);
+        final User    owner          = getOwner(ownerId);
+        final Item    item           = getItem(itemId, TRUE, owner, null);
+        final Booking booking        = getBooking(bookingId, status, booker, item);
+        final Booking updatedBooking = getBooking(booking.getId(), Status.REJECTED,
+                                                  booking.getBooker(), booking.getItem());
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
+        when(bookingRepository.save(any(Booking.class))).thenReturn(updatedBooking);
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        BookingDto bookingDto = bookingService.updateBookingStatus(bookingId, FALSE, ownerId);
 
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        Booking booking = new Booking();
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.save((Booking) any())).thenThrow(new IncorrectDataException("An error occurred"));
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user3);
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        Item item1 = new Item();
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user4);
-        when(itemRepository.getReferenceById((Long) any())).thenReturn(item1);
-        assertThrows(IncorrectDataException.class, () -> bookingServiceImpl.updateBookingStatus(123L, true, 123L));
-        verify(bookingRepository).existsById((Long) any());
-        verify(bookingRepository).getReferenceById((Long) any());
-        verify(bookingRepository).save((Booking) any());
-        verify(userRepository).existsById((Long) any());
-        verify(itemRepository).getReferenceById((Long) any());
+        assertBookingEquals(updatedBooking, bookingDto);
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(ownerId);
+        verify(bookingRepository).getReferenceById(bookingId);
+        verify(itemRepository).getReferenceById(itemId);
+        verify(bookingRepository).save(any(Booking.class));
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#updateBookingStatus(Long, Boolean, Long)}
      */
     @Test
-    void testUpdateBookingStatus3() {
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
+    void testUpdateBookingStatus_BookingNotExists() {
+        // test parameters
+        final Long    userId    = 1L;
+        final Long    bookingId = 1L;
+        final Boolean approved  = TRUE;
+        // test context
+        when(bookingRepository.existsById(anyLong())).thenReturn(false);
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        assertThrows(BookingNotFoundException.class, () ->
+                bookingService.updateBookingStatus(bookingId, approved, userId));
 
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        Booking booking = new Booking();
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user4);
-
-        User user5 = new User();
-        user5.setEmail("jane.doe@example.org");
-        user5.setId(123L);
-        user5.setName("Name");
-
-        Item item1 = new Item();
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user5);
-
-        User user6 = new User();
-        user6.setEmail("jane.doe@example.org");
-        user6.setId(123L);
-        user6.setName("Name");
-
-        User user7 = new User();
-        user7.setEmail("jane.doe@example.org");
-        user7.setId(123L);
-        user7.setName("Name");
-
-        ItemRequest itemRequest2 = new ItemRequest();
-        itemRequest2.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest2.setDescription("The characteristics of someone or something");
-        itemRequest2.setId(123L);
-        itemRequest2.setRequester(user7);
-
-        User user8 = new User();
-        user8.setEmail("jane.doe@example.org");
-        user8.setId(123L);
-        user8.setName("Name");
-
-        Item item2 = new Item();
-        item2.setDescription("The characteristics of someone or something");
-        item2.setId(123L);
-        item2.setIsAvailable(true);
-        item2.setItemRequest(itemRequest2);
-        item2.setName("Name");
-        item2.setOwner(user8);
-        Booking booking1 = mock(Booking.class);
-        when(booking1.getItem()).thenReturn(item2);
-        when(booking1.getId()).thenReturn(123L);
-        when(booking1.getEndTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking1.getStartTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking1.getStatus()).thenReturn(Booking.Status.WAITING);
-        when(booking1.getBooker()).thenReturn(user6);
-        doNothing().when(booking1).setBooker((User) any());
-        doNothing().when(booking1).setEndTime((LocalDateTime) any());
-        doNothing().when(booking1).setId((Long) any());
-        doNothing().when(booking1).setItem((Item) any());
-        doNothing().when(booking1).setStartTime((LocalDateTime) any());
-        doNothing().when(booking1).setStatus((Booking.Status) any());
-        booking1.setBooker(user3);
-        booking1.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking1.setId(123L);
-        booking1.setItem(item1);
-        booking1.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking1.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.save((Booking) any())).thenReturn(booking1);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-
-        User user9 = new User();
-        user9.setEmail("jane.doe@example.org");
-        user9.setId(123L);
-        user9.setName("Name");
-
-        ItemRequest itemRequest3 = new ItemRequest();
-        itemRequest3.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest3.setDescription("The characteristics of someone or something");
-        itemRequest3.setId(123L);
-        itemRequest3.setRequester(user9);
-
-        User user10 = new User();
-        user10.setEmail("jane.doe@example.org");
-        user10.setId(123L);
-        user10.setName("Name");
-
-        Item item3 = new Item();
-        item3.setDescription("The characteristics of someone or something");
-        item3.setId(123L);
-        item3.setIsAvailable(true);
-        item3.setItemRequest(itemRequest3);
-        item3.setName("Name");
-        item3.setOwner(user10);
-        when(itemRepository.getReferenceById((Long) any())).thenReturn(item3);
-        BookingDto actualUpdateBookingStatusResult = bookingServiceImpl.updateBookingStatus(123L, true, 123L);
-        assertEquals(Booking.Status.WAITING, actualUpdateBookingStatusResult.getStatus());
-        assertEquals("01:01", actualUpdateBookingStatusResult.getEnd().toLocalTime().toString());
-        assertEquals("01:01", actualUpdateBookingStatusResult.getStart().toLocalTime().toString());
-        assertEquals(123L, actualUpdateBookingStatusResult.getId().longValue());
-        BookingDto.ItemDto item4 = actualUpdateBookingStatusResult.getItem();
-        assertEquals("Name", item4.getName());
-        assertEquals(123L, item4.getId().longValue());
-        assertEquals(123L, actualUpdateBookingStatusResult.getBooker().getId().longValue());
-        verify(bookingRepository).existsById((Long) any());
-        verify(bookingRepository).getReferenceById((Long) any());
-        verify(bookingRepository).save((Booking) any());
-        verify(booking1, atLeast(1)).getId();
-        verify(booking1).getEndTime();
-        verify(booking1).getStartTime();
-        verify(booking1).getStatus();
-        verify(booking1).getItem();
-        verify(booking1).getBooker();
-        verify(booking1).setBooker((User) any());
-        verify(booking1).setEndTime((LocalDateTime) any());
-        verify(booking1).setId((Long) any());
-        verify(booking1).setItem((Item) any());
-        verify(booking1).setStartTime((LocalDateTime) any());
-        verify(booking1).setStatus((Booking.Status) any());
-        verify(userRepository).existsById((Long) any());
-        verify(itemRepository).getReferenceById((Long) any());
+        verify(bookingRepository).existsById(bookingId);
     }
 
     /**
      * Method under test: {@link BookingServiceImpl#updateBookingStatus(Long, Boolean, Long)}
      */
     @Test
-    @Disabled("TODO: Complete this test")
-    void testUpdateBookingStatus4() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.exception.IncorrectDataException: An error occurred
-        //       at ru.practicum.shareit.booking.mapper.BookingDtoMapper.toBookingDto(BookingDtoMapper.java:52)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.updateBookingStatus(BookingServiceImpl.java:74)
-        //   See https://diff.blue/R013 to resolve this issue.
+    void testUpdateBookingStatus_UserNotExists() {
+        // test parameters
+        final Long    userId    = 1L;
+        final Long    bookingId = 1L;
+        final Boolean approved  = TRUE;
+        // test context
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(false);
 
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
+        assertThrows(UserNotFoundException.class, () ->
+                bookingService.updateBookingStatus(bookingId, approved, userId));
 
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(userId);
+    }
 
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
+    /**
+     * Method under test: {@link BookingServiceImpl#updateBookingStatus(Long, Boolean, Long)}
+     */
+    @Test
+    void testUpdateBookingStatus_NotOwner() {
+        // test parameters
+        final Long    userId    = 1L;
+        final Long    bookerId  = 2L;
+        final Long    ownerId   = 3L;
+        final Long    itemId    = 1L;
+        final Long    bookingId = 1L;
+        final Boolean approved  = TRUE;
+        final Status  status    = Status.WAITING;
+        // test context
+        final User    booker  = getBooker(bookerId);
+        final User    owner   = getOwner(ownerId);
+        final Item    item    = getItem(itemId, TRUE, owner, null);
+        final Booking booking = getBooking(bookingId, status, booker, item);
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
 
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
+        assertThrows(ItemNotFoundException.class, () ->
+                bookingService.updateBookingStatus(bookingId, approved, userId));
+
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(userId);
+        verify(bookingRepository).getReferenceById(bookingId);
+        verify(itemRepository).getReferenceById(itemId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#updateBookingStatus(Long, Boolean, Long)}
+     */
+    @Test
+    void testUpdateBookingStatus_BookingAlreadyApproved() {
+        // test parameters
+        final Long    bookerId  = 1L;
+        final Long    ownerId   = 2L;
+        final Long    itemId    = 1L;
+        final Long    bookingId = 1L;
+        final Boolean approved  = TRUE;
+        // test context
+        final User    booker  = getBooker(bookerId);
+        final User    owner   = getOwner(ownerId);
+        final Item    item    = getItem(itemId, TRUE, owner, null);
+        final Booking booking = getBooking(bookingId, Status.APPROVED, booker, item);
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+        when(itemRepository.getReferenceById(anyLong())).thenReturn(item);
+
+        assertThrows(BookingAlreadyApprovedException.class, () ->
+                bookingService.updateBookingStatus(bookingId, approved, ownerId));
+
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(ownerId);
+        verify(bookingRepository).getReferenceById(bookingId);
+        verify(itemRepository).getReferenceById(itemId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
+     */
+    @Test
+    void testGetBookingByIdOnlyForOwnerOrBooker_BookingNotExists() {
+        // test parameters
+        final Long userId    = 1L;
+        final Long bookingId = 1L;
+        // test context
+        when(bookingRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(BookingNotFoundException.class,
+                () -> bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, userId));
+
+        verify(bookingRepository).existsById(bookingId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
+     */
+    @Test
+    void testGetBookingByIdOnlyForOwnerOrBooker_UserNotExists() {
+        // test parameters
+        final Long userId    = 1L;
+        final Long bookingId = 1L;
+        // test context
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class,
+                () -> bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, userId));
+
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(userId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
+     */
+    @Test
+    void testGetBookingByIdOnlyForOwnerOrBooker_Owner() {
+        // test parameters
+        final Long   bookerId  = 1L;
+        final Long   ownerId   = 2L;
+        final Long   bookingId = 1L;
+        final Long   itemId    = 1L;
+        final Status status    = Status.WAITING;
+        // test context
+        final User    booker  = getBooker(bookerId);
+        final User    owner   = getOwner(ownerId);
+        final Item    item    = getItem(itemId, TRUE, owner, null);
+        final Booking booking = getBooking(bookingId, status, booker, item);
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+
+        BookingDto bookingDto =
+                bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, ownerId);
+
+        assertBookingEquals(booking, bookingDto);
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(ownerId);
+        verify(bookingRepository).getReferenceById(bookingId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
+     */
+    @Test
+    void testGetBookingByIdOnlyForOwnerOrBooker_Booker() {
+        // test parameters
+        final Long   bookerId  = 1L;
+        final Long   ownerId   = 2L;
+        final Long   bookingId = 1L;
+        final Long   itemId    = 1L;
+        final Status status    = Status.WAITING;
+        // test context
+        final User    booker  = getBooker(bookerId);
+        final User    owner   = getOwner(ownerId);
+        final Item    item    = getItem(itemId, TRUE, owner, null);
+        final Booking booking = getBooking(bookingId, status, booker, item);
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+
+        BookingDto bookingDto =
+                bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, bookerId);
+
+        assertBookingEquals(booking, bookingDto);
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).getReferenceById(bookingId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
+     */
+    @Test
+    void testGetBookingByIdOnlyForOwnerOrBooker_NotOwnerAndNotBooker() {
+        // test parameters
+        final Long   userId    = 1L;
+        final Long   bookerId  = 2L;
+        final Long   ownerId   = 3L;
+        final Long   bookingId = 1L;
+        final Long   itemId    = 1L;
+        final Status status    = Status.WAITING;
+        // test context
+        final User    booker  = getBooker(bookerId);
+        final User    owner   = getOwner(ownerId);
+        final Item    item    = getItem(itemId, TRUE, owner, null);
+        final Booking booking = getBooking(bookingId, status, booker, item);
+        when(bookingRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.getReferenceById(anyLong())).thenReturn(booking);
+
+        assertThrows(BookingNotFoundException.class, () ->
+                bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, userId));
+
+        verify(bookingRepository).existsById(bookingId);
+        verify(userRepository).existsById(userId);
+        verify(bookingRepository).getReferenceById(bookingId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithPaginationAll() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.ALL.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdOrderByStartTimeDesc(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdOrderByStartTimeDesc(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithPaginationCurrent() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.CURRENT.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithPaginationPast() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.PAST.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndEndTimeIsBefore(anyLong(), any(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndEndTimeIsBefore(anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithPaginationFuture() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.FUTURE.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithPaginationWaiting() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.WAITING.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStatusEquals(anyLong(), any(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStatusEquals(anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithPaginationRejected() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.REJECTED.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStatusEquals(anyLong(), any(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStatusEquals(anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithoutPaginationAll() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.ALL.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdOrderByStartTimeDesc(anyLong()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdOrderByStartTimeDesc(anyLong());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithoutPaginationCurrent() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithoutPaginationPast() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.PAST.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndEndTimeIsBefore(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndEndTimeIsBefore(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithoutPaginationFuture() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.FUTURE.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithoutPaginationWaiting() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.WAITING.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStatusEquals(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStatusEquals(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_WithoutPaginationRejected() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.REJECTED.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByBookerIdAndStatusEquals(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerId(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByBookerIdAndStatusEquals(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_NullFrom() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        final Integer size     = 1;
+
+        assertThrows(IncorrectDataException.class, () ->
+                bookingService.getAllByBookerId(bookerId, state, null, size));
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_NullSize() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        final Integer from     = 1;
+
+        assertThrows(IncorrectDataException.class, () ->
+                bookingService.getAllByBookerId(bookerId, state, from, null));
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_UserNotExists() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        final Integer from     = 1;
+        final Integer size     = 1;
+        // test context
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class, () ->
+                bookingService.getAllByBookerId(bookerId, state, from, size));
+
+        verify(userRepository).existsById(bookerId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerId_UnknownState() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        // test context
+        final String state = "UnknownState123";
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+
+        assertThrows(IncorrectStateException.class, () ->
+                bookingService.getAllByBookerId(bookerId, state, from, size));
+
+        verify(userRepository).existsById(bookerId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithPaginationAll() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.ALL.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdOrderByStartTimeDesc(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithPaginationCurrent() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.CURRENT.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithPaginationPast() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.PAST.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndEndTimeIsBefore(
+                anyLong(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndEndTimeIsBefore(anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithPaginationFuture() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.FUTURE.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithPaginationWaiting() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.WAITING.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStatusEquals(anyLong(), any(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStatusEquals(anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithPaginationRejected() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        final String  state    = State.REJECTED.name();
+        // test context
+        final Page<Booking> bookings = new PageImpl<>(getBookings());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStatusEquals(anyLong(), any(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, from, size);
+
+        assertEquals(bookings.toList().size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStatusEquals(anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithoutPaginationAll() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.ALL.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(anyLong()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdOrderByStartTimeDesc(anyLong());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithoutPaginationCurrent() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
+                anyLong(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithoutPaginationPast() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.PAST.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndEndTimeIsBefore(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndEndTimeIsBefore(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithoutPaginationFuture() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.FUTURE.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any())).thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithoutPaginationWaiting() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.WAITING.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStatusEquals(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStatusEquals(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_WithoutPaginationRejected() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.REJECTED.name();
+        // test context
+        final List<Booking> bookings = getBookings();
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(bookingRepository.findAllByItemOwnerIdAndStatusEquals(anyLong(), any()))
+                .thenReturn(bookings);
+
+        List<BookingDto> bookingsDto = bookingService.getAllByBookerItems(bookerId, state, null, null);
+
+        assertEquals(bookings.size(), bookingsDto.size());
+        verify(userRepository).existsById(bookerId);
+        verify(bookingRepository).findAllByItemOwnerIdAndStatusEquals(anyLong(), any());
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_NullFrom() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        final Integer size     = 1;
+
+        assertThrows(IncorrectDataException.class, () ->
+                bookingService.getAllByBookerItems(bookerId, state, null, size));
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_NullSize() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        final Integer from     = 1;
+
+        assertThrows(IncorrectDataException.class, () ->
+                bookingService.getAllByBookerItems(bookerId, state, from, null));
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_UserNotExists() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final String  state    = State.CURRENT.name();
+        final Integer from     = 1;
+        final Integer size     = 1;
+        // test context
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class, () ->
+                bookingService.getAllByBookerItems(bookerId, state, from, size));
+
+        verify(userRepository).existsById(bookerId);
+    }
+
+    /**
+     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
+     */
+    @Test
+    void testGetAllByBookerItems_UnknownState() {
+        // test parameters
+        final Long    bookerId = 1L;
+        final Integer from     = 1;
+        final Integer size     = 1;
+        // test context
+        final String state = "UnknownState123";
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+
+        assertThrows(IncorrectStateException.class, () ->
+                bookingService.getAllByBookerItems(bookerId, state, from, size));
+
+        verify(userRepository).existsById(bookerId);
+    }
+
+    private static void assertBookingEquals(Booking booking, BookingDto bookingDto) {
+        assertEquals(booking.getId(),        bookingDto.getId());
+        assertEquals(booking.getStartTime(), bookingDto.getStart());
+        assertEquals(booking.getEndTime(),   bookingDto.getEnd());
+        assertEquals(booking.getStatus(),    bookingDto.getStatus());
+
+        assertEquals(booking.getItem().getId(),   bookingDto.getItem().getId());
+        assertEquals(booking.getItem().getName(), bookingDto.getItem().getName());
+
+        assertEquals(booking.getBooker().getId(), bookingDto.getBooker().getId());
+    }
+
+    private static User getBooker(Long bookerId) {
+        final String name  = String.format("Booker%dName", bookerId);
+        final String email = String.format("user.booker%d@example.org", bookerId);
+
+        User booker = new User();
+        booker.setId(bookerId);
+        booker.setName(name);
+        booker.setEmail(email);
+
+        return booker;
+    }
+
+    private static User getOwner(Long ownerId) {
+        final String name  = String.format("Owner%dName", ownerId);
+        final String email = String.format("user.owner%d@example.org", ownerId);
+
+        User owner = new User();
+        owner.setId(ownerId);
+        owner.setName(name);
+        owner.setEmail(email);
+
+        return owner;
+    }
+
+    private static User getRequester(Long requesterId) {
+        final String name  = String.format("Requester%dName", requesterId);
+        final String email = String.format("user.requester%d@example.org", requesterId);
+
+        User requester = new User();
+        requester.setId(requesterId);
+        requester.setName(name);
+        requester.setEmail(email);
+
+        return requester;
+    }
+
+    private static Item getItem(Long itemId, Boolean isAvailable, User owner, ItemRequest itemRequest) {
+        final String name        = String.format("Item%dName", itemId);
+        final String description = String.format("Item %d description", itemId);
 
         Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
+        item.setId(itemId);
+        item.setName(name);
+        item.setDescription(description);
+        item.setIsAvailable(isAvailable);
+        item.setOwner(owner);
         item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
+
+        return item;
+    }
+
+    private static Booking getBooking(Long bookingId, Status status, User booker, Item item) {
+        final LocalDateTime start = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
+        final LocalDateTime end   = LocalDateTime.of(7, 6, 5, 4, 3, 2, 1);
 
         Booking booking = new Booking();
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
+        booking.setId(bookingId);
+        booking.setStatus(status);
+        booking.setStartTime(start);
+        booking.setEndTime(end);
+        booking.setBooker(booker);
         booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
 
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user4);
-
-        User user5 = new User();
-        user5.setEmail("jane.doe@example.org");
-        user5.setId(123L);
-        user5.setName("Name");
-
-        Item item1 = new Item();
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user5);
-
-        User user6 = new User();
-        user6.setEmail("jane.doe@example.org");
-        user6.setId(123L);
-        user6.setName("Name");
-        Booking booking1 = mock(Booking.class);
-        when(booking1.getItem()).thenThrow(new IncorrectDataException("An error occurred"));
-        when(booking1.getId()).thenReturn(123L);
-        when(booking1.getEndTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking1.getStartTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking1.getStatus()).thenReturn(Booking.Status.WAITING);
-        when(booking1.getBooker()).thenReturn(user6);
-        doNothing().when(booking1).setBooker((User) any());
-        doNothing().when(booking1).setEndTime((LocalDateTime) any());
-        doNothing().when(booking1).setId((Long) any());
-        doNothing().when(booking1).setItem((Item) any());
-        doNothing().when(booking1).setStartTime((LocalDateTime) any());
-        doNothing().when(booking1).setStatus((Booking.Status) any());
-        booking1.setBooker(user3);
-        booking1.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking1.setId(123L);
-        booking1.setItem(item1);
-        booking1.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking1.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.save((Booking) any())).thenReturn(booking1);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-
-        User user7 = new User();
-        user7.setEmail("jane.doe@example.org");
-        user7.setId(123L);
-        user7.setName("Name");
-
-        ItemRequest itemRequest2 = new ItemRequest();
-        itemRequest2.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest2.setDescription("The characteristics of someone or something");
-        itemRequest2.setId(123L);
-        itemRequest2.setRequester(user7);
-
-        User user8 = new User();
-        user8.setEmail("jane.doe@example.org");
-        user8.setId(123L);
-        user8.setName("Name");
-
-        Item item2 = new Item();
-        item2.setDescription("The characteristics of someone or something");
-        item2.setId(123L);
-        item2.setIsAvailable(true);
-        item2.setItemRequest(itemRequest2);
-        item2.setName("Name");
-        item2.setOwner(user8);
-        when(itemRepository.getReferenceById((Long) any())).thenReturn(item2);
-        bookingServiceImpl.updateBookingStatus(123L, true, 123L);
+        return booking;
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
-     */
-    @Test
-    void testGetBookingByIdOnlyForOwnerOrBooker() {
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
-
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
-
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        Booking booking = new Booking();
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        BookingDto actualBookingByIdOnlyForOwnerOrBooker = bookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(123L,
-                123L);
-        assertEquals(Booking.Status.WAITING, actualBookingByIdOnlyForOwnerOrBooker.getStatus());
-        assertEquals("01:01", actualBookingByIdOnlyForOwnerOrBooker.getEnd().toLocalTime().toString());
-        assertEquals("01:01", actualBookingByIdOnlyForOwnerOrBooker.getStart().toLocalTime().toString());
-        assertEquals(123L, actualBookingByIdOnlyForOwnerOrBooker.getId().longValue());
-        BookingDto.ItemDto item1 = actualBookingByIdOnlyForOwnerOrBooker.getItem();
-        assertEquals("Name", item1.getName());
-        assertEquals(123L, item1.getId().longValue());
-        assertEquals(123L, actualBookingByIdOnlyForOwnerOrBooker.getBooker().getId().longValue());
-        verify(bookingRepository).existsById((Long) any());
-        verify(bookingRepository).getReferenceById((Long) any());
-        verify(userRepository).existsById((Long) any());
+    private static Booking getBooking(RequestBookingDto requestBookingDto, User booker, Item item) {
+        return BookingDtoMapper.toBooking(requestBookingDto, booker, item);
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
-     */
-    @Test
-    void testGetBookingByIdOnlyForOwnerOrBooker2() {
-        when(bookingRepository.getReferenceById((Long) any())).thenThrow(new IncorrectDataException("An error occurred"));
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        assertThrows(IncorrectDataException.class,
-                () -> bookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(123L, 123L));
-        verify(bookingRepository).existsById((Long) any());
-        verify(bookingRepository).getReferenceById((Long) any());
-        verify(userRepository).existsById((Long) any());
+    private static RequestBookingDto getRequestBookingDto(Long itemId) {
+        final LocalDateTime start = LocalDateTime.of(1, 2, 3, 4, 5, 6, 7);
+        final LocalDateTime end   = LocalDateTime.of(7, 6, 5, 4, 3, 2, 1);
+
+        RequestBookingDto bookingDto = new RequestBookingDto();
+        bookingDto.setItemId(itemId);
+        bookingDto.setStart(start);
+        bookingDto.setEnd(end);
+
+        return bookingDto;
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
-     */
-    @Test
-    void testGetBookingByIdOnlyForOwnerOrBooker3() {
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
-
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
-
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user3);
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        Item item1 = new Item();
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user4);
-
-        User user5 = new User();
-        user5.setEmail("jane.doe@example.org");
-        user5.setId(123L);
-        user5.setName("Name");
-        Booking booking = mock(Booking.class);
-        when(booking.getId()).thenReturn(123L);
-        when(booking.getEndTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking.getStartTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking.getStatus()).thenReturn(Booking.Status.WAITING);
-        when(booking.getBooker()).thenReturn(user5);
-        when(booking.getItem()).thenReturn(item1);
-        doNothing().when(booking).setBooker((User) any());
-        doNothing().when(booking).setEndTime((LocalDateTime) any());
-        doNothing().when(booking).setId((Long) any());
-        doNothing().when(booking).setItem((Item) any());
-        doNothing().when(booking).setStartTime((LocalDateTime) any());
-        doNothing().when(booking).setStatus((Booking.Status) any());
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        BookingDto actualBookingByIdOnlyForOwnerOrBooker = bookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(123L,
-                123L);
-        assertEquals(Booking.Status.WAITING, actualBookingByIdOnlyForOwnerOrBooker.getStatus());
-        assertEquals("01:01", actualBookingByIdOnlyForOwnerOrBooker.getEnd().toLocalTime().toString());
-        assertEquals("01:01", actualBookingByIdOnlyForOwnerOrBooker.getStart().toLocalTime().toString());
-        assertEquals(123L, actualBookingByIdOnlyForOwnerOrBooker.getId().longValue());
-        BookingDto.ItemDto item2 = actualBookingByIdOnlyForOwnerOrBooker.getItem();
-        assertEquals("Name", item2.getName());
-        assertEquals(123L, item2.getId().longValue());
-        assertEquals(123L, actualBookingByIdOnlyForOwnerOrBooker.getBooker().getId().longValue());
-        verify(bookingRepository).existsById((Long) any());
-        verify(bookingRepository).getReferenceById((Long) any());
-        verify(booking).getId();
-        verify(booking).getEndTime();
-        verify(booking).getStartTime();
-        verify(booking).getStatus();
-        verify(booking, atLeast(1)).getItem();
-        verify(booking, atLeast(1)).getBooker();
-        verify(booking).setBooker((User) any());
-        verify(booking).setEndTime((LocalDateTime) any());
-        verify(booking).setId((Long) any());
-        verify(booking).setItem((Item) any());
-        verify(booking).setStartTime((LocalDateTime) any());
-        verify(booking).setStatus((Booking.Status) any());
-        verify(userRepository).existsById((Long) any());
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetBookingByIdOnlyForOwnerOrBooker4() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.booking.exception.StateNotImplementedException: STATE['ALL'] not implemented
-        //       at ru.practicum.shareit.booking.mapper.BookingDtoMapper.toBookingDto(BookingDtoMapper.java:47)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(BookingServiceImpl.java:85)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
-
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
-
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user3);
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        Item item1 = new Item();
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user4);
-
-        User user5 = new User();
-        user5.setEmail("jane.doe@example.org");
-        user5.setId(123L);
-        user5.setName("Name");
-        Booking booking = mock(Booking.class);
-        when(booking.getId()).thenThrow(StateNotImplementedException.getFromState(BookingService.State.ALL));
-        when(booking.getEndTime()).thenThrow(StateNotImplementedException.getFromState(BookingService.State.ALL));
-        when(booking.getStartTime()).thenThrow(StateNotImplementedException.getFromState(BookingService.State.ALL));
-        when(booking.getStatus()).thenThrow(StateNotImplementedException.getFromState(BookingService.State.ALL));
-        when(booking.getBooker()).thenReturn(user5);
-        when(booking.getItem()).thenReturn(item1);
-        doNothing().when(booking).setBooker((User) any());
-        doNothing().when(booking).setEndTime((LocalDateTime) any());
-        doNothing().when(booking).setId((Long) any());
-        doNothing().when(booking).setItem((Item) any());
-        doNothing().when(booking).setStartTime((LocalDateTime) any());
-        doNothing().when(booking).setStatus((Booking.Status) any());
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        bookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(123L, 123L);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getBookingByIdOnlyForOwnerOrBooker(Long, Long)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetBookingByIdOnlyForOwnerOrBooker5() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.booking.exception.StateNotImplementedException: STATE['ALL'] not implemented
-        //       at ru.practicum.shareit.booking.mapper.BookingDtoMapper.toItemDtoForBookingDto(BookingDtoMapper.java:77)
-        //       at ru.practicum.shareit.booking.mapper.BookingDtoMapper.toBookingDto(BookingDtoMapper.java:52)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(BookingServiceImpl.java:85)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        User user = new User();
-        user.setEmail("jane.doe@example.org");
-        user.setId(123L);
-        user.setName("Name");
-
-        User user1 = new User();
-        user1.setEmail("jane.doe@example.org");
-        user1.setId(123L);
-        user1.setName("Name");
-
-        ItemRequest itemRequest = new ItemRequest();
-        itemRequest.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest.setDescription("The characteristics of someone or something");
-        itemRequest.setId(123L);
-        itemRequest.setRequester(user1);
-
-        User user2 = new User();
-        user2.setEmail("jane.doe@example.org");
-        user2.setId(123L);
-        user2.setName("Name");
-
-        Item item = new Item();
-        item.setDescription("The characteristics of someone or something");
-        item.setId(123L);
-        item.setIsAvailable(true);
-        item.setItemRequest(itemRequest);
-        item.setName("Name");
-        item.setOwner(user2);
-
-        User user3 = new User();
-        user3.setEmail("jane.doe@example.org");
-        user3.setId(123L);
-        user3.setName("Name");
-
-        ItemRequest itemRequest1 = new ItemRequest();
-        itemRequest1.setCreationTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        itemRequest1.setDescription("The characteristics of someone or something");
-        itemRequest1.setId(123L);
-        itemRequest1.setRequester(user3);
-
-        User user4 = new User();
-        user4.setEmail("jane.doe@example.org");
-        user4.setId(123L);
-        user4.setName("Name");
-
-        User user5 = new User();
-        user5.setEmail("jane.doe@example.org");
-        user5.setId(123L);
-        user5.setName("Name");
-        Item item1 = mock(Item.class);
-        when(item1.getId()).thenThrow(StateNotImplementedException.getFromState(BookingService.State.ALL));
-        when(item1.getName()).thenThrow(StateNotImplementedException.getFromState(BookingService.State.ALL));
-        when(item1.getOwner()).thenReturn(user5);
-        doNothing().when(item1).setDescription((String) any());
-        doNothing().when(item1).setId((Long) any());
-        doNothing().when(item1).setIsAvailable((Boolean) any());
-        doNothing().when(item1).setItemRequest((ItemRequest) any());
-        doNothing().when(item1).setName((String) any());
-        doNothing().when(item1).setOwner((User) any());
-        item1.setDescription("The characteristics of someone or something");
-        item1.setId(123L);
-        item1.setIsAvailable(true);
-        item1.setItemRequest(itemRequest1);
-        item1.setName("Name");
-        item1.setOwner(user4);
-
-        User user6 = new User();
-        user6.setEmail("jane.doe@example.org");
-        user6.setId(123L);
-        user6.setName("Name");
-        Booking booking = mock(Booking.class);
-        when(booking.getId()).thenReturn(123L);
-        when(booking.getEndTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking.getStartTime()).thenReturn(LocalDateTime.of(1, 1, 1, 1, 1));
-        when(booking.getStatus()).thenReturn(Booking.Status.WAITING);
-        when(booking.getBooker()).thenReturn(user6);
-        when(booking.getItem()).thenReturn(item1);
-        doNothing().when(booking).setBooker((User) any());
-        doNothing().when(booking).setEndTime((LocalDateTime) any());
-        doNothing().when(booking).setId((Long) any());
-        doNothing().when(booking).setItem((Item) any());
-        doNothing().when(booking).setStartTime((LocalDateTime) any());
-        doNothing().when(booking).setStatus((Booking.Status) any());
-        booking.setBooker(user);
-        booking.setEndTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setId(123L);
-        booking.setItem(item);
-        booking.setStartTime(LocalDateTime.of(1, 1, 1, 1, 1));
-        booking.setStatus(Booking.Status.WAITING);
-        when(bookingRepository.getReferenceById((Long) any())).thenReturn(booking);
-        when(bookingRepository.existsById((Long) any())).thenReturn(true);
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        bookingServiceImpl.getBookingByIdOnlyForOwnerOrBooker(123L, 123L);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetAllByBookerId() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.booking.exception.IncorrectStateException: Unknown state: Possible State
-        //       at ru.practicum.shareit.booking.exception.IncorrectStateException.getFromStringState(IncorrectStateException.java:18)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.checkState(BookingServiceImpl.java:158)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getAllByBookerId(BookingServiceImpl.java:95)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        bookingServiceImpl.getAllByBookerId(123L, "Possible State", 1, 3);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetAllByBookerId2() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.user.exception.UserNotFoundException: USER[ID_123] not found
-        //       at ru.practicum.shareit.user.exception.UserNotFoundException.getFromUserId(UserNotFoundException.java:18)
-        //       at ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById(UserServiceImpl.java:26)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getAllByBookerId(BookingServiceImpl.java:94)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        when(userRepository.existsById((Long) any())).thenReturn(false);
-        bookingServiceImpl.getAllByBookerId(123L, "Possible State", 1, 3);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetAllByBookerId3() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException: Name is null
-        //       at java.lang.Enum.valueOf(Enum.java:238)
-        //       at ru.practicum.shareit.booking.service.BookingService$State.valueOf(BookingService.java:9)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.checkState(BookingServiceImpl.java:156)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getAllByBookerId(BookingServiceImpl.java:95)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        bookingServiceImpl.getAllByBookerId(123L, null, 1, 3);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
-     */
-    @Test
-    void testGetAllByBookerId4() {
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        assertThrows(IncorrectDataException.class,
-                () -> bookingServiceImpl.getAllByBookerId(123L, "Possible State", null, 3));
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerId(Long, String, Integer, Integer)}
-     */
-    @Test
-    void testGetAllByBookerId5() {
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        assertThrows(IncorrectDataException.class,
-                () -> bookingServiceImpl.getAllByBookerId(123L, "Possible State", 1, null));
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetAllByBookerItems() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.booking.exception.IncorrectStateException: Unknown state: Possible State
-        //       at ru.practicum.shareit.booking.exception.IncorrectStateException.getFromStringState(IncorrectStateException.java:18)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.checkState(BookingServiceImpl.java:158)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getAllByBookerItems(BookingServiceImpl.java:113)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        bookingServiceImpl.getAllByBookerItems(123L, "Possible State", 1, 3);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetAllByBookerItems2() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   ru.practicum.shareit.user.exception.UserNotFoundException: USER[ID_123] not found
-        //       at ru.practicum.shareit.user.exception.UserNotFoundException.getFromUserId(UserNotFoundException.java:18)
-        //       at ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById(UserServiceImpl.java:26)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getAllByBookerItems(BookingServiceImpl.java:112)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        when(userRepository.existsById((Long) any())).thenReturn(false);
-        bookingServiceImpl.getAllByBookerItems(123L, "Possible State", 1, 3);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetAllByBookerItems3() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException: Name is null
-        //       at java.lang.Enum.valueOf(Enum.java:238)
-        //       at ru.practicum.shareit.booking.service.BookingService$State.valueOf(BookingService.java:9)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.checkState(BookingServiceImpl.java:156)
-        //       at ru.practicum.shareit.booking.service.BookingServiceImpl.getAllByBookerItems(BookingServiceImpl.java:113)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        bookingServiceImpl.getAllByBookerItems(123L, null, 1, 3);
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
-     */
-    @Test
-    void testGetAllByBookerItems4() {
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        assertThrows(IncorrectDataException.class,
-                () -> bookingServiceImpl.getAllByBookerItems(123L, "Possible State", null, 3));
-    }
-
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllByBookerItems(Long, String, Integer, Integer)}
-     */
-    @Test
-    void testGetAllByBookerItems5() {
-        when(userRepository.existsById((Long) any())).thenReturn(true);
-        assertThrows(IncorrectDataException.class,
-                () -> bookingServiceImpl.getAllByBookerItems(123L, "Possible State", 1, null));
+    private List<Booking> getBookings(Booking... bookings) {
+        return Arrays.asList(bookings);
     }
 }
-

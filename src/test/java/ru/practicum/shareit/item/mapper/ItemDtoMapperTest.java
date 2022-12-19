@@ -5,11 +5,13 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
+import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1728,5 +1730,20 @@ class ItemDtoMapperTest {
         assertEquals("Text", getResult.getText());
         assertEquals("Text", getResult1.getText());
     }
-}
 
+    /**
+     * Method under test: {@link CommentDtoMapper#CommentDtoMapper()}
+     */
+    @Test
+    void testConstructor() throws NoSuchMethodException {
+        // test context
+        var constructor = ItemDtoMapper.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        var ex = assertThrows(InvocationTargetException.class, constructor::newInstance);
+
+        String message = "This is a utility class and cannot be instantiated";
+        assertTrue(ex.getCause() instanceof AssertionError);
+        assertEquals(message, ex.getCause().getMessage());
+    }
+}

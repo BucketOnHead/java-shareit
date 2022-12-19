@@ -415,4 +415,3 @@ class BookingControllerTest {
                                         + ":123,\"name\":\"Name\"}}"));
     }
 }
-

@@ -155,7 +155,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             return State.valueOf(possibleState);
         } catch (IllegalArgumentException ex) {
-            throw IncorrectStateException.getFromStringState(possibleState);
+            throw IncorrectStateException.getFromString(possibleState);
         }
     }
 

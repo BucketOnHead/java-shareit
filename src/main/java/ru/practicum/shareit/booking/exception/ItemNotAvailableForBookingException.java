@@ -15,6 +15,6 @@ public class ItemNotAvailableForBookingException extends IncorrectDataException 
 
     public static ItemNotAvailableForBookingException getFromItemId(Long itemId) {
         String message = String.format(ITEM_NOT_AVAILABLE, itemId);
-        throw new ItemNotAvailableForBookingException(message);
+        return new ItemNotAvailableForBookingException(message);
     }
 }

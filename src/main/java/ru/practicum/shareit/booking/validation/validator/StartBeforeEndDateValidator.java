@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
 
-public class StartBeforeEndDatesValidator
+public class StartBeforeEndDateValidator
         implements ConstraintValidator<StartBeforeEndValid, RequestBookingDto> {
 
     @Override

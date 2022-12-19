@@ -1,13 +1,12 @@
 package ru.practicum.shareit.booking.exception;
 
-import org.apache.commons.lang3.NotImplementedException;
 import ru.practicum.shareit.booking.service.BookingService.State;
 
-public class StateNotImplementedException extends NotImplementedException {
+public class StateNotImplementedException extends RuntimeException {
     private static final String STATE_NOT_IMPLEMENTED;
 
     static {
-        STATE_NOT_IMPLEMENTED = "STATE['%s'] not implemented";
+        STATE_NOT_IMPLEMENTED = "State '%s' not implemented";
     }
 
     public StateNotImplementedException(String message) {

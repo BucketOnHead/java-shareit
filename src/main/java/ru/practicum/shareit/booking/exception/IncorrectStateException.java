@@ -13,8 +13,8 @@ public class IncorrectStateException extends IncorrectDataException {
         super(message);
     }
 
-    public static IncorrectStateException getFromStringState(String state) {
+    public static IncorrectStateException getFromString(String state) {
         String message = String.format(UNKNOWN_STATE, state);
-        throw new IncorrectStateException(message);
+        return new IncorrectStateException(message);
     }
 }
