@@ -1370,13 +1370,13 @@ class ItemServiceImplTest {
     }
 
     /**
-     * Method under test: {@link ItemServiceImpl#searchItemsByNameOrDescription(String)}
+     * Method under test: {@link ItemService#searchItemsByNameOrDescription(String, Integer, Integer)}
      */
     @Test
     void testSearchItemsByNameOrDescription() {
-        assertTrue(itemServiceImpl.searchItemsByNameOrDescription("Text").isEmpty());
-        assertTrue(itemServiceImpl.searchItemsByNameOrDescription("l.UlUlUlUlUl.U").isEmpty());
-        assertTrue(itemServiceImpl.searchItemsByNameOrDescription("").isEmpty());
+        assertTrue(itemServiceImpl.searchItemsByNameOrDescription("Text", null, null).isEmpty());
+        assertTrue(itemServiceImpl.searchItemsByNameOrDescription("l.UlUlUlUlUl.U", null, null).isEmpty());
+        assertTrue(itemServiceImpl.searchItemsByNameOrDescription("", null, null).isEmpty());
     }
 }
 

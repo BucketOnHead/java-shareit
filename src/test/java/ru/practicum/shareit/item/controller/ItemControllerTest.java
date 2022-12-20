@@ -156,7 +156,7 @@ class ItemControllerTest {
     }
 
     /**
-     * Method under test: {@link ItemController#searchItemsByNameOrDescription(String)}
+     * Method under test: {@link ItemController#searchItemsByNameOrDescription(String, Integer, Integer)}
      */
     @Test
     void testSearchItemsByNameOrDescription() throws Exception {
@@ -164,7 +164,8 @@ class ItemControllerTest {
         String text = "text";
         // test context
         final List<ItemDto> items = new ArrayList<>();
-        when(itemService.searchItemsByNameOrDescription(anyString())).thenReturn(items);
+        when(itemService.searchItemsByNameOrDescription(anyString(), anyInt(), anyInt()))
+                .thenReturn(items);
 
         var requestBuilder = get("/items/search")
                 .param("text", text);

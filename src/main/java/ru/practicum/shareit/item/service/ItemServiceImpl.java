@@ -127,15 +127,33 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsByNameOrDescription(String text) {
+    public List<ItemDto> searchItemsByNameOrDescription(String text,
+                                                        Integer from, Integer size) {
         if (StringUtils.isEmpty(text)) {
             return Collections.emptyList();
         }
 
-        List<Item> foundItems = findItemsByText(text);
-        List<ItemDto> foundItemsDto = ItemDtoMapper.toItemDto(foundItems);
-        log.debug("All ITEM<DTO> containing '{}' returned, {} in total.", text, foundItems.size());
+        List<ItemDto> foundItemsDto;
+        boolean withPagination = checkPaginationParameters(from, size);
+        if (withPagination) {
+            foundItemsDto = getItemsByNameOrDescriptionWithPagination(text, from, size);
+        } else {
+            foundItemsDto = getItemsByNameOrDescriptionWithoutPagination(text);
+        }
+        log.debug("All ITEM<DTO> containing '{}' returned, {} in total.", text, foundItemsDto.size());
         return foundItemsDto;
+    }
+
+    private List<ItemDto> getItemsByNameOrDescriptionWithPagination(String text,
+                                                                    Integer from, Integer size) {
+        Pageable page = PageRequest.of(from, size);
+        List<Item> foundItems = findItemsByText(text, page);
+        return ItemDtoMapper.toItemDto(foundItems);
+    }
+
+    private List<ItemDto> getItemsByNameOrDescriptionWithoutPagination(String text) {
+        List<Item> foundItems = findItemsByText(text);
+        return ItemDtoMapper.toItemDto(foundItems);
     }
 
     /**
@@ -202,6 +220,13 @@ public class ItemServiceImpl implements ItemService {
 
     private List<Item> findItemsByText(String text) {
         return itemRepository.findAllByIsAvailableIsTrue()
+                .stream()
+                .filter(item -> itemContainsTextInNameOrDescription(item, text))
+                .collect(Collectors.toList());
+    }
+
+    private List<Item> findItemsByText(String text, Pageable page) {
+        return itemRepository.findAllByIsAvailableIsTrue(page).toList()
                 .stream()
                 .filter(item -> itemContainsTextInNameOrDescription(item, text))
                 .collect(Collectors.toList());
