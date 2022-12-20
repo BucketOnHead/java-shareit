@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class Booking {
-    public static final Status DEFAULT_STATUS = Status.WAITING;
-
     public enum Status {
         WAITING, APPROVED, REJECTED, CANCELED
     }
+
+    public static final Status DEFAULT_STATUS = Status.WAITING;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,11 +33,11 @@ public class Booking {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "booker_id")
     private User booker;
 

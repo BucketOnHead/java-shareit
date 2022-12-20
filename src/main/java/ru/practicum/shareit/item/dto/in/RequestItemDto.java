@@ -3,34 +3,27 @@ package ru.practicum.shareit.item.dto.in;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.item.model.Item.CreationInfo;
+import ru.practicum.shareit.validation.annotation.NotEmptyIfNotNull;
+import ru.practicum.shareit.validation.group.CreationGroup;
+import ru.practicum.shareit.validation.group.UpdateGroup;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 @Setter
 @Getter
 @NoArgsConstructor
 public class RequestItemDto {
-    @NotEmpty(groups = {CreationInfo.class})
+    @NotEmpty(groups = {CreationGroup.class})
+    @NotEmptyIfNotNull(groups = {UpdateGroup.class})
     private String name;
 
-    @NotEmpty(groups = {CreationInfo.class})
+    @NotEmpty(groups = {CreationGroup.class})
+    @NotEmptyIfNotNull(groups = {UpdateGroup.class})
     private String description;
 
-    @NotNull(groups = {CreationInfo.class})
+    @NotNull(groups = {CreationGroup.class})
     private Boolean available;
 
-    public Optional<String> getName() {
-        return Optional.ofNullable(name);
-    }
-
-    public Optional<String> getDescription() {
-        return Optional.ofNullable(description);
-    }
-
-    public Optional<Boolean> getAvailable() {
-        return Optional.ofNullable(available);
-    }
+    private Long requestId;
 }
