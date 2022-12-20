@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -135,7 +134,7 @@ class ItemControllerTest {
     }
 
     /**
-     * Method under test: {@link ItemController#getItemsByOwnerId(Long)}
+     * Method under test: {@link ItemController#getItemsByOwnerId(Long, Integer, Integer)}
      */
     @Test
     void testGetItemsByOwnerId() throws Exception {
@@ -143,7 +142,7 @@ class ItemControllerTest {
         final Long userId = 1L;
         // test context
         final List<DetailedItemDto> items = new ArrayList<>();
-        when(itemService.getItemsByOwnerId(anyLong())).thenReturn(items);
+        when(itemService.getItemsByOwnerId(anyLong(), anyInt(), anyInt())).thenReturn(items);
 
         var requestBuilder = get("/items")
                 .header("X-Sharer-User-Id", userId);

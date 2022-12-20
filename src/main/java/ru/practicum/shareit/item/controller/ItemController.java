@@ -13,6 +13,8 @@ import ru.practicum.shareit.item.service.comment.CommentService;
 import ru.practicum.shareit.validation.group.CreationGroup;
 import ru.practicum.shareit.validation.group.UpdateGroup;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -47,8 +49,10 @@ public class ItemController {
 
     @GetMapping
     public List<DetailedItemDto> getItemsByOwnerId(
-            @RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        return itemService.getItemsByOwnerId(ownerId);
+            @RequestHeader("X-Sharer-User-Id") Long ownerId,
+            @PositiveOrZero @RequestParam(required = false) Integer from,
+            @Positive @RequestParam(required = false) Integer size) {
+        return itemService.getItemsByOwnerId(ownerId, from, size);
     }
 
     @GetMapping("/search")

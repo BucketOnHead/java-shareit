@@ -3,10 +3,14 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.item.dto.in.RequestItemDto;
 import ru.practicum.shareit.item.dto.out.DetailedItemDto;
 import ru.practicum.shareit.item.dto.out.ItemDto;
@@ -108,10 +112,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<DetailedItemDto> getItemsByOwnerId(Long ownerId) {
-        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
+    public List<DetailedItemDto> getItemsByOwnerId(Long ownerId, Integer from, Integer size) {
+        checkUserExistsById(userRepository, ownerId);
 
-        List<DetailedItemDto> itemsByOwnerId = toDetailedItemDto(items);
+        List<DetailedItemDto> itemsByOwnerId;
+        boolean withPagination = checkPaginationParameters(from, size);
+        if (withPagination) {
+            itemsByOwnerId = getItemsByOwnerIdWithPagination(ownerId, from, size);
+        } else {
+            itemsByOwnerId = getItemsByOwnerIdWithoutPagination(ownerId);
+        }
         log.debug("All ITEM<DTO> returned, {} in total.", itemsByOwnerId.size());
         return itemsByOwnerId;
     }
@@ -126,6 +136,28 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> foundItemsDto = ItemDtoMapper.toItemDto(foundItems);
         log.debug("All ITEM<DTO> containing '{}' returned, {} in total.", text, foundItems.size());
         return foundItemsDto;
+    }
+
+    /**
+     * The method checks the parameters according
+     * to the all-or-nothing principle, and also returns
+     * a boolean value indicating the use of pagination.
+     *
+     * @param from Index of the starting element,
+     * @param size Number of items to display.
+     * @return Boolean value indicating the use of pagination.
+     */
+    private static boolean checkPaginationParameters(Integer from, Integer size) {
+        boolean withPagination = (from != null) && (size != null);
+        boolean withoutPagination = (from == null) && (size == null);
+
+        if (!withPagination && !withoutPagination) {
+            throw new IncorrectDataException(String.format("" +
+                    "Pagination parameters must be specified in full or not specified at all, " +
+                    "but it was: from = '%d' and size = '%d'", from, size));
+        }
+
+        return withPagination;
     }
 
     private static boolean itemContainsTextInNameOrDescription(Item item, String text) {
@@ -180,6 +212,24 @@ public class ItemServiceImpl implements ItemService {
         return ItemDtoMapper.toDetailedItemDtoWithoutBookings(item, comments);
     }
 
+    private List<DetailedItemDto> getItemsByOwnerIdWithPagination(Long ownerId,
+                                                                  Integer from, Integer size) {
+        Pageable page = PageRequest.of(from, size);
+        Page<Item> items = itemRepository.findAllByOwnerId(ownerId, page);
+        return toDetailedItemDto(items.toList());
+    }
+
+    private List<DetailedItemDto> getItemsByOwnerIdWithoutPagination(Long ownerId) {
+        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
+        return toDetailedItemDto(items);
+    }
+
+    private List<DetailedItemDto> toDetailedItemDto(List<Item> items) {
+        return items.stream()
+                .map(this::getDetailedItemDto)
+                .collect(Collectors.toList());
+    }
+
     private DetailedItemDto getDetailedItemDto(Item item) {
         List<Comment> comments = commentRepository.findAllByItemId(item.getId());
         LocalDateTime time = LocalDateTime.now();
@@ -202,11 +252,5 @@ public class ItemServiceImpl implements ItemService {
         } else {
             return ItemDtoMapper.toDetailedItemDtoWithoutNextBooking(item, comments, lastBooking);
         }
-    }
-
-    private List<DetailedItemDto> toDetailedItemDto(List<Item> items) {
-        return items.stream()
-                .map(this::getDetailedItemDto)
-                .collect(Collectors.toList());
     }
 }

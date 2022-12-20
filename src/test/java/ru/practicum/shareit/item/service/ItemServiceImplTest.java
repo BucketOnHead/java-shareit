@@ -1360,12 +1360,13 @@ class ItemServiceImplTest {
     }
 
     /**
-     * Method under test: {@link ItemServiceImpl#getItemsByOwnerId(Long)}
+     * Method under test: {@link ItemService#getItemsByOwnerId(Long, Integer, Integer)}
      */
     @Test
     void testGetItemsByOwnerId() {
-        assertTrue(itemServiceImpl.getItemsByOwnerId(123L).isEmpty());
-        assertTrue(itemServiceImpl.getItemsByOwnerId(1L).isEmpty());
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        assertTrue(itemServiceImpl.getItemsByOwnerId(123L, null, null).isEmpty());
+        assertTrue(itemServiceImpl.getItemsByOwnerId(1L, null, null).isEmpty());
     }
 
     /**

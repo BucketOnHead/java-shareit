@@ -136,8 +136,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private List<ItemRequestDto> getItemRequestsByRequesterIdWithPagination(Long userId,
                                                                             Integer from, Integer size) {
         Pageable page = PageRequest.of(from, size);
-        List<ItemRequest> itemRequestsPage = getItemRequestsWithoutRequester(userId, page).toList();
-        return getItemRequestsDto(itemRequestsPage);
+        Page<ItemRequest> itemRequestsPage = getItemRequestsWithoutRequester(userId, page);
+        return getItemRequestsDto(itemRequestsPage.toList());
     }
 
     private ItemRequest getItemRequest(RequestItemRequestDto requestItemDto, Long requesterId, LocalDateTime time) {
