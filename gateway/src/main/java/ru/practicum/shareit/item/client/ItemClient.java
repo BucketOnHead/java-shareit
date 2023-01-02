@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.response.DetailedItemResponseDto;
 import ru.practicum.shareit.item.dto.response.ItemResponseDto;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -54,6 +55,7 @@ public class ItemClient {
                 .header("size", size.toString())
                 .retrieve()
                 .bodyToFlux(DetailedItemResponseDto.class)
+                .sort(Comparator.comparingLong(DetailedItemResponseDto::getId))
                 .collectList()
                 .block();
     }

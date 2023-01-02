@@ -219,7 +219,6 @@ public class ItemServiceImpl implements ItemService {
                 .findFirstByItemIdAndStartTimeIsAfter(item.getId(), time)
                 .orElse(null);
 
-
         if (lastBooking != null && nextBooking != null) {
             return ItemDtoMapper.toDetailedItemDto(item, comments, lastBooking, nextBooking);
         } else if (lastBooking == null && nextBooking == null) {

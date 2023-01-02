@@ -8,14 +8,11 @@ import ru.practicum.shareit.request.dto.response.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.validation.group.CreationGroup;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @RequestMapping("/requests")
 @RequiredArgsConstructor
-@Validated
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
@@ -42,8 +39,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestDto> getPageWithItemRequestsByRequesterId(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @PositiveOrZero @RequestParam(required = false) Integer from,
-            @Positive @RequestParam(required = false) Integer size) {
+            @RequestParam Integer from,
+            @RequestParam Integer size) {
         return itemRequestService.getItemRequestsByRequesterId(userId, from, size);
     }
 }

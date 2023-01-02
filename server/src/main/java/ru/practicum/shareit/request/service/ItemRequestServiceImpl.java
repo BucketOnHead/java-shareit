@@ -7,7 +7,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.request.RequestItemRequestDto;
@@ -20,7 +19,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
@@ -67,14 +69,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId,
                                                              Integer from, Integer size) {
         checkUserExistsById(userRepository, userId);
-        boolean withPagination = checkPaginationParameters(from, size);
 
-        List<ItemRequestDto> itemRequestsDto;
-        if (withPagination) {
-            itemRequestsDto = getItemRequestsByRequesterIdWithPagination(userId, from, size);
-        } else {
-            itemRequestsDto = Collections.emptyList();
-        }
+        List<ItemRequestDto> itemRequestsDto
+                = getItemRequestsByRequesterIdWithPagination(userId, from, size);
 
         log.debug("All ITEM_REQUEST<DTO> from USER[ID_{}] returned, {} in total.", userId, itemRequestsDto.size());
         return itemRequestsDto;
@@ -89,28 +86,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         log.debug("ITEM_REQUEST[ID_{}]<DTO> from USER[ID_{}] returned", itemRequestId, userId);
         return itemRequestDto;
-    }
-
-    /**
-     * The method checks the parameters according
-     * to the all-or-nothing principle, and also returns
-     * a boolean value indicating the use of pagination.
-     *
-     * @param from Index of the starting element,
-     * @param size Number of items to display.
-     * @return Boolean value indicating the use of pagination.
-     */
-    private static boolean checkPaginationParameters(Integer from, Integer size) {
-        boolean withPagination = (from != null) && (size != null);
-        boolean withoutPagination = (from == null) && (size == null);
-
-        if (!withPagination && !withoutPagination) {
-            throw new IncorrectDataException(String.format("" +
-                    "Pagination parameters must be specified in full or not specified at all, " +
-                    "but it was: from = '%d' and size = '%d'", from, size));
-        }
-
-        return withPagination;
     }
 
     private static ItemRequestDto getItemRequestDto(ItemRequest itemRequest,
@@ -146,7 +121,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     private Page<ItemRequest> getItemRequestsWithoutRequester(Long userId, Pageable page) {
-        return itemRequestRepository.findAllByRequesterIdIsNotLike(userId, page);
+        return itemRequestRepository.findAllByRequesterIdIsNot(userId, page);
     }
 
     private Map<Long, List<Item>> getItemsByItemRequestId() {
