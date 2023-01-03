@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
-import ru.practicum.shareit.booking.dto.response.BookingDto;
+import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -43,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto addBooking(BookItemRequestDto bookingDto, Long userId) {
+    public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
         checkUserExistsById(userRepository, userId);
         checkItemExistsById(itemRepository, bookingDto.getItemId());
         checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
+    public BookingResponseDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
         checkUserExistsById(userRepository, userId);
 
@@ -74,25 +74,25 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
+    public BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
         checkUserExistsById(userRepository, userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         checkOwnerOrBooker(booking, userId);
 
-        BookingDto bookingDto = BookingDtoMapper.toBookingDto(booking);
+        BookingResponseDto bookingDto = BookingDtoMapper.toBookingDto(booking);
         log.debug("BOOKING[ID_{}]<DTO> returned.", bookingDto.getId());
         return bookingDto;
     }
 
     @Override
-    public List<BookingDto> getAllByBookerId(Long bookerId, String stateStr,
-                                             Integer from, Integer size) {
+    public List<BookingResponseDto> getAllByBookerId(Long bookerId, String stateStr,
+                                                     Integer from, Integer size) {
         checkUserExistsById(userRepository, bookerId);
         State state = State.valueOf(stateStr);
 
-        List<BookingDto> bookingsByBookerId
+        List<BookingResponseDto> bookingsByBookerId
                 = getAllByBookerIdWithPagination(bookerId, state, from, size);
 
         log.debug("All BOOKING<DTO> by booker-USER[ID_{}] returned, {} in total.",
@@ -101,12 +101,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByBookerItems(Long ownerId, String stateStr,
-                                                Integer from, Integer size) {
+    public List<BookingResponseDto> getAllByBookerItems(Long ownerId, String stateStr,
+                                                        Integer from, Integer size) {
         checkUserExistsById(userRepository, ownerId);
         State state = State.valueOf(stateStr);
 
-        List<BookingDto> bookingsByBookerItems
+        List<BookingResponseDto> bookingsByBookerItems
                 = getAllByBookerItemsWithPagination(ownerId, state, from, size);
 
         log.debug("All BOOKING<DTO> by booker-USER[ID_{}] items returned, {} in total.",
@@ -151,8 +151,8 @@ public class BookingServiceImpl implements BookingService {
         return BookingDtoMapper.toBooking(bookingDto, booker, item);
     }
 
-    private List<BookingDto> getAllByBookerIdWithPagination(Long bookerId, State state,
-                                                            Integer from, Integer size) {
+    private List<BookingResponseDto> getAllByBookerIdWithPagination(Long bookerId, State state,
+                                                                    Integer from, Integer size) {
         Pageable page = PageRequest.of(from / size, size);
         switch (state) {
             case ALL:
@@ -178,8 +178,8 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<BookingDto> getAllByBookerItemsWithPagination(Long ownerId, State state,
-                                                               Integer from, Integer size) {
+    private List<BookingResponseDto> getAllByBookerItemsWithPagination(Long ownerId, State state,
+                                                                       Integer from, Integer size) {
         Pageable page = PageRequest.of(from / size, size);
         switch (state) {
             case ALL:

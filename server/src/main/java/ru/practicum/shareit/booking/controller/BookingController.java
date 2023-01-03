@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
-import ru.practicum.shareit.booking.dto.response.BookingDto;
+import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import java.util.List;
@@ -15,14 +15,14 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDto addBooking(
+    public BookingResponseDto addBooking(
             @RequestBody BookItemRequestDto bookingDto,
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         return bookingService.addBooking(bookingDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto updateBookingStatus(
+    public BookingResponseDto updateBookingStatus(
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @PathVariable Long bookingId,
             @RequestParam Boolean approved) {
@@ -30,14 +30,14 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getBooking(
+    public BookingResponseDto getBooking(
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @PathVariable Long bookingId) {
         return bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, userId);
     }
 
     @GetMapping
-    public List<BookingDto> getAllByBookerId(
+    public List<BookingResponseDto> getAllByBookerId(
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestParam String state,
             @RequestParam Integer from,
@@ -46,7 +46,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getAllByBookerItems(
+    public List<BookingResponseDto> getAllByBookerItems(
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestParam String state,
             @RequestParam Integer from,

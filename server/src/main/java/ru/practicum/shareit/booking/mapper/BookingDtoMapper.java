@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.mapper;
 
 import org.springframework.data.domain.Page;
 import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
-import ru.practicum.shareit.booking.dto.response.BookingDto;
+import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -41,8 +41,8 @@ public final class BookingDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
 
-    public static BookingDto toBookingDto(Booking booking) {
-        BookingDto bookingDto = new BookingDto();
+    public static BookingResponseDto toBookingDto(Booking booking) {
+        BookingResponseDto bookingDto = new BookingResponseDto();
 
         bookingDto.setStart(booking.getStartTime());
         bookingDto.setEnd(booking.getEndTime());
@@ -61,18 +61,18 @@ public final class BookingDtoMapper {
     // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║──────║╚═╗───╔╝╚╗───╔═╝║─────║║──
     // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝──────╚══╝───╚══╝───╚══╝─────╚╝──
 
-    public static List<BookingDto> toBookingDto(Collection<Booking> bookings) {
+    public static List<BookingResponseDto> toBookingDto(Collection<Booking> bookings) {
         return bookings.stream()
                 .map(BookingDtoMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
-    public static List<BookingDto> toBookingDto(Page<Booking> bookings) {
+    public static List<BookingResponseDto> toBookingDto(Page<Booking> bookings) {
         return toBookingDto(bookings.toList());
     }
 
-    private static BookingDto.ItemDto toItemDtoForBookingDto(Item item) {
-        BookingDto.ItemDto itemDto = new BookingDto.ItemDto();
+    private static BookingResponseDto.ItemDto toItemDtoForBookingDto(Item item) {
+        BookingResponseDto.ItemDto itemDto = new BookingResponseDto.ItemDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
@@ -80,8 +80,8 @@ public final class BookingDtoMapper {
         return itemDto;
     }
 
-    private static BookingDto.UserDto toUserDtoForBookingDto(User user) {
-        BookingDto.UserDto userDto = new BookingDto.UserDto();
+    private static BookingResponseDto.UserDto toUserDtoForBookingDto(User user) {
+        BookingResponseDto.UserDto userDto = new BookingResponseDto.UserDto();
 
         userDto.setId(user.getId());
 

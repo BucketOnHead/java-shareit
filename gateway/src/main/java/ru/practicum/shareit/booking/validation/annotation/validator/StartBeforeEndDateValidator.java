@@ -14,6 +14,7 @@ public class StartBeforeEndDateValidator
     public boolean isValid(BookItemRequestDto bookingDto, ConstraintValidatorContext context) {
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
+
         if (start != null && end != null) {
             return start.isBefore(end);
         } else {
