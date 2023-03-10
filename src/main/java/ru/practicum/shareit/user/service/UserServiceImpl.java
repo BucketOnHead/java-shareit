@@ -33,8 +33,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, Long userId) {
         checkUserExistsById(userId);
-        checkUniquenessUserEmail(userDto.getEmail());
         User user = userRepository.getUserById(userId);
+        if (!user.getEmail().equals(userDto.getEmail())) {
+            checkUniquenessUserEmail(userDto.getEmail());
+        }
         fillUserFromUserDto(user, userDto);
         User updatedUser = userRepository.updateUser(user);
         UserDto updatedUserDto = userDtoMapper.toUserDto(updatedUser);
