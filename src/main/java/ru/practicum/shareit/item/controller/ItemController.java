@@ -15,30 +15,40 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto addItem(@Valid @RequestBody ItemDto itemDto,
-                           @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public ItemDto addItem(
+            @RequestBody @Valid ItemDto itemDto,
+            @RequestHeader("X-Sharer-User-Id") Long ownerId
+    ) {
         return itemService.addItem(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto,
-                              @PathVariable Long itemId,
-                              @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public ItemDto updateItem(
+            @RequestBody ItemDto itemDto,
+            @PathVariable Long itemId,
+            @RequestHeader("X-Sharer-User-Id") Long ownerId
+    ) {
         return itemService.updateItem(itemDto, itemId, ownerId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
+    public ItemDto getItemById(
+            @PathVariable Long itemId
+    ) {
         return itemService.getItemById(itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByOwnerId(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public List<ItemDto> getItemsByOwnerId(
+            @RequestHeader("X-Sharer-User-Id") Long ownerId
+    ) {
         return itemService.getItemsByOwnerId(ownerId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItemsByNameOrDescription(@RequestParam String text) {
+    public List<ItemDto> searchItemsByNameOrDescription(
+            @RequestParam String text
+    ) {
         return itemService.searchItemsByNameOrDescription(text);
     }
 }

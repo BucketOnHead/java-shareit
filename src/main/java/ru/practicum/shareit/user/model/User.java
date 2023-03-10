@@ -11,7 +11,7 @@ public class User {
 
     private String name;
 
-    @NotNull
     @Email
+    @NotNull
     private String email;
 }
