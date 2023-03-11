@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.user.service.UserServiceImpl.validateUserExistsById;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -45,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
-        validateUserExistsById(userRepository, ownerUserId);
+        userRepository.validateUserExistsById(ownerUserId);
         if (itemDto.getRequestId() != null) {
             ItemRequestServiceImpl.validateItemRequestExistsById(itemRequestRepository, itemDto.getRequestId());
         }
@@ -61,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public SimpleItemResponseDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
-        validateUserExistsById(userRepository, currentUserId);
+        userRepository.validateUserExistsById(currentUserId);
         itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
 
         Item updatedItem = getUpdatedItem(itemDto, itemId, currentUserId);
@@ -73,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDetailsResponseDto getItemById(Long itemId, Long currentUserId) {
-        validateUserExistsById(userRepository, currentUserId);
+        userRepository.validateUserExistsById(currentUserId);
         itemRepository.validateItemExistsById(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
@@ -91,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
-        validateUserExistsById(userRepository, ownerUserId);
+        userRepository.validateUserExistsById(ownerUserId);
 
         Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, PageRequest.of(from, size));
         List<ItemDetailsResponseDto> ownerItemDtos = getItemDetailsResponseDtos(items.toList());

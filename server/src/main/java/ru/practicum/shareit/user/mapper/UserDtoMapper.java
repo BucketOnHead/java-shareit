@@ -5,9 +5,8 @@ import ru.practicum.shareit.user.dto.request.UserRequestDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public final class UserDtoMapper {
@@ -31,9 +30,14 @@ public final class UserDtoMapper {
         return userDto;
     }
 
-    public static List<UserResponseDto> toUserResponseDto(Collection<User> users) {
-        return users.stream()
-                .map(UserDtoMapper::toUserResponseDto)
-                .collect(Collectors.toList());
+    public static List<UserResponseDto> toUserResponseDto(Iterable<User> users) {
+        var userDtos = new ArrayList<UserResponseDto>();
+
+        for (User user : users) {
+            var userDto = toUserResponseDto(user);
+            userDtos.add(userDto);
+        }
+
+        return userDtos;
     }
 }

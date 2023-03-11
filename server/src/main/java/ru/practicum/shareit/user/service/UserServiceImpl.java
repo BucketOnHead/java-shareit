@@ -2,11 +2,13 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.request.UserRequestDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.user.logger.UserServiceLoggerHelper;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -21,54 +23,48 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    public static void validateUserExistsById(UserRepository userRepository, Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw UserNotFoundException.getFromUserId(userId);
-        }
-    }
-
     @Override
     @Transactional
     public UserResponseDto addUser(UserRequestDto userDto) {
         User user = UserDtoMapper.toUser(userDto);
         User savedUser = userRepository.save(user);
-        log.debug("USER[ID_{}] added.", savedUser.getId());
+        UserServiceLoggerHelper.userSaved(log, savedUser);
         return UserDtoMapper.toUserResponseDto(savedUser);
     }
 
     @Override
     @Transactional
     public UserResponseDto updateUser(UserRequestDto userDto, Long userId) {
-        validateUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
         User updatedUser = getUpdatedUser(userId, userDto);
         User savedUser = userRepository.save(updatedUser);
-        log.debug("USER[ID_{}] updated.", savedUser.getId());
+        UserServiceLoggerHelper.userUpdated(log, savedUser);
         return UserDtoMapper.toUserResponseDto(savedUser);
     }
 
     @Override
     public UserResponseDto getUserById(Long userId) {
-        validateUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
         User user = userRepository.getReferenceById(userId);
         UserResponseDto userDto = UserDtoMapper.toUserResponseDto(user);
-        log.debug("USER[ID_{}]<DTO> returned.", userDto.getId());
+        UserServiceLoggerHelper.userDtoByIdReturned(log, userDto);
         return userDto;
     }
 
     @Override
     public List<UserResponseDto> getUsers(Integer from, Integer size) {
-        List<User> users = userRepository.findAll();
+        Page<User> users = userRepository.findAll(PageRequest.of(from, size));
         List<UserResponseDto> usersDto = UserDtoMapper.toUserResponseDto(users);
-        log.debug("All USER<DTO> returned, {} in total.", usersDto.size());
+        UserServiceLoggerHelper.userDtoPageReturned(log, from, size, usersDto);
         return usersDto;
     }
 
     @Override
     @Transactional
     public void deleteUserById(Long userId) {
-        validateUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
         userRepository.deleteById(userId);
-        log.debug("USER[ID_{}] deleted.", userId);
+        UserServiceLoggerHelper.userByIdDeleted(log, userId);
     }
 
     private User getUpdatedUser(Long userId, UserRequestDto userDto) {
