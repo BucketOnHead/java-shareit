@@ -15,10 +15,10 @@ public class IncorrectCommentException extends IncorrectDataException {
         super(message);
     }
 
-    public static IncorrectCommentException getFromItemIdAndUserIdAndTime(Long userId, Long itemId,
-                                                                          LocalDateTime time) {
-        String message = String.format(
-                COMPLETED_BOOKING_NOT_FOUND, itemId, userId, time);
+    public static IncorrectCommentException fromItemIdAndUserIdAndTime(
+            Long itemId, Long userId, LocalDateTime time
+    ) {
+        String message = String.format(COMPLETED_BOOKING_NOT_FOUND, itemId, userId, time);
         return new IncorrectCommentException(message);
     }
 }

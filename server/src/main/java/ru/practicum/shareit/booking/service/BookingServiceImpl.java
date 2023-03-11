@@ -22,9 +22,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.shareit.item.service.ItemServiceImpl.checkItemExistsById;
-import static ru.practicum.shareit.item.service.ItemServiceImpl.checkOwnerOfItemByItemIdAndUserId;
-import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
+import static ru.practicum.shareit.user.service.UserServiceImpl.validateUserExistsById;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +42,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
-        checkUserExistsById(userRepository, userId);
-        checkItemExistsById(itemRepository, bookingDto.getItemId());
+        validateUserExistsById(userRepository, userId);
+        itemRepository.validateItemExistsById(bookingDto.getItemId());
         checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
 
         Booking booking = getBooking(bookingDto, userId);
@@ -60,10 +58,10 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
-        checkOwnerOfItemByItemIdAndUserId(itemRepository, booking.getItem().getId(), userId);
+        itemRepository.validateUserIdIsItemOwner(booking.getItem().getId(), userId);
         checkBookingStatusNotApprove(booking);
 
         booking.setStatus((approved == Boolean.TRUE) ? (Status.APPROVED) : (Status.REJECTED));
@@ -76,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         checkOwnerOrBooker(booking, userId);
@@ -89,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllByBookerId(Long bookerId, String stateStr,
                                                      Integer from, Integer size) {
-        checkUserExistsById(userRepository, bookerId);
+        validateUserExistsById(userRepository, bookerId);
         State state = State.valueOf(stateStr);
 
         List<BookingResponseDto> bookingsByBookerId
@@ -103,7 +101,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllByBookerItems(Long ownerId, String stateStr,
                                                         Integer from, Integer size) {
-        checkUserExistsById(userRepository, ownerId);
+        validateUserExistsById(userRepository, ownerId);
         State state = State.valueOf(stateStr);
 
         List<BookingResponseDto> bookingsByBookerItems

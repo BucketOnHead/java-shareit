@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
+import static ru.practicum.shareit.user.service.UserServiceImpl.validateUserExistsById;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public static void checkItemRequestExistsById(ItemRequestRepository itemRequestRepository, Long itemRequestId) {
+    public static void validateItemRequestExistsById(ItemRequestRepository itemRequestRepository, Long itemRequestId) {
         if (!itemRequestRepository.existsById(itemRequestId)) {
             throw ItemRequestNotFoundException.getFromId(itemRequestId);
         }
@@ -45,7 +45,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public ItemRequestDto addItemRequest(RequestItemRequestDto requestItemDto, Long userId) {
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
 
         ItemRequest itemRequest = getItemRequest(requestItemDto, userId, LocalDateTime.now());
         ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
@@ -56,7 +56,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId) {
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(userId);
         List<ItemRequestDto> itemRequestsDto = getItemRequestsDto(itemRequests);
@@ -68,7 +68,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId,
                                                              Integer from, Integer size) {
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
 
         List<ItemRequestDto> itemRequestsDto
                 = getItemRequestsByRequesterIdWithPagination(userId, from, size);
@@ -79,8 +79,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto getItemRequestById(Long itemRequestId, Long userId) {
-        checkItemRequestExistsById(itemRequestRepository, itemRequestId);
-        checkUserExistsById(userRepository, userId);
+        validateItemRequestExistsById(itemRequestRepository, itemRequestId);
+        validateUserExistsById(userRepository, userId);
 
         ItemRequestDto itemRequestDto = getItemRequestDto(itemRequestId);
 
