@@ -30,7 +30,7 @@ public class ItemDetailsResponseDto {
         private Long bookerId;
 
         public static BookingDto fromBooking(Booking booking) {
-            BookingDto bookingDto = new BookingDto();
+            var bookingDto = new BookingDto();
 
             bookingDto.setId(bookingDto.getId());
             bookingDto.setBookerId(booking.getBooker().getId());
@@ -49,7 +49,7 @@ public class ItemDetailsResponseDto {
         private LocalDateTime created;
 
         public static CommentDto fromComment(Comment comment) {
-            CommentDto commentDto = new CommentDto();
+            var commentDto = new CommentDto();
 
             commentDto.setId(comment.getId());
             commentDto.setText(comment.getText());
@@ -60,7 +60,7 @@ public class ItemDetailsResponseDto {
         }
 
         public static List<CommentDto> fromComment(Iterable<Comment> comments) {
-            List<CommentDto> commentDtos = new ArrayList<>();
+            var commentDtos = new ArrayList<CommentDto>();
 
             for (Comment comment : comments) {
                 CommentDto commentDto = fromComment(comment);
