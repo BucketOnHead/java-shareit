@@ -4,10 +4,9 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemDto;
+import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
@@ -28,29 +27,24 @@ public final class ItemDtoMapper {
         return item;
     }
 
-    public static Item toItem(ItemRequestDto itemDto, User owner, ItemRequest itemRequest) {
-        Item item = toItemWithoutItemRequest(itemDto, owner);
+    public static Item toItem(ItemRequestDto itemDto) {
+        Item item = new Item();
 
-        item.setItemRequest(itemRequest);
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setIsAvailable(itemDto.getAvailable());
 
         return item;
     }
 
-    public static SimpleItemDto toItemDto(Item item, Long requestId) {
-        SimpleItemDto itemDto = toItemDtoWithoutItemRequestId(item);
-
-        itemDto.setRequestId(requestId);
-
-        return itemDto;
-    }
-
-    public static SimpleItemDto toItemDtoWithoutItemRequestId(Item item) {
-        SimpleItemDto itemDto = new SimpleItemDto();
+    public static SimpleItemResponseDto toSimpleItemResponseDto(Item item, Long requestId) {
+        SimpleItemResponseDto itemDto = new SimpleItemResponseDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getIsAvailable());
+        itemDto.setRequestId(requestId);
 
         return itemDto;
     }
@@ -99,9 +93,9 @@ public final class ItemDtoMapper {
         return itemDto;
     }
 
-    public static List<SimpleItemDto> toItemDto(Collection<Item> items) {
+    public static List<SimpleItemResponseDto> toSimpleItemResponseDto(Collection<Item> items) {
         return items.stream()
-                .map(ItemDtoMapper::toItemDtoWithoutItemRequestId)
+                .map(item -> ItemDtoMapper.toSimpleItemResponseDto(item, null))
                 .collect(Collectors.toList());
     }
 

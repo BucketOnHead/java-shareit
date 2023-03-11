@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SimpleItemDto {
+public class SimpleItemResponseDto {
     private Long id;
     private String name;
     private String description;

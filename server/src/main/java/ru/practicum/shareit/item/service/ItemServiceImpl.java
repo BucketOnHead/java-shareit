@@ -12,14 +12,13 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemDto;
+import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.model.User;
@@ -55,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public SimpleItemDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
+    public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
         checkUserExistsById(userRepository, ownerUserId);
         checkItemRequestExistsById(itemDto.getRequestId());
 
@@ -63,16 +62,12 @@ public class ItemServiceImpl implements ItemService {
         Item savedItem = itemRepository.save(item);
         log.debug("ITEM[ID_{}] added.", savedItem.getId());
 
-        if (itemDto.getRequestId() == null) {
-            return ItemDtoMapper.toItemDtoWithoutItemRequestId(savedItem);
-        } else {
-            return ItemDtoMapper.toItemDto(savedItem, itemDto.getRequestId());
-        }
+        return ItemDtoMapper.toSimpleItemResponseDto(savedItem, itemDto.getRequestId());
     }
 
     @Override
     @Transactional
-    public SimpleItemDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
+    public SimpleItemResponseDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
         checkUserExistsById(userRepository, currentUserId);
         checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, currentUserId);
@@ -82,9 +77,9 @@ public class ItemServiceImpl implements ItemService {
         log.debug("ITEM[ID_{}] updated.", savedItem.getId());
 
         if (updatedItem.getItemRequest() == null) {
-            return ItemDtoMapper.toItemDtoWithoutItemRequestId(updatedItem);
+            return ItemDtoMapper.toSimpleItemResponseDto(updatedItem, null);
         } else {
-            return ItemDtoMapper.toItemDto(savedItem, updatedItem.getItemRequest().getId());
+            return ItemDtoMapper.toSimpleItemResponseDto(savedItem, updatedItem.getItemRequest().getId());
         }
     }
 
@@ -116,24 +111,24 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<SimpleItemDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
-                                                                        Integer from, Integer size) {
+    public List<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
+                                                                                Integer from, Integer size) {
         if (StringUtils.isEmpty(text)) {
             return Collections.emptyList();
         }
 
-        List<SimpleItemDto> foundItemsDto
+        List<SimpleItemResponseDto> foundItemsDto
                 = getItemsByNameOrDescriptionWithPagination(text, from, size);
 
         log.debug("All ITEM<DTO> containing '{}' returned, {} in total.", text, foundItemsDto.size());
         return foundItemsDto;
     }
 
-    private List<SimpleItemDto> getItemsByNameOrDescriptionWithPagination(String text,
-                                                                          Integer from, Integer size) {
+    private List<SimpleItemResponseDto> getItemsByNameOrDescriptionWithPagination(String text,
+                                                                                  Integer from, Integer size) {
         Pageable page = PageRequest.of(from, size);
         List<Item> foundItems = findItemsByText(text, page);
-        return ItemDtoMapper.toItemDto(foundItems);
+        return ItemDtoMapper.toSimpleItemResponseDto(foundItems);
     }
 
     private static boolean itemContainsTextInNameOrDescription(Item item, String text) {
@@ -153,14 +148,16 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private Item getItem(ItemRequestDto itemDto, Long ownerId) {
-        User owner = userRepository.getReferenceById(ownerId);
-        if (itemDto.getRequestId() == null) {
-            return ItemDtoMapper.toItemWithoutItemRequest(itemDto, owner);
-        } else {
-            ItemRequest itemRequest = itemRequestRepository.getReferenceById(itemDto.getRequestId());
-            return ItemDtoMapper.toItem(itemDto, owner, itemRequest);
+    private Item getItem(ItemRequestDto itemDto, Long ownerUserId) {
+        Item item = ItemDtoMapper.toItem(itemDto);
+
+        item.setOwner(userRepository.getReferenceById(ownerUserId));
+
+        if (itemDto.getRequestId() != null) {
+            item.setItemRequest(itemRequestRepository.getReferenceById(itemDto.getRequestId()));
         }
+
+        return item;
     }
 
     private Item getUpdatedItem(ItemRequestDto itemDto, Long itemId, Long ownerId) {

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemDto;
+import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
@@ -20,7 +20,7 @@ public class ItemController {
     private final CommentService commentService;
 
     @PostMapping
-    public SimpleItemDto addItem(
+    public SimpleItemResponseDto addItem(
             @RequestBody ItemRequestDto itemDto,
             @RequestHeader("X-Sharer-User-Id") Long ownerUserId
     ) {
@@ -28,7 +28,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public SimpleItemDto updateItem(
+    public SimpleItemResponseDto updateItem(
             @RequestBody ItemRequestDto itemDto,
             @PathVariable Long itemId,
             @RequestHeader("X-Sharer-User-Id") Long currentUserId
@@ -54,7 +54,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<SimpleItemDto> searchItemsByNameOrDescriptionIgnoreCase(
+    public List<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(
             @RequestParam String text,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
