@@ -22,7 +22,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.shareit.item.service.ItemServiceImpl.checkItemExistsById;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.checkOwnerOfItemByItemIdAndUserId;
 import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
 
@@ -45,7 +44,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
         checkUserExistsById(userRepository, userId);
-        checkItemExistsById(itemRepository, bookingDto.getItemId());
+        itemRepository.validateItemExistsById(bookingDto.getItemId());
         checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
 
         Booking booking = getBooking(bookingDto, userId);

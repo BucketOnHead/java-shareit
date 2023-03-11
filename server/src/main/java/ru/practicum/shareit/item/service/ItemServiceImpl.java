@@ -44,12 +44,6 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final ItemRequestRepository itemRequestRepository;
 
-    public static void checkItemExistsById(ItemRepository itemRepository, Long itemId) {
-        if (!itemRepository.existsById(itemId)) {
-            throw ItemNotFoundException.fromItemId(itemId);
-        }
-    }
-
     public static void checkOwnerOfItemByItemIdAndUserId(ItemRepository itemRepository,
                                                          Long itemId, Long userId) {
         Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
@@ -79,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public SimpleItemDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
-        checkItemExistsById(itemRepository, itemId);
+        itemRepository.validateItemExistsById(itemId);
         checkUserExistsById(userRepository, currentUserId);
         checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, currentUserId);
 
@@ -96,7 +90,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDetailsResponseDto getItemById(Long itemId, Long currentUserId) {
-        checkItemExistsById(itemRepository, itemId);
+        itemRepository.validateItemExistsById(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
 
