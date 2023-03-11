@@ -17,9 +17,17 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findAllByIsAvailableIsTrue(Pageable page);
 
+    boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
+
     default void validateItemExistsById(Long itemId) {
         if (!existsById(itemId)) {
             throw ItemNotFoundException.fromItemId(itemId);
+        }
+    }
+
+    default void validateUserIdIsItemOwner(Long itemId, Long userId) {
+        if (!existsByIdAndOwnerId(itemId, userId)) {
+            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
         }
     }
 }

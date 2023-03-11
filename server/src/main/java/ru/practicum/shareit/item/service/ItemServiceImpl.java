@@ -14,6 +14,7 @@ import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.logger.ItemServiceLoggerHelper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
+import static ru.practicum.shareit.user.service.UserServiceImpl.validateUserExistsById;
 
 @Service
 @RequiredArgsConstructor
@@ -43,25 +44,16 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final ItemRequestRepository itemRequestRepository;
 
-    public static void checkOwnerOfItemByItemIdAndUserId(ItemRepository itemRepository,
-                                                         Long itemId, Long userId) {
-        Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
-
-        if (!ownerId.equals(userId)) {
-            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
-        }
-    }
-
     @Override
     @Transactional
     public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
-        checkUserExistsById(userRepository, ownerUserId);
-        checkItemRequestExistsById(itemDto.getRequestId());
+        validateUserExistsById(userRepository, ownerUserId);
+        validateItemRequestExistsById(itemDto.getRequestId());
 
         Item item = getItem(itemDto, ownerUserId);
         Item savedItem = itemRepository.save(item);
-        log.debug("ITEM[ID_{}] added.", savedItem.getId());
 
+        ItemServiceLoggerHelper.itemSaved(log, savedItem);
         return ItemDtoMapper.toSimpleItemResponseDto(savedItem, itemDto.getRequestId());
     }
 
@@ -69,8 +61,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public SimpleItemResponseDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
-        checkUserExistsById(userRepository, currentUserId);
-        checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, currentUserId);
+        validateUserExistsById(userRepository, currentUserId);
+        itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
 
         Item updatedItem = getUpdatedItem(itemDto, itemId, currentUserId);
         Item savedItem = itemRepository.save(updatedItem);
@@ -101,7 +93,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
-        checkUserExistsById(userRepository, ownerUserId);
+        validateUserExistsById(userRepository, ownerUserId);
 
         List<ItemDetailsResponseDto> itemsByOwnerId
                 = getItemsByOwnerIdWithPagination(ownerUserId, from, size);
@@ -142,7 +134,7 @@ public class ItemServiceImpl implements ItemService {
         return ownerId.equals(userId);
     }
 
-    private void checkItemRequestExistsById(Long requestId) {
+    private void validateItemRequestExistsById(Long requestId) {
         if (requestId != null) {
             ItemRequestServiceImpl.checkItemRequestExistsById(itemRequestRepository, requestId);
         }

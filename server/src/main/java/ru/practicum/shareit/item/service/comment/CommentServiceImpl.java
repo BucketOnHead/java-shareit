@@ -18,7 +18,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
+import static ru.practicum.shareit.user.service.UserServiceImpl.validateUserExistsById;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public SimpleCommentResponseDto addComment(CommentRequestDto commentRequestDto, Long authorUserId, Long itemId) {
-        checkUserExistsById(userRepository, authorUserId);
+        validateUserExistsById(userRepository, authorUserId);
         itemRepository.validateItemExistsById(itemId);
         checkUserBookingByUserIdAndItemId(authorUserId, itemId);
         Comment comment = getComment(commentRequestDto, authorUserId, itemId);

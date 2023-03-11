@@ -21,7 +21,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    public static void checkUserExistsById(UserRepository userRepository, Long userId) {
+    public static void validateUserExistsById(UserRepository userRepository, Long userId) {
         if (!userRepository.existsById(userId)) {
             throw UserNotFoundException.getFromUserId(userId);
         }
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto updateUser(UserRequestDto userDto, Long userId) {
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
         User updatedUser = getUpdatedUser(userId, userDto);
         User savedUser = userRepository.save(updatedUser);
         log.debug("USER[ID_{}] updated.", savedUser.getId());
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserById(Long userId) {
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
         User user = userRepository.getReferenceById(userId);
         UserResponseDto userDto = UserDtoMapper.toUserDto(user);
         log.debug("USER[ID_{}]<DTO> returned.", userDto.getId());
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUserById(Long userId) {
-        checkUserExistsById(userRepository, userId);
+        validateUserExistsById(userRepository, userId);
         userRepository.deleteById(userId);
         log.debug("USER[ID_{}] deleted.", userId);
     }

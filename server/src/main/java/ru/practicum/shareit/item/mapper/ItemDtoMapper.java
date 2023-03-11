@@ -16,17 +16,6 @@ import java.util.stream.Collectors;
 @UtilityClass
 public final class ItemDtoMapper {
 
-    public static Item toItemWithoutItemRequest(ItemRequestDto itemDto, User owner) {
-        Item item = new Item();
-
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setIsAvailable(itemDto.getAvailable());
-        item.setOwner(owner);
-
-        return item;
-    }
-
     public static Item toItem(ItemRequestDto itemDto) {
         Item item = new Item();
 
