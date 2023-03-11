@@ -3,14 +3,10 @@ package ru.practicum.shareit.item.dto.request.comment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.validation.group.CreationGroup;
-
-import javax.validation.constraints.NotEmpty;
 
 @Setter
 @Getter
 @NoArgsConstructor
-public class RequestCommentDto {
-    @NotEmpty(groups = {CreationGroup.class})
+public class CommentRequestDto {
     private String text;
 }

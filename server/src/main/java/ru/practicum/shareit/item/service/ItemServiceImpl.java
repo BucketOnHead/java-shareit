@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.request.RequestItemDto;
-import ru.practicum.shareit.item.dto.response.DetailedItemDto;
-import ru.practicum.shareit.item.dto.response.ItemDto;
+import ru.practicum.shareit.item.dto.request.ItemRequestDto;
+import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
+import ru.practicum.shareit.item.dto.response.SimpleItemDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -46,7 +46,7 @@ public class ItemServiceImpl implements ItemService {
 
     public static void checkItemExistsById(ItemRepository itemRepository, Long itemId) {
         if (!itemRepository.existsById(itemId)) {
-            throw ItemNotFoundException.getFromItemId(itemId);
+            throw ItemNotFoundException.fromItemId(itemId);
         }
     }
 
@@ -55,17 +55,17 @@ public class ItemServiceImpl implements ItemService {
         Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
 
         if (!ownerId.equals(userId)) {
-            throw ItemNotFoundException.getFromItemIdAndUserId(itemId, userId);
+            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
         }
     }
 
     @Override
     @Transactional
-    public ItemDto addItem(RequestItemDto itemDto, Long ownerId) {
-        checkUserExistsById(userRepository, ownerId);
+    public SimpleItemDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
+        checkUserExistsById(userRepository, ownerUserId);
         checkItemRequestExistsById(itemDto.getRequestId());
 
-        Item item = getItem(itemDto, ownerId);
+        Item item = getItem(itemDto, ownerUserId);
         Item savedItem = itemRepository.save(item);
         log.debug("ITEM[ID_{}] added.", savedItem.getId());
 
@@ -78,12 +78,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto updateItem(RequestItemDto itemDto, Long itemId, Long userId) {
+    public SimpleItemDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
         checkItemExistsById(itemRepository, itemId);
-        checkUserExistsById(userRepository, userId);
-        checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, userId);
+        checkUserExistsById(userRepository, currentUserId);
+        checkOwnerOfItemByItemIdAndUserId(itemRepository, itemId, currentUserId);
 
-        Item updatedItem = getUpdatedItem(itemDto, itemId, userId);
+        Item updatedItem = getUpdatedItem(itemDto, itemId, currentUserId);
         Item savedItem = itemRepository.save(updatedItem);
         log.debug("ITEM[ID_{}] updated.", savedItem.getId());
 
@@ -95,13 +95,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public DetailedItemDto getItemById(Long itemId, Long userId) {
+    public ItemDetailsResponseDto getItemById(Long itemId, Long currentUserId) {
         checkItemExistsById(itemRepository, itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
 
-        DetailedItemDto itemDto;
-        if (isOwner(item, userId)) {
+        ItemDetailsResponseDto itemDto;
+        if (isOwner(item, currentUserId)) {
             itemDto = getDetailedItemDto(item);
         } else {
             itemDto = getDetailedItemDtoWithoutBookings(item);
@@ -111,32 +111,32 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<DetailedItemDto> getItemsByOwnerId(Long ownerId, Integer from, Integer size) {
-        checkUserExistsById(userRepository, ownerId);
+    public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
+        checkUserExistsById(userRepository, ownerUserId);
 
-        List<DetailedItemDto> itemsByOwnerId
-         = getItemsByOwnerIdWithPagination(ownerId, from, size);
+        List<ItemDetailsResponseDto> itemsByOwnerId
+                = getItemsByOwnerIdWithPagination(ownerUserId, from, size);
 
         log.debug("All ITEM<DTO> returned, {} in total.", itemsByOwnerId.size());
         return itemsByOwnerId;
     }
 
     @Override
-    public List<ItemDto> searchItemsByNameOrDescription(String text,
-                                                        Integer from, Integer size) {
+    public List<SimpleItemDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
+                                                                        Integer from, Integer size) {
         if (StringUtils.isEmpty(text)) {
             return Collections.emptyList();
         }
 
-        List<ItemDto> foundItemsDto
-      = getItemsByNameOrDescriptionWithPagination(text, from, size);
+        List<SimpleItemDto> foundItemsDto
+                = getItemsByNameOrDescriptionWithPagination(text, from, size);
 
         log.debug("All ITEM<DTO> containing '{}' returned, {} in total.", text, foundItemsDto.size());
         return foundItemsDto;
     }
 
-    private List<ItemDto> getItemsByNameOrDescriptionWithPagination(String text,
-                                                                    Integer from, Integer size) {
+    private List<SimpleItemDto> getItemsByNameOrDescriptionWithPagination(String text,
+                                                                          Integer from, Integer size) {
         Pageable page = PageRequest.of(from, size);
         List<Item> foundItems = findItemsByText(text, page);
         return ItemDtoMapper.toItemDto(foundItems);
@@ -159,7 +159,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private Item getItem(RequestItemDto itemDto, Long ownerId) {
+    private Item getItem(ItemRequestDto itemDto, Long ownerId) {
         User owner = userRepository.getReferenceById(ownerId);
         if (itemDto.getRequestId() == null) {
             return ItemDtoMapper.toItemWithoutItemRequest(itemDto, owner);
@@ -169,7 +169,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private Item getUpdatedItem(RequestItemDto itemDto, Long itemId, Long ownerId) {
+    private Item getUpdatedItem(ItemRequestDto itemDto, Long itemId, Long ownerId) {
         Item item = itemRepository.getReferenceById(itemId);
 
         Optional.ofNullable(itemDto.getName()).ifPresent(item::setName);
@@ -189,25 +189,25 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    private DetailedItemDto getDetailedItemDtoWithoutBookings(Item item) {
+    private ItemDetailsResponseDto getDetailedItemDtoWithoutBookings(Item item) {
         List<Comment> comments = commentRepository.findAllByItemId(item.getId());
         return ItemDtoMapper.toDetailedItemDtoWithoutBookings(item, comments);
     }
 
-    private List<DetailedItemDto> getItemsByOwnerIdWithPagination(Long ownerId,
-                                                                  Integer from, Integer size) {
+    private List<ItemDetailsResponseDto> getItemsByOwnerIdWithPagination(Long ownerId,
+                                                                         Integer from, Integer size) {
         Pageable page = PageRequest.of(from, size);
         Page<Item> items = itemRepository.findAllByOwnerId(ownerId, page);
         return toDetailedItemDto(items.toList());
     }
 
-    private List<DetailedItemDto> toDetailedItemDto(List<Item> items) {
+    private List<ItemDetailsResponseDto> toDetailedItemDto(List<Item> items) {
         return items.stream()
                 .map(this::getDetailedItemDto)
                 .collect(Collectors.toList());
     }
 
-    private DetailedItemDto getDetailedItemDto(Item item) {
+    private ItemDetailsResponseDto getDetailedItemDto(Item item) {
         List<Comment> comments = commentRepository.findAllByItemId(item.getId());
         LocalDateTime time = LocalDateTime.now();
 

@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.request.comment.RequestCommentDto;
-import ru.practicum.shareit.item.dto.response.comment.CommentDto;
+import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
+import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
 import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
 import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -33,26 +33,26 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentDto addComment(RequestCommentDto requestCommentDto, Long authorId, Long itemId) {
-        checkUserExistsById(userRepository, authorId);
+    public SimpleCommentResponseDto addComment(CommentRequestDto commentRequestDto, Long authorUserId, Long itemId) {
+        checkUserExistsById(userRepository, authorUserId);
         checkItemExistsById(itemRepository, itemId);
-        checkUserBookingByUserIdAndItemId(authorId, itemId);
-        Comment comment = getComment(requestCommentDto, authorId, itemId);
+        checkUserBookingByUserIdAndItemId(authorUserId, itemId);
+        Comment comment = getComment(commentRequestDto, authorUserId, itemId);
         Comment addedComment = commentRepository.save(comment);
         log.debug("COMMENT[ID_{}] added.", addedComment.getId());
-        return CommentDtoMapper.toCommentDto(addedComment);
+        return CommentDtoMapper.toSimpleCommentResponseDto(addedComment);
     }
 
     private void checkUserBookingByUserIdAndItemId(Long userId, Long itemId) {
         LocalDateTime time = LocalDateTime.now();
         if (!bookingRepository.existsByBookerIdAndItemIdAndEndTimeIsBefore(userId, itemId, time)) {
-            throw IncorrectCommentException.getFromItemIdAndUserIdAndTime(userId, itemId, time);
+            throw IncorrectCommentException.fromItemIdAndUserIdAndTime(itemId, userId, time);
         }
     }
 
-    private Comment getComment(RequestCommentDto requestCommentDto, Long authorId, Long itemId) {
+    private Comment getComment(CommentRequestDto commentRequestDto, Long authorId, Long itemId) {
         User author = userRepository.getReferenceById(authorId);
         Item item = itemRepository.getReferenceById(itemId);
-        return CommentDtoMapper.toComment(requestCommentDto, author, item, LocalDateTime.now());
+        return CommentDtoMapper.toComment(commentRequestDto, author, item, LocalDateTime.now());
     }
 }

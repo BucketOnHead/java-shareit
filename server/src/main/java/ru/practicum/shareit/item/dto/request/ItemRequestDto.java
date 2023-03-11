@@ -1,14 +1,13 @@
-package ru.practicum.shareit.item.dto.response;
+package ru.practicum.shareit.item.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
-public class ItemDto {
-    private Long id;
+public class ItemRequestDto {
     private String name;
     private String description;
     private Boolean available;
