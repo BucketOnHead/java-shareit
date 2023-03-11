@@ -10,19 +10,19 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 /**
- * Утилитарный класс для маппинга комментариев.
+ * Utility class for mapping comments.
  */
 @UtilityClass
 public final class CommentDtoMapper {
 
     /**
-     * Метод для преобразования CommentRequestDto в Comment.
+     * Method for converting CommentRequestDto to Comment.
      *
-     * @param commentDto объект типа CommentRequestDto, содержащий информацию о комментарии
-     * @param author     автор комментария
-     * @param item       объект типа Item, к которому написан комментарий
-     * @param time       время создания комментария
-     * @return объект типа {@link Comment}
+     * @param commentDto the CommentRequestDto object containing information about the comment
+     * @param author     the author of the comment
+     * @param item       the Item object to which the comment is written
+     * @param time       the time of the comment creation
+     * @return the Comment object
      */
     public static Comment toComment(
             CommentRequestDto commentDto,
@@ -41,10 +41,10 @@ public final class CommentDtoMapper {
     }
 
     /**
-     * Метод для преобразования Comment в SimpleCommentResponseDto.
+     * Method for converting Comment to SimpleCommentResponseDto.
      *
-     * @param comment объект типа Comment, который нужно преобразовать
-     * @return объект типа {@link SimpleCommentResponseDto}
+     * @param comment the Comment object to be converted
+     * @return the {@link SimpleCommentResponseDto} object
      */
     public static SimpleCommentResponseDto toSimpleCommentResponseDto(Comment comment) {
         SimpleCommentResponseDto commentDto = new SimpleCommentResponseDto();

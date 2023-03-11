@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
@@ -9,8 +10,6 @@ import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/items")
@@ -22,7 +21,7 @@ public class ItemController {
     @PostMapping
     public SimpleItemResponseDto addItem(
             @RequestBody ItemRequestDto itemDto,
-            @RequestHeader("X-Sharer-User-Id") Long ownerUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId
     ) {
         return itemService.addItem(itemDto, ownerUserId);
     }
@@ -31,7 +30,7 @@ public class ItemController {
     public SimpleItemResponseDto updateItem(
             @RequestBody ItemRequestDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long currentUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
     ) {
         return itemService.updateItem(itemDto, itemId, currentUserId);
     }
@@ -39,14 +38,14 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDetailsResponseDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long currentUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
     ) {
         return itemService.getItemById(itemId, currentUserId);
     }
 
     @GetMapping
-    public List<ItemDetailsResponseDto> getItemsByOwnerUserId(
-            @RequestHeader("X-Sharer-User-Id") Long ownerUserId,
+    public Iterable<ItemDetailsResponseDto> getItemsByOwnerUserId(
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
@@ -54,7 +53,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(
+    public Iterable<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(
             @RequestParam String text,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
@@ -66,7 +65,7 @@ public class ItemController {
     public SimpleCommentResponseDto addComment(
             @RequestBody CommentRequestDto comment,
             @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long authorUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long authorUserId
     ) {
         return commentService.addComment(comment, authorUserId, itemId);
     }

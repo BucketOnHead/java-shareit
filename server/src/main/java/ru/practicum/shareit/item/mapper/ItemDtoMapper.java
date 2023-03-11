@@ -7,7 +7,6 @@ import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,33 +25,41 @@ public final class ItemDtoMapper {
         return item;
     }
 
-    public static SimpleItemResponseDto toSimpleItemResponseDto(Item item, Long requestId) {
+    public static SimpleItemResponseDto toSimpleItemResponseDto(Item item) {
         SimpleItemResponseDto itemDto = new SimpleItemResponseDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getIsAvailable());
-        itemDto.setRequestId(requestId);
+
+        if (item.getItemRequest() != null) {
+            itemDto.setRequestId(item.getItemRequest().getId());
+        }
 
         return itemDto;
     }
 
-    public static ItemDetailsResponseDto toDetailedItemDto(
+    public static ItemDetailsResponseDto toItemDetailsResponseDto(
             Item item,
             List<Comment> comments,
             Booking lastBooking,
             Booking nextBooking
     ) {
-        ItemDetailsResponseDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
+        ItemDetailsResponseDto itemDto = toItemDetailsResponseDto(item, comments);
 
-        itemDto.setLastBooking(toBookingDtoForDetailedItemDto(lastBooking));
-        itemDto.setNextBooking(toBookingDtoForDetailedItemDto(nextBooking));
+        if (lastBooking != null) {
+            itemDto.setLastBooking(toBookingDtoForDetailedItemDto(lastBooking));
+        }
+
+        if (nextBooking != null) {
+            itemDto.setNextBooking(toBookingDtoForDetailedItemDto(nextBooking));
+        }
 
         return itemDto;
     }
 
-    public static ItemDetailsResponseDto toDetailedItemDtoWithoutBookings(Item item, List<Comment> comments) {
+    public static ItemDetailsResponseDto toItemDetailsResponseDto(Item item, List<Comment> comments) {
         ItemDetailsResponseDto itemDto = new ItemDetailsResponseDto();
 
         itemDto.setId(item.getId());
@@ -64,27 +71,9 @@ public final class ItemDtoMapper {
         return itemDto;
     }
 
-    public static ItemDetailsResponseDto toDetailedItemDtoWithoutLastBooking(Item item, List<Comment> comments,
-                                                                             Booking nextBooking) {
-        ItemDetailsResponseDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
-
-        itemDto.setNextBooking(toBookingDtoForDetailedItemDto(nextBooking));
-
-        return itemDto;
-    }
-
-    public static ItemDetailsResponseDto toDetailedItemDtoWithoutNextBooking(Item item, List<Comment> comments,
-                                                                             Booking lastBooking) {
-        ItemDetailsResponseDto itemDto = toDetailedItemDtoWithoutBookings(item, comments);
-
-        itemDto.setLastBooking(toBookingDtoForDetailedItemDto(lastBooking));
-
-        return itemDto;
-    }
-
     public static List<SimpleItemResponseDto> toSimpleItemResponseDto(Collection<Item> items) {
         return items.stream()
-                .map(item -> ItemDtoMapper.toSimpleItemResponseDto(item, null))
+                .map(item -> ItemDtoMapper.toSimpleItemResponseDto(item))
                 .collect(Collectors.toList());
     }
 
