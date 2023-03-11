@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         User user = UserDtoMapper.toUser(userDto);
         User savedUser = userRepository.save(user);
         log.debug("USER[ID_{}] added.", savedUser.getId());
-        return UserDtoMapper.toUserDto(savedUser);
+        return UserDtoMapper.toUserResponseDto(savedUser);
     }
 
     @Override
@@ -43,14 +43,14 @@ public class UserServiceImpl implements UserService {
         User updatedUser = getUpdatedUser(userId, userDto);
         User savedUser = userRepository.save(updatedUser);
         log.debug("USER[ID_{}] updated.", savedUser.getId());
-        return UserDtoMapper.toUserDto(savedUser);
+        return UserDtoMapper.toUserResponseDto(savedUser);
     }
 
     @Override
     public UserResponseDto getUserById(Long userId) {
         validateUserExistsById(userRepository, userId);
         User user = userRepository.getReferenceById(userId);
-        UserResponseDto userDto = UserDtoMapper.toUserDto(user);
+        UserResponseDto userDto = UserDtoMapper.toUserResponseDto(user);
         log.debug("USER[ID_{}]<DTO> returned.", userDto.getId());
         return userDto;
     }
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDto> getUsers(Integer from, Integer size) {
         List<User> users = userRepository.findAll();
-        List<UserResponseDto> usersDto = UserDtoMapper.toUserDto(users);
+        List<UserResponseDto> usersDto = UserDtoMapper.toUserResponseDto(users);
         log.debug("All USER<DTO> returned, {} in total.", usersDto.size());
         return usersDto;
     }
