@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
+    public List<UserResponseDto> getUsers(Integer from, Integer size) {
         List<User> users = userRepository.findAll();
         List<UserResponseDto> usersDto = UserDtoMapper.toUserDto(users);
         log.debug("All USER<DTO> returned, {} in total.", usersDto.size());

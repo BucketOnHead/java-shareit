@@ -49,7 +49,7 @@ public class UserController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         UserControllerLoggerHelper.getUserDtoPage(log, from, size);
-        return userService.getAllUsers();
+        return userService.getUsers(from, size);
     }
 
     @DeleteMapping("/{userId}")
