@@ -3,11 +3,7 @@ package ru.practicum.shareit.user.exception;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 
 public class UserNotFoundException extends EntityNotFoundException {
-    private static final String USER_NOT_FOUND;
-
-    static {
-        USER_NOT_FOUND = "USER[ID_%d] not found";
-    }
+    private static final String USER_NOT_FOUND = "USER[ID_%d] not found";
 
     public UserNotFoundException(String message) {
         super(message);

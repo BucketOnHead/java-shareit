@@ -22,8 +22,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.shareit.user.service.UserServiceImpl.validateUserExistsById;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
-        validateUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
         itemRepository.validateItemExistsById(bookingDto.getItemId());
         checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
 
@@ -58,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
-        validateUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         itemRepository.validateUserIdIsItemOwner(booking.getItem().getId(), userId);
@@ -74,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
         checkBookingExistsById(bookingRepository, bookingId);
-        validateUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         checkOwnerOrBooker(booking, userId);
@@ -87,7 +85,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllByBookerId(Long bookerId, String stateStr,
                                                      Integer from, Integer size) {
-        validateUserExistsById(userRepository, bookerId);
+        userRepository.validateUserExistsById(bookerId);
         State state = State.valueOf(stateStr);
 
         List<BookingResponseDto> bookingsByBookerId
@@ -101,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllByBookerItems(Long ownerId, String stateStr,
                                                         Integer from, Integer size) {
-        validateUserExistsById(userRepository, ownerId);
+        userRepository.validateUserExistsById(ownerId);
         State state = State.valueOf(stateStr);
 
         List<BookingResponseDto> bookingsByBookerItems
