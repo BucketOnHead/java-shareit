@@ -47,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
     public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
         validateUserExistsById(userRepository, ownerUserId);
         if (itemDto.getRequestId() != null) {
-            ItemRequestServiceImpl.checkItemRequestExistsById(itemRequestRepository, itemDto.getRequestId());
+            ItemRequestServiceImpl.validateItemRequestExistsById(itemRequestRepository, itemDto.getRequestId());
         }
 
         Item item = getItem(itemDto, ownerUserId);
@@ -84,6 +84,7 @@ public class ItemServiceImpl implements ItemService {
         } else {
             itemDto = getDetailedItemDtoWithoutBookings(item);
         }
+
         ItemServiceLoggerHelper.itemDtoReturned(log, itemDto);
         return itemDto;
     }
@@ -92,9 +93,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
         validateUserExistsById(userRepository, ownerUserId);
 
-        Pageable page = PageRequest.of(from, size);
-        Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, page);
-
+        Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, PageRequest.of(from, size));
         List<ItemDetailsResponseDto> ownerItemDtos = getItemDetailsResponseDtos(items.toList());
 
         ItemServiceLoggerHelper.itemDtosReturned(log, ownerItemDtos);
@@ -109,9 +108,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        Pageable page = PageRequest.of(from, size);
-        List<Item> foundItems = findItemsByText(text, page);
-
+        List<Item> foundItems = findItemsByText(text, PageRequest.of(from, size));
         List<SimpleItemResponseDto> itemDtos = ItemDtoMapper.toSimpleItemResponseDto(foundItems);
 
         ItemServiceLoggerHelper.itemDtosByTextReturned(log, text, itemDtos);

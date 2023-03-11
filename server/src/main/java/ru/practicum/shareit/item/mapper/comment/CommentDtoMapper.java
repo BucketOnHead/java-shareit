@@ -10,19 +10,20 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 /**
- * Utility class for mapping comments.
+ * The {@link CommentDtoMapper} class provides methods to convert
+ * between {@link Comment}-related DTOs and {@link Comment} entities.
  */
 @UtilityClass
 public final class CommentDtoMapper {
 
     /**
-     * Method for converting CommentRequestDto to Comment.
+     * Method for converting {@link CommentRequestDto} to {@link Comment}.
      *
      * @param commentDto the CommentRequestDto object containing information about the comment
      * @param author     the author of the comment
      * @param item       the Item object to which the comment is written
      * @param time       the time of the comment creation
-     * @return the Comment object
+     * @return the {@link Comment} object
      */
     public static Comment toComment(
             CommentRequestDto commentDto,
@@ -41,13 +42,13 @@ public final class CommentDtoMapper {
     }
 
     /**
-     * Method for converting Comment to SimpleCommentResponseDto.
+     * Method for converting {@link Comment} to {@link SimpleCommentResponseDto}.
      *
      * @param comment the Comment object to be converted
      * @return the {@link SimpleCommentResponseDto} object
      */
     public static SimpleCommentResponseDto toSimpleCommentResponseDto(Comment comment) {
-        SimpleCommentResponseDto commentDto = new SimpleCommentResponseDto();
+        var commentDto = new SimpleCommentResponseDto();
 
         commentDto.setId(comment.getId());
         commentDto.setText(comment.getText());

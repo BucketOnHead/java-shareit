@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
@@ -8,11 +9,13 @@ import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
+import ru.practicum.shareit.item.logger.ItemControllerLoggerHelper;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
 
 @RestController
 @RequestMapping("/items")
+@Slf4j
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
@@ -23,6 +26,7 @@ public class ItemController {
             @RequestBody ItemRequestDto itemDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId
     ) {
+        ItemControllerLoggerHelper.addItem(log, itemDto, ownerUserId);
         return itemService.addItem(itemDto, ownerUserId);
     }
 
@@ -32,6 +36,7 @@ public class ItemController {
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
     ) {
+        ItemControllerLoggerHelper.updateItem(log, itemDto, itemId, currentUserId);
         return itemService.updateItem(itemDto, itemId, currentUserId);
     }
 
@@ -40,6 +45,7 @@ public class ItemController {
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
     ) {
+        ItemControllerLoggerHelper.getItemById(log, itemId, currentUserId);
         return itemService.getItemById(itemId, currentUserId);
     }
 
@@ -49,6 +55,7 @@ public class ItemController {
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
+        ItemControllerLoggerHelper.getItemsByOwnerUserId(log, ownerUserId, from, size);
         return itemService.getItemsByOwnerUserId(ownerUserId, from, size);
     }
 
@@ -58,15 +65,17 @@ public class ItemController {
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
+        ItemControllerLoggerHelper.searchItemsByTextIgnoreCase(log, text, from, size);
         return itemService.searchItemsByNameOrDescriptionIgnoreCase(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
     public SimpleCommentResponseDto addComment(
-            @RequestBody CommentRequestDto comment,
+            @RequestBody CommentRequestDto commentDto,
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long authorUserId
     ) {
-        return commentService.addComment(comment, authorUserId, itemId);
+        ItemControllerLoggerHelper.addComment(log, commentDto, itemId, authorUserId);
+        return commentService.addComment(commentDto, authorUserId, itemId);
     }
 }

@@ -36,7 +36,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public static void checkItemRequestExistsById(ItemRequestRepository itemRequestRepository, Long itemRequestId) {
+    public static void validateItemRequestExistsById(ItemRequestRepository itemRequestRepository, Long itemRequestId) {
         if (!itemRequestRepository.existsById(itemRequestId)) {
             throw ItemRequestNotFoundException.getFromId(itemRequestId);
         }
@@ -79,7 +79,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto getItemRequestById(Long itemRequestId, Long userId) {
-        checkItemRequestExistsById(itemRequestRepository, itemRequestId);
+        validateItemRequestExistsById(itemRequestRepository, itemRequestId);
         validateUserExistsById(userRepository, userId);
 
         ItemRequestDto itemRequestDto = getItemRequestDto(itemRequestId);
