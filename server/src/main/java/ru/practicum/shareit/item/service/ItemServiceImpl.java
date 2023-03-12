@@ -20,7 +20,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
-import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -45,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
     public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
         userRepository.validateUserExistsById(ownerUserId);
         if (itemDto.getRequestId() != null) {
-            ItemRequestServiceImpl.validateItemRequestExistsById(itemRequestRepository, itemDto.getRequestId());
+            itemRepository.validateItemExistsById(itemDto.getRequestId());
         }
 
         Item item = getItem(itemDto, ownerUserId);
