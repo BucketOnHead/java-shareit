@@ -3,11 +3,7 @@ package ru.practicum.shareit.request.exception;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 
 public class ItemRequestNotFoundException extends EntityNotFoundException {
-    private static final String ITEM_REQUEST_NOT_FOUND;
-
-    static {
-        ITEM_REQUEST_NOT_FOUND = "ITEM_REQUEST[ID_%d] not found";
-    }
+    private static final String ITEM_REQUEST_NOT_FOUND = "ITEM_REQUEST[ID_%d] not found";
 
     public ItemRequestNotFoundException(String message) {
         super(message);
