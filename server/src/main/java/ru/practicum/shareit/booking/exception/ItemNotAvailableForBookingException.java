@@ -3,11 +3,7 @@ package ru.practicum.shareit.booking.exception;
 import ru.practicum.shareit.exception.IncorrectDataException;
 
 public class ItemNotAvailableForBookingException extends IncorrectDataException {
-    private static final String ITEM_NOT_AVAILABLE;
-
-    static {
-        ITEM_NOT_AVAILABLE = "ITEM[ID_%d] is not available for booking";
-    }
+    private static final String ITEM_NOT_AVAILABLE = "ITEM[ID_%d] is not available for booking";
 
     public ItemNotAvailableForBookingException(String message) {
         super(message);

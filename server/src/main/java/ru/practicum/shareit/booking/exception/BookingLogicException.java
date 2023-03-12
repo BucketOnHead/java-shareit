@@ -3,11 +3,7 @@ package ru.practicum.shareit.booking.exception;
 import ru.practicum.shareit.exception.LogicException;
 
 public class BookingLogicException extends LogicException {
-    private static final String USER_CANT_BOOK_OWN_ITEM;
-
-    static {
-        USER_CANT_BOOK_OWN_ITEM = "USER[ID_%d] cannot book own ITEM[ID_%d]";
-    }
+    private static final String USER_CANT_BOOK_OWN_ITEM = "USER[ID_%d] cannot book own ITEM[ID_%d]";
 
     public BookingLogicException(String message) {
         super(message);

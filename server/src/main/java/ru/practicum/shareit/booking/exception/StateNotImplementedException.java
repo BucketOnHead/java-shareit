@@ -3,11 +3,7 @@ package ru.practicum.shareit.booking.exception;
 import ru.practicum.shareit.booking.service.BookingService.State;
 
 public class StateNotImplementedException extends RuntimeException {
-    private static final String STATE_NOT_IMPLEMENTED;
-
-    static {
-        STATE_NOT_IMPLEMENTED = "State '%s' not implemented";
-    }
+    private static final String STATE_NOT_IMPLEMENTED = "State '%s' not implemented";
 
     public StateNotImplementedException(String message) {
         super(message);

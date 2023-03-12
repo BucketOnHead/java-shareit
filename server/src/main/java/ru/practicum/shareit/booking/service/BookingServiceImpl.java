@@ -129,7 +129,7 @@ public class BookingServiceImpl implements BookingService {
         boolean isOwner = ownerId.equals(userId);
         boolean isBooker = bookerId.equals(userId);
 
-        if (!isOwner && !isBooker) {
+        if (!(isOwner || isBooker)) {
             throw BookingNotFoundException.getFromBookingIdAndUserId(booking.getId(), userId);
         }
     }

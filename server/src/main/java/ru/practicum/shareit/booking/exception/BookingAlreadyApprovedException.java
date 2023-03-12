@@ -3,11 +3,7 @@ package ru.practicum.shareit.booking.exception;
 import ru.practicum.shareit.exception.IncorrectDataException;
 
 public class BookingAlreadyApprovedException extends IncorrectDataException {
-    private static final String BOOKING_ALREADY_APPROVED;
-
-    static {
-        BOOKING_ALREADY_APPROVED = "BOOKING[ID_%d] already approved";
-    }
+    private static final String BOOKING_ALREADY_APPROVED = "BOOKING[ID_%d] already approved";
 
     public BookingAlreadyApprovedException(String message) {
         super(message);
