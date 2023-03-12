@@ -28,19 +28,11 @@ public class Item {
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id")
     private User owner;
 
     @ManyToOne
     @JoinColumn(name = "request_id")
     private ItemRequest itemRequest;
-
-    public boolean isOwnedByUserId(Long userId) {
-        if (userId == null || owner == null || owner.getId() == null) {
-            return false;
-        }
-
-        return owner.getId().equals(userId);
-    }
 }

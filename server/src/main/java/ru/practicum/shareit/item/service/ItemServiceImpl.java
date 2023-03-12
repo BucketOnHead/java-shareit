@@ -77,7 +77,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getReferenceById(itemId);
 
         ItemDetailsResponseDto itemDto;
-        if (item.isOwnedByUserId(currentUserId)) {
+
+        if (item.getOwner().getId().equals(currentUserId)) {
             itemDto = getDetailedItemDto(item);
         } else {
             itemDto = getDetailedItemDtoWithoutBookings(item);
