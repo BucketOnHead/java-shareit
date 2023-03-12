@@ -9,7 +9,7 @@ public class StateNotImplementedException extends RuntimeException {
         super(message);
     }
 
-    public static StateNotImplementedException getFromState(State state) {
+    public static StateNotImplementedException fromState(State state) {
         String message = String.format(STATE_NOT_IMPLEMENTED, state);
         return new StateNotImplementedException(message);
     }

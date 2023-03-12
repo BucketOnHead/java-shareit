@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.exception.*;
+import ru.practicum.shareit.booking.logger.BookingServiceLoggerHelper;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Booking.Status;
@@ -31,98 +32,90 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public static void checkBookingExistsById(BookingRepository bookingRepository, Long bookingId) {
-        if (!bookingRepository.existsById(bookingId)) {
-            throw BookingNotFoundException.getFromBookingId(bookingId);
-        }
-    }
-
     @Override
     @Transactional
     public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
         userRepository.validateUserExistsById(userId);
         itemRepository.validateItemExistsById(bookingDto.getItemId());
-        checkUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
+        validateUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
 
         Booking booking = getBooking(bookingDto, userId);
-        checkItemAvailableForBooking(booking.getItem());
+        validateItemAvailableForBooking(booking.getItem());
 
         Booking savedBooking = bookingRepository.save(booking);
-        log.debug("BOOKING[ID_{}] added.", savedBooking.getId());
+        BookingServiceLoggerHelper.bookingSaved(log, savedBooking);
         return BookingDtoMapper.toBookingDto(savedBooking);
     }
 
     @Override
     @Transactional
     public BookingResponseDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
-        checkBookingExistsById(bookingRepository, bookingId);
+        bookingRepository.validateBookingExistsById(bookingId);
         userRepository.validateUserExistsById(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         itemRepository.validateUserIdIsItemOwner(booking.getItem().getId(), userId);
-        checkBookingStatusNotApprove(booking);
+        validateBookingStatusNotApprove(booking);
 
         booking.setStatus((approved == Boolean.TRUE) ? (Status.APPROVED) : (Status.REJECTED));
 
         Booking updatedBooking = bookingRepository.save(booking);
-        log.debug("BOOKING[ID_{}] updated.", updatedBooking.getId());
+        BookingServiceLoggerHelper.bookingUpdated(log, updatedBooking);
         return BookingDtoMapper.toBookingDto(updatedBooking);
     }
 
     @Override
     public BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
-        checkBookingExistsById(bookingRepository, bookingId);
+        bookingRepository.validateBookingExistsById(bookingId);
         userRepository.validateUserExistsById(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
-        checkOwnerOrBooker(booking, userId);
+        validateUserIsOwnerOrBooker(booking, userId);
 
         BookingResponseDto bookingDto = BookingDtoMapper.toBookingDto(booking);
-        log.debug("BOOKING[ID_{}]<DTO> returned.", bookingDto.getId());
+        BookingServiceLoggerHelper.bookingReturned(log, bookingDto, userId);
         return bookingDto;
     }
 
     @Override
-    public List<BookingResponseDto> getAllByBookerId(Long bookerId, String stateStr,
-                                                     Integer from, Integer size) {
+    public List<BookingResponseDto> getBookingPageByBookerId(Long bookerId, String stateStr,
+                                                             Integer from, Integer size) {
         userRepository.validateUserExistsById(bookerId);
         State state = State.valueOf(stateStr);
 
-        List<BookingResponseDto> bookingsByBookerId
-                = getAllByBookerIdWithPagination(bookerId, state, from, size);
+        Page<Booking> bookingsByBookerId = getBookingsByBookerIdAndState(bookerId, state, from, size);
+        List<BookingResponseDto> bookingDtos = BookingDtoMapper.toBookingDto(bookingsByBookerId);
 
-        log.debug("All BOOKING<DTO> by booker-USER[ID_{}] returned, {} in total.",
-                bookerId, bookingsByBookerId.size());
-        return bookingsByBookerId;
+        BookingServiceLoggerHelper.bookingByBookerIdPageReturned(log, from, size, bookingDtos, stateStr, bookerId);
+        return bookingDtos;
     }
 
     @Override
-    public List<BookingResponseDto> getAllByBookerItems(Long ownerId, String stateStr,
-                                                        Integer from, Integer size) {
+    public List<BookingResponseDto> getBookingsForUserItems(Long ownerId, String stateStr,
+                                                            Integer from, Integer size) {
         userRepository.validateUserExistsById(ownerId);
         State state = State.valueOf(stateStr);
 
-        List<BookingResponseDto> bookingsByBookerItems
-                = getAllByBookerItemsWithPagination(ownerId, state, from, size);
+        Page<Booking> bookingsByBookerItems = getBookingsForUserItemsByState(ownerId, state, from, size);
+        List<BookingResponseDto> bookingDtos = BookingDtoMapper.toBookingDto(bookingsByBookerItems);
 
-        log.debug("All BOOKING<DTO> by booker-USER[ID_{}] items returned, {} in total.",
-                ownerId, bookingsByBookerItems.size());
-        return bookingsByBookerItems;
+        BookingServiceLoggerHelper.bookingPageForUserItemsReturned(log, from, size, stateStr, bookingDtos, ownerId);
+        return bookingDtos;
     }
 
-    private static void checkBookingStatusNotApprove(Booking booking) {
+    private static void validateBookingStatusNotApprove(Booking booking) {
         if (booking.getStatus() == Status.APPROVED) {
             throw BookingAlreadyApprovedException.getFromBookingId(booking.getId());
         }
     }
 
-    private static void checkItemAvailableForBooking(Item item) {
+    private static void validateItemAvailableForBooking(Item item) {
         if (item.getIsAvailable() == Boolean.FALSE) {
             throw ItemNotAvailableForBookingException.getFromItemId(item.getId());
         }
     }
 
-    private static void checkOwnerOrBooker(Booking booking, Long userId) {
+    private static void validateUserIsOwnerOrBooker(Booking booking, Long userId) {
         Long ownerId = booking.getItem().getOwner().getId();
         Long bookerId = booking.getBooker().getId();
 
@@ -134,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkUserNotOwnerByItemIdAndUserId(Long itemId, Long userId) {
+    private void validateUserNotOwnerByItemIdAndUserId(Long itemId, Long userId) {
         Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
         if (ownerId.equals(userId)) {
             throw BookingLogicException.getFromOwnerIdAndItemId(ownerId, itemId);
@@ -147,119 +140,135 @@ public class BookingServiceImpl implements BookingService {
         return BookingDtoMapper.toBooking(bookingDto, booker, item);
     }
 
-    private List<BookingResponseDto> getAllByBookerIdWithPagination(Long bookerId, State state,
-                                                                    Integer from, Integer size) {
+    private Page<Booking> getBookingsByBookerIdAndState(Long bookerId, State state, Integer from, Integer size) {
+        LocalDateTime time = LocalDateTime.now();
         Pageable page = PageRequest.of(from / size, size);
+
+        Page<Booking> bookingsByState;
         switch (state) {
             case ALL:
-                return BookingDtoMapper.toBookingDto(
-                        getAllBookingsByBookerId(bookerId, page));
+                bookingsByState = getAllBookingsByBookerId(bookerId, page);
+                break;
             case CURRENT:
-                return BookingDtoMapper.toBookingDto(
-                        getCurrentBookingsByBookerIdWithCurrentTime(bookerId, page));
+                bookingsByState = getCurrentBookingsByBookerId(bookerId, time, page);
+                break;
             case PAST:
-                return BookingDtoMapper.toBookingDto(
-                        getPastBookingsByBookerIdWithCurrentTime(bookerId, page));
+                bookingsByState = getPastBookingsByBookerId(bookerId, time, page);
+                break;
             case FUTURE:
-                return BookingDtoMapper.toBookingDto(
-                        getFutureBookingsByBookerIdWithCurrentTime(bookerId, page));
+                bookingsByState = getFutureBookingsByBookerId(bookerId, time, page);
+                break;
             case WAITING:
-                return BookingDtoMapper.toBookingDto(
-                        getWaitingBookingsByBookerId(bookerId, page));
+                bookingsByState = getBookingsByBookerIdAndStatus(bookerId, Status.WAITING, page);
+                break;
             case REJECTED:
-                return BookingDtoMapper.toBookingDto(
-                        getRejectedBookingsByBookerId(bookerId, page));
+                bookingsByState = getBookingsByBookerIdAndStatus(bookerId, Status.REJECTED, page);
+                break;
             default:
-                throw StateNotImplementedException.getFromState(state);
+                throw StateNotImplementedException.fromState(state);
         }
+
+        return bookingsByState;
     }
 
-    private List<BookingResponseDto> getAllByBookerItemsWithPagination(Long ownerId, State state,
-                                                                       Integer from, Integer size) {
+    private Page<Booking> getBookingsForUserItemsByState(Long ownerId, State state, Integer from, Integer size) {
+        LocalDateTime time = LocalDateTime.now();
         Pageable page = PageRequest.of(from / size, size);
+
+        Page<Booking> bookingsForUserItemsByState;
         switch (state) {
             case ALL:
-                return BookingDtoMapper.toBookingDto(
-                        getAllBookingsByOwnerId(ownerId, page));
+                bookingsForUserItemsByState = getAllBookingsForUserItems(ownerId, page);
+                break;
             case CURRENT:
-                return BookingDtoMapper.toBookingDto(
-                        getCurrentBookingsByOwnerIdWithCurrentTime(ownerId, page));
+                bookingsForUserItemsByState = getCurrentBookingsForUserItems(ownerId, time, page);
+                break;
             case PAST:
-                return BookingDtoMapper.toBookingDto(
-                        getPastBookingsByOwnerIdWithCurrentTime(ownerId, page));
+                bookingsForUserItemsByState = getPastBookingsForUserItems(ownerId, time, page);
+                break;
             case FUTURE:
-                return BookingDtoMapper.toBookingDto(
-                        getFutureBookingsByOwnerIdWithCurrentTime(ownerId, page));
+                bookingsForUserItemsByState = getFutureBookingsForUserItems(ownerId, time, page);
+                break;
             case WAITING:
-                return BookingDtoMapper.toBookingDto(
-                        getWaitingBookingsByOwnerId(ownerId, page));
+                bookingsForUserItemsByState = getBookingsForUserItemsAndStatus(ownerId, Status.WAITING, page);
+                break;
             case REJECTED:
-                return BookingDtoMapper.toBookingDto(
-                        getRejectedBookingsByOwnerId(ownerId, page));
+                bookingsForUserItemsByState = getBookingsForUserItemsAndStatus(ownerId, Status.REJECTED, page);
+                break;
             default:
-                throw StateNotImplementedException.getFromState(state);
+                throw StateNotImplementedException.fromState(state);
         }
+
+        return bookingsForUserItemsByState;
     }
 
     private Page<Booking> getAllBookingsByBookerId(Long bookerId, Pageable page) {
         return bookingRepository.findAllByBookerIdOrderByStartTimeDesc(
-                bookerId, page);
+                bookerId,
+                page);
     }
 
-    private Page<Booking> getCurrentBookingsByBookerIdWithCurrentTime(Long bookerId, Pageable page) {
-        LocalDateTime time = LocalDateTime.now();
+    private Page<Booking> getCurrentBookingsByBookerId(Long bookerId, LocalDateTime time, Pageable page) {
         return bookingRepository.findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
-                bookerId, time, time, page);
+                bookerId,
+                time,
+                time,
+                page);
     }
 
-    private Page<Booking> getPastBookingsByBookerIdWithCurrentTime(Long bookerId, Pageable page) {
+    private Page<Booking> getPastBookingsByBookerId(Long bookerId, LocalDateTime time, Pageable page) {
         return bookingRepository.findAllByBookerIdAndEndTimeIsBefore(
-                bookerId, LocalDateTime.now(), page);
+                bookerId,
+                time,
+                page);
     }
 
-    private Page<Booking> getFutureBookingsByBookerIdWithCurrentTime(Long bookerId, Pageable page) {
+    private Page<Booking> getFutureBookingsByBookerId(Long bookerId, LocalDateTime time, Pageable page) {
         return bookingRepository.findAllByBookerIdAndStartTimeIsAfterOrderByStartTimeDesc(
-                bookerId, LocalDateTime.now(), page);
+                bookerId,
+                time,
+                page);
     }
 
-    private Page<Booking> getWaitingBookingsByBookerId(Long bookerId, Pageable page) {
+    private Page<Booking> getBookingsByBookerIdAndStatus(Long bookerId, Status status, Pageable page) {
         return bookingRepository.findAllByBookerIdAndStatusEquals(
-                bookerId, Status.WAITING, page);
+                bookerId,
+                status,
+                page);
     }
 
-    private Page<Booking> getRejectedBookingsByBookerId(Long bookerId, Pageable page) {
-        return bookingRepository.findAllByBookerIdAndStatusEquals(
-                bookerId, Status.REJECTED, page);
-    }
-
-    private Page<Booking> getAllBookingsByOwnerId(Long ownerId, Pageable page) {
+    private Page<Booking> getAllBookingsForUserItems(Long ownerId, Pageable page) {
         return bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(
-                ownerId, page);
+                ownerId,
+                page);
     }
 
-    private Page<Booking> getCurrentBookingsByOwnerIdWithCurrentTime(Long ownerId, Pageable page) {
-        LocalDateTime time = LocalDateTime.now();
+    private Page<Booking> getCurrentBookingsForUserItems(Long ownerId, LocalDateTime time, Pageable page) {
         return bookingRepository.findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
-                ownerId, time, time, page);
+                ownerId,
+                time,
+                time,
+                page);
     }
 
-    private Page<Booking> getPastBookingsByOwnerIdWithCurrentTime(Long ownerId, Pageable page) {
+    private Page<Booking> getPastBookingsForUserItems(Long ownerId, LocalDateTime time, Pageable page) {
         return bookingRepository.findAllByItemOwnerIdAndEndTimeIsBefore(
-                ownerId, LocalDateTime.now(), page);
+                ownerId,
+                time,
+                page);
     }
 
-    private Page<Booking> getFutureBookingsByOwnerIdWithCurrentTime(Long ownerId, Pageable page) {
+    private Page<Booking> getFutureBookingsForUserItems(Long ownerId, LocalDateTime time, Pageable page) {
         return bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
-                ownerId, LocalDateTime.now(), page);
+                ownerId,
+                time,
+                page);
     }
 
-    private Page<Booking> getWaitingBookingsByOwnerId(Long ownerId, Pageable page) {
+    private Page<Booking> getBookingsForUserItemsAndStatus(Long ownerId, Status status, Pageable page) {
         return bookingRepository.findAllByItemOwnerIdAndStatusEquals(
-                ownerId, Status.WAITING, page);
-    }
-
-    private Page<Booking> getRejectedBookingsByOwnerId(Long ownerId, Pageable page) {
-        return bookingRepository.findAllByItemOwnerIdAndStatusEquals(
-                ownerId, Status.REJECTED, page);
+                ownerId,
+                status,
+                page);
     }
 }

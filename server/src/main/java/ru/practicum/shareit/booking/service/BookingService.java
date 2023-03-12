@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import java.util.List;
 
 public interface BookingService {
+
     enum State {
         ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED
     }
@@ -16,8 +17,7 @@ public interface BookingService {
 
     BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId);
 
-    List<BookingResponseDto> getAllByBookerId(Long userId, String state, Integer from, Integer size);
+    List<BookingResponseDto> getBookingPageByBookerId(Long userId, String state, Integer from, Integer size);
 
-    // TODO getBookingsForUserItems
-    List<BookingResponseDto> getAllByBookerItems(Long bookerId, String state, Integer from, Integer size);
+    List<BookingResponseDto> getBookingsForUserItems(Long bookerId, String state, Integer from, Integer size);
 }

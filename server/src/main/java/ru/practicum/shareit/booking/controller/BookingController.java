@@ -54,7 +54,7 @@ public class BookingController {
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         BookingControllerLoggerHelper.getBookingByBookerIdDtoPage(log, userId, state, from, size);
-        return bookingService.getAllByBookerId(userId, state, from, size);
+        return bookingService.getBookingPageByBookerId(userId, state, from, size);
     }
 
     @GetMapping("/owner")
@@ -65,6 +65,6 @@ public class BookingController {
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         BookingControllerLoggerHelper.getBookingDtoPageForUserItems(log, userId, state, from, size);
-        return bookingService.getAllByBookerItems(userId, state, from, size);
+        return bookingService.getBookingsForUserItems(userId, state, from, size);
     }
 }
