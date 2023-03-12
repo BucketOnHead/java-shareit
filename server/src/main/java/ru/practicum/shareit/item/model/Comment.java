@@ -22,11 +22,11 @@ public class Comment {
     @Column(nullable = false, length = 1000)
     private String text;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "author_id")
     private User author;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "item_id")
     private Item item;
 

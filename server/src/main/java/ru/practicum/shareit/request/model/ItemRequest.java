@@ -25,7 +25,7 @@ public class ItemRequest {
     @Column(nullable = false, name = "creation_time")
     private LocalDateTime creationTime;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "requester_id")
     private User requester;
 }

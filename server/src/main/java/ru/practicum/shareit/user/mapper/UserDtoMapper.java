@@ -1,24 +1,15 @@
 package ru.practicum.shareit.user.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.user.dto.request.UserRequestDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@UtilityClass
 public final class UserDtoMapper {
-    private UserDtoMapper() {
-        throw new AssertionError("This is a utility class and cannot be instantiated");
-    }
-
-    // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
-    // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ║╚═╗───║╚═╝║───║║║║───║╚╗╔╝║──────║║╚╗║─────║║─────║║║║
-    // ║╔═╝───║╔╗╔╝───║║║║───║╔╗╔╗║──────║║─║║─────║║─────║║║║
-    // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
-    // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
 
     public static User toUser(UserRequestDto userDto) {
         User user = new User();
@@ -29,15 +20,8 @@ public final class UserDtoMapper {
         return user;
     }
 
-    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗
-    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║
-    // ──║║─────║║║║──────║║─║║─────║║─────║║║║
-    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
-    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
-
-    public static UserResponseDto toUserDto(User user) {
-        UserResponseDto userDto = new UserResponseDto();
+    public static UserResponseDto toUserResponseDto(User user) {
+        var userDto = new UserResponseDto();
 
         userDto.setId(user.getId());
         userDto.setName(user.getName());
@@ -46,16 +30,14 @@ public final class UserDtoMapper {
         return userDto;
     }
 
-    // ╔════╗───╔══╗──────╔╗─────╔══╗───╔══╗───╔════╗──────╔══╗────╔════╗───╔══╗
-    // ╚═╗╔═╝───║╔╗║──────║║─────╚╗╔╝───║╔═╝───╚═╗╔═╝──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ──║║─────║║║║──────║║──────║║────║╚═╗─────║║────────║║╚╗║─────║║─────║║║║
-    // ──║║─────║║║║──────║║──────║║────╚═╗║─────║║────────║║─║║─────║║─────║║║║
-    // ──║║─────║╚╝║──────║╚═╗───╔╝╚╗───╔═╝║─────║║────────║╚═╝║─────║║─────║╚╝║
-    // ──╚╝─────╚══╝──────╚══╝───╚══╝───╚══╝─────╚╝────────╚═══╝─────╚╝─────╚══╝
+    public static List<UserResponseDto> toUserResponseDto(Iterable<User> users) {
+        var userDtos = new ArrayList<UserResponseDto>();
 
-    public static List<UserResponseDto> toUserDto(Collection<User> users) {
-        return users.stream()
-                .map(UserDtoMapper::toUserDto)
-                .collect(Collectors.toList());
+        for (User user : users) {
+            var userDto = toUserResponseDto(user);
+            userDtos.add(userDto);
+        }
+
+        return userDtos;
     }
 }

@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.request.RequestItemRequestDto;
 import ru.practicum.shareit.request.dto.response.ItemRequestDto;
-import ru.practicum.shareit.request.exception.ItemRequestNotFoundException;
+import ru.practicum.shareit.request.logger.ItemRequestServiceLoggerHelper;
 import ru.practicum.shareit.request.mapper.ItemRequestDtoMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
@@ -25,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.user.service.UserServiceImpl.checkUserExistsById;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -36,55 +33,49 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public static void checkItemRequestExistsById(ItemRequestRepository itemRequestRepository, Long itemRequestId) {
-        if (!itemRequestRepository.existsById(itemRequestId)) {
-            throw ItemRequestNotFoundException.getFromId(itemRequestId);
-        }
-    }
-
     @Override
     @Transactional
-    public ItemRequestDto addItemRequest(RequestItemRequestDto requestItemDto, Long userId) {
-        checkUserExistsById(userRepository, userId);
+    public ItemRequestDto addItemRequest(RequestItemRequestDto requestItemDto, Long requesterId) {
+        userRepository.validateUserExistsById(requesterId);
 
-        ItemRequest itemRequest = getItemRequest(requestItemDto, userId, LocalDateTime.now());
+        ItemRequest itemRequest = getItemRequest(requestItemDto, requesterId);
         ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
 
-        log.debug("ITEM_REQUEST[ID_{}] saved.", savedItemRequest.getId());
+        ItemRequestServiceLoggerHelper.itemRequestSaved(log, savedItemRequest);
         return ItemRequestDtoMapper.toItemRequestDtoWithoutItems(savedItemRequest);
     }
 
     @Override
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId) {
-        checkUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(userId);
         List<ItemRequestDto> itemRequestsDto = getItemRequestsDto(itemRequests);
 
-        log.debug("All ITEM_REQUEST<DTO> from USER[ID_{}] returned, {} in total.", userId, itemRequestsDto.size());
+        ItemRequestServiceLoggerHelper.itemRequestByRequesterIdReturned(log, itemRequestsDto, userId);
         return itemRequestsDto;
     }
 
     @Override
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId,
                                                              Integer from, Integer size) {
-        checkUserExistsById(userRepository, userId);
+        userRepository.validateUserExistsById(userId);
 
-        List<ItemRequestDto> itemRequestsDto
+        List<ItemRequestDto> itemRequestDtos
                 = getItemRequestsByRequesterIdWithPagination(userId, from, size);
 
-        log.debug("All ITEM_REQUEST<DTO> from USER[ID_{}] returned, {} in total.", userId, itemRequestsDto.size());
-        return itemRequestsDto;
+        ItemRequestServiceLoggerHelper.itemRequestPageByRequesterIdReturned(log, from, size, itemRequestDtos, userId);
+        return itemRequestDtos;
     }
 
     @Override
     public ItemRequestDto getItemRequestById(Long itemRequestId, Long userId) {
-        checkItemRequestExistsById(itemRequestRepository, itemRequestId);
-        checkUserExistsById(userRepository, userId);
+        itemRequestRepository.validateItemRequestExistsById(itemRequestId);
+        userRepository.validateUserExistsById(userId);
 
         ItemRequestDto itemRequestDto = getItemRequestDto(itemRequestId);
 
-        log.debug("ITEM_REQUEST[ID_{}]<DTO> from USER[ID_{}] returned", itemRequestId, userId);
+        ItemRequestServiceLoggerHelper.itemRequestReturned(log, itemRequestDto, userId);
         return itemRequestDto;
     }
 
@@ -110,18 +101,15 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     private List<ItemRequestDto> getItemRequestsByRequesterIdWithPagination(Long userId,
                                                                             Integer from, Integer size) {
-        Pageable page = PageRequest.of(from, size);
-        Page<ItemRequest> itemRequestsPage = getItemRequestsWithoutRequester(userId, page);
+        Page<ItemRequest> itemRequestsPage =
+                itemRequestRepository.findAllByRequesterIdIsNot(userId, PageRequest.of(from, size));
+
         return getItemRequestsDto(itemRequestsPage.toList());
     }
 
-    private ItemRequest getItemRequest(RequestItemRequestDto requestItemDto, Long requesterId, LocalDateTime time) {
+    private ItemRequest getItemRequest(RequestItemRequestDto requestItemDto, Long requesterId) {
         User requester = userRepository.getReferenceById(requesterId);
-        return ItemRequestDtoMapper.toItemRequest(requestItemDto, requester, time);
-    }
-
-    private Page<ItemRequest> getItemRequestsWithoutRequester(Long userId, Pageable page) {
-        return itemRequestRepository.findAllByRequesterIdIsNot(userId, page);
+        return ItemRequestDtoMapper.toItemRequest(requestItemDto, requester, LocalDateTime.now());
     }
 
     private Map<Long, List<Item>> getItemsByItemRequestId() {

@@ -28,7 +28,7 @@ public class Item {
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id")
     private User owner;
 
