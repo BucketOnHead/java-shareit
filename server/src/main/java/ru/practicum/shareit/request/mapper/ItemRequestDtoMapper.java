@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.request.RequestItemRequestDto;
 import ru.practicum.shareit.request.dto.response.ItemRequestDto;
@@ -8,21 +9,22 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * A utility class for mapping {@link ItemRequest} objects and their DTOs.
+ */
+
+@UtilityClass
 public final class ItemRequestDtoMapper {
-    private ItemRequestDtoMapper() {
-        throw new AssertionError("This is a utility class and cannot be instantiated");
-    }
 
-    // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
-    // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ║╚═╗───║╚═╝║───║║║║───║╚╗╔╝║──────║║╚╗║─────║║─────║║║║
-    // ║╔═╝───║╔╗╔╝───║║║║───║╔╗╔╗║──────║║─║║─────║║─────║║║║
-    // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
-    // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
-
+    /**
+     * Converts a {@link RequestItemRequestDto} object to an {@link  ItemRequest} object.
+     *
+     * @param itemRequestDto the {@link RequestItemRequestDto} to convert.
+     * @param requester      the {@link User} who made the request.
+     * @param time           the LocalDateTime when the request was created.
+     * @return the converted {@link ItemRequest} object.
+     */
     public static ItemRequest toItemRequest(RequestItemRequestDto itemRequestDto,
                                             User requester, LocalDateTime time) {
         ItemRequest itemRequest = new ItemRequest();
@@ -34,13 +36,13 @@ public final class ItemRequestDtoMapper {
         return itemRequest;
     }
 
-    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗
-    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║
-    // ──║║─────║║║║──────║║─║║─────║║─────║║║║
-    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
-    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
-
+    /**
+     * Converts an {@link ItemRequest} object to an
+     * {@link ItemRequestDto} object without its items.
+     *
+     * @param itemRequest the {@link ItemRequest} to convert.
+     * @return the converted {@link ItemRequestDto} object.
+     */
     public static ItemRequestDto toItemRequestDtoWithoutItems(ItemRequest itemRequest) {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
 
@@ -51,29 +53,20 @@ public final class ItemRequestDtoMapper {
         return itemRequestDto;
     }
 
+    /**
+     * Converts an {@link ItemRequest} object and a collection
+     * of its items to an {@link ItemRequestDto} object.
+     *
+     * @param itemRequest the {@link ItemRequest} to convert.
+     * @param items       the collection of {@link Item} objects
+     *                    associated with the request.
+     * @return the converted {@link ItemRequestDto} object.
+     */
     public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest, Collection<Item> items) {
         ItemRequestDto itemRequestDto = toItemRequestDtoWithoutItems(itemRequest);
 
-        itemRequestDto.setItems(toItemDtoForItemRequestDto(items));
+        itemRequestDto.setItems(ItemRequestDto.ItemDto.fromItem(items));
 
         return itemRequestDto;
-    }
-
-    private static List<ItemRequestDto.ItemDto> toItemDtoForItemRequestDto(Collection<Item> items) {
-        return items.stream()
-                .map(ItemRequestDtoMapper::toItemDtoForItemRequestDto)
-                .collect(Collectors.toList());
-    }
-
-    private static ItemRequestDto.ItemDto toItemDtoForItemRequestDto(Item item) {
-        ItemRequestDto.ItemDto itemDto = new ItemRequestDto.ItemDto();
-
-        itemDto.setId(item.getId());
-        itemDto.setName(item.getName());
-        itemDto.setDescription(item.getDescription());
-        itemDto.setAvailable(item.getIsAvailable());
-        itemDto.setRequestId(item.getItemRequest().getId());
-
-        return itemDto;
     }
 }
