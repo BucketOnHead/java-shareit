@@ -16,11 +16,10 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class Booking {
+
     public enum Status {
         WAITING, APPROVED, REJECTED, CANCELED
     }
-
-    public static final Status DEFAULT_STATUS = Status.WAITING;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,5 +42,5 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private Status status = DEFAULT_STATUS;
+    private Status status = Status.WAITING;
 }

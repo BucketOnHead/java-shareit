@@ -1,28 +1,30 @@
 package ru.practicum.shareit.booking.mapper;
 
-import org.springframework.data.domain.Page;
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * This class provides methods for mapping booking
+ * related DTOs to corresponding entities and vice versa.
+ */
+@UtilityClass
 public final class BookingDtoMapper {
-    private BookingDtoMapper() {
-        throw new AssertionError("This is a utility class and cannot be instantiated");
-    }
 
-    // ╔══╗───╔═══╗───╔══╗───╔╗──╔╗──────╔══╗────╔════╗───╔══╗
-    // ║╔═╝───║╔═╗║───║╔╗║───║║──║║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ║╚═╗───║╚═╝║───║║║║───║╚╗╔╝║──────║║╚╗║─────║║─────║║║║
-    // ║╔═╝───║╔╗╔╝───║║║║───║╔╗╔╗║──────║║─║║─────║║─────║║║║
-    // ║║─────║║║║────║╚╝║───║║╚╝║║──────║╚═╝║─────║║─────║╚╝║
-    // ╚╝─────╚╝╚╝────╚══╝───╚╝──╚╝──────╚═══╝─────╚╝─────╚══╝
-
+    /**
+     * Maps a {@link BookItemRequestDto} and related entities to a {@link Booking} entity.
+     *
+     * @param bookingDto the DTO containing booking information.
+     * @param booker     the user who made the booking.
+     * @param item       the item being booked.
+     * @return the mapped {@link Booking} entity.
+     */
     public static Booking toBooking(BookItemRequestDto bookingDto, User booker, Item item) {
         Booking booking = new Booking();
 
@@ -34,13 +36,12 @@ public final class BookingDtoMapper {
         return booking;
     }
 
-    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗
-    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║
-    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║
-    // ──║║─────║║║║──────║║─║║─────║║─────║║║║
-    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║
-    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝
-
+    /**
+     * Maps a {@link Booking} entity to a {@link BookingResponseDto} DTO.
+     *
+     * @param booking the {@link Booking} entity to be mapped.
+     * @return the mapped {@link BookingResponseDto} DTO.
+     */
     public static BookingResponseDto toBookingDto(Booking booking) {
         BookingResponseDto bookingDto = new BookingResponseDto();
 
@@ -48,43 +49,28 @@ public final class BookingDtoMapper {
         bookingDto.setEnd(booking.getEndTime());
         bookingDto.setId(booking.getId());
         bookingDto.setStatus(booking.getStatus());
-        bookingDto.setBooker(toUserDtoForBookingDto(booking.getBooker()));
-        bookingDto.setItem(toItemDtoForBookingDto(booking.getItem()));
+        bookingDto.setBooker(BookingResponseDto.UserDto.fromUser(booking.getBooker()));
+        bookingDto.setItem(BookingResponseDto.ItemDto.fromItem(booking.getItem()));
 
         return bookingDto;
     }
 
-    // ╔════╗───╔══╗──────╔══╗────╔════╗───╔══╗──────╔╗─────╔══╗───╔══╗───╔════╗
-    // ╚═╗╔═╝───║╔╗║──────║╔╗╚╗───╚═╗╔═╝───║╔╗║──────║║─────╚╗╔╝───║╔═╝───╚═╗╔═╝
-    // ──║║─────║║║║──────║║╚╗║─────║║─────║║║║──────║║──────║║────║╚═╗─────║║──
-    // ──║║─────║║║║──────║║─║║─────║║─────║║║║──────║║──────║║────╚═╗║─────║║──
-    // ──║║─────║╚╝║──────║╚═╝║─────║║─────║╚╝║──────║╚═╗───╔╝╚╗───╔═╝║─────║║──
-    // ──╚╝─────╚══╝──────╚═══╝─────╚╝─────╚══╝──────╚══╝───╚══╝───╚══╝─────╚╝──
+    /**
+     * Maps an iterable collection of {@link Booking}
+     * entities to a list of {@link BookingResponseDto} DTOs.
+     *
+     * @param bookings the iterable collection of {@link Booking}
+     *                 entities to be mapped.
+     * @return the list of mapped {@link BookingResponseDto} DTOs.
+     */
+    public static List<BookingResponseDto> toBookingDto(Iterable<Booking> bookings) {
+        var bookingDtos = new ArrayList<BookingResponseDto>();
 
-    public static List<BookingResponseDto> toBookingDto(Collection<Booking> bookings) {
-        return bookings.stream()
-                .map(BookingDtoMapper::toBookingDto)
-                .collect(Collectors.toList());
-    }
+        for (Booking booking : bookings) {
+            var bookingDto = toBookingDto(booking);
+            bookingDtos.add(bookingDto);
+        }
 
-    public static List<BookingResponseDto> toBookingDto(Page<Booking> bookings) {
-        return toBookingDto(bookings.toList());
-    }
-
-    private static BookingResponseDto.ItemDto toItemDtoForBookingDto(Item item) {
-        BookingResponseDto.ItemDto itemDto = new BookingResponseDto.ItemDto();
-
-        itemDto.setId(item.getId());
-        itemDto.setName(item.getName());
-
-        return itemDto;
-    }
-
-    private static BookingResponseDto.UserDto toUserDtoForBookingDto(User user) {
-        BookingResponseDto.UserDto userDto = new BookingResponseDto.UserDto();
-
-        userDto.setId(user.getId());
-
-        return userDto;
+        return bookingDtos;
     }
 }

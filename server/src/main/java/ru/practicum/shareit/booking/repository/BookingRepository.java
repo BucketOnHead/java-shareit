@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
@@ -47,4 +48,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByBookerIdAndItemIdAndEndTimeIsBefore(
             Long bookerId, Long itemId, LocalDateTime time);
+
+    default void validateBookingExistsById(Long bookingId) {
+        if (!existsById(bookingId)) {
+            throw BookingNotFoundException.getFromBookingId(bookingId);
+        }
+    }
 }
