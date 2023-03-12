@@ -10,7 +10,6 @@ import java.util.List;
 @UtilityClass
 public final class ItemRequestServiceLoggerHelper {
 
-
     public static void itemRequestSaved(
             Logger log,
             ItemRequest itemRequest
