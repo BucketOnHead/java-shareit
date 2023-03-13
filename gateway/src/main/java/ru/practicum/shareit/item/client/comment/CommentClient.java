@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.client.comment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.comment.CreateCommentRequestDto;
 import ru.practicum.shareit.item.dto.response.comment.CommentResponseDto;
 
@@ -18,7 +19,7 @@ public class CommentClient {
         return client.post()
                 .uri("/items/{id}/comment", itemId)
                 .bodyValue(comment)
-                .header("X-Sharer-User-Id", userId.toString())
+                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(CommentResponseDto.class)
                 .block();

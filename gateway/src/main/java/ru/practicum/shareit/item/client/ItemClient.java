@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.response.DetailedItemResponseDto;
 import ru.practicum.shareit.item.dto.response.ItemResponseDto;
@@ -22,7 +23,7 @@ public class ItemClient {
         return client.post()
                 .uri("/items")
                 .bodyValue(itemDto)
-                .header("X-Sharer-User-Id", userId.toString())
+                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(ItemResponseDto.class)
                 .block();
@@ -32,7 +33,7 @@ public class ItemClient {
         return client.patch()
                 .uri("/items/{id}", itemId)
                 .bodyValue(itemDto)
-                .header("X-Sharer-User-Id", userId.toString())
+                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(ItemResponseDto.class)
                 .block();
@@ -41,7 +42,7 @@ public class ItemClient {
     public DetailedItemResponseDto getItemById(Long itemId, Long userId) {
         return client.get()
                 .uri("/items/{id}", itemId)
-                .header("X-Sharer-User-Id", userId.toString())
+                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(DetailedItemResponseDto.class)
                 .block();
@@ -50,7 +51,7 @@ public class ItemClient {
     public List<DetailedItemResponseDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
         return client.get()
                 .uri("/items")
-                .header("X-Sharer-User-Id", userId.toString())
+                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .header("from", from.toString())
                 .header("size", size.toString())
                 .retrieve()
