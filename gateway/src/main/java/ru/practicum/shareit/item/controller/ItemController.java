@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.client.comment.CommentClient;
 import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
@@ -28,7 +29,8 @@ public class ItemController {
     @PostMapping
     public ItemResponseDto addItem(
             @RequestBody @Validated(CreationGroup.class) CreateItemRequestDto itemDto,
-            @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerId
+    ) {
         return itemClient.addItem(itemDto, ownerId);
     }
 
@@ -36,22 +38,25 @@ public class ItemController {
     public ItemResponseDto updateItem(
             @RequestBody @Validated(UpdateGroup.class) CreateItemRequestDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+    ) {
         return itemClient.updateItem(itemDto, itemId, userId);
     }
 
     @GetMapping("/{itemId}")
     public DetailedItemResponseDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+    ) {
         return itemClient.getItemById(itemId, userId);
     }
 
     @GetMapping
     public List<DetailedItemResponseDto> getItemsByOwnerId(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size) {
+            @RequestParam(defaultValue = "10") @Positive Integer size
+    ) {
         return itemClient.getItemsByOwnerId(userId, from, size);
     }
 
@@ -67,7 +72,8 @@ public class ItemController {
     public CommentResponseDto addComment(
             @RequestBody @Validated(CreationGroup.class) CreateCommentRequestDto comment,
             @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+    ) {
         return commentClient.addComment(comment, userId, itemId);
     }
 }
