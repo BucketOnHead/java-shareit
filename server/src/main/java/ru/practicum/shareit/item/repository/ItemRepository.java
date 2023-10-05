@@ -27,12 +27,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      */
     @Query("" +
             "SELECT i FROM Item i " +
-            "WHERE " +
-            "  (i.isAvailable IS TRUE) " +
-            "AND " +
-            "  (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%')" +
-            "  OR " +
-            "  (LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')))")
+            "WHERE (i.isAvailable = TRUE) " +
+            "AND (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%')" +
+            "     OR (LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')))")
     Page<Item> findAllByText(@Param("text") String text, Pageable page);
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
