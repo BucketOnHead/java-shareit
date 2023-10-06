@@ -7,8 +7,6 @@ import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring")
 public interface UserDtoMapper {
@@ -18,9 +16,5 @@ public interface UserDtoMapper {
 
     UserResponseDto mapToUserResponseDto(User user);
 
-    default List<UserResponseDto> mapToUserResponseDto(Iterable<User> users) {
-        return StreamSupport.stream(users.spliterator(), false)
-                .map(this::mapToUserResponseDto)
-                .collect(Collectors.toList());
-    }
+    List<UserResponseDto> mapToUserResponseDto(Iterable<User> users);
 }
