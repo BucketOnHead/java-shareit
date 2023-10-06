@@ -15,7 +15,6 @@ import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.logger.ItemServiceLoggerHelper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
@@ -26,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +36,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final ItemRequestRepository itemRequestRepository;
+    private final ItemDtoMapper itemMapper;
 
     @Override
     @Transactional
@@ -51,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
         Item savedItem = itemRepository.save(item);
 
         ItemServiceLoggerHelper.itemSaved(log, savedItem);
-        return ItemDtoMapper.toSimpleItemResponseDto(savedItem);
+        return itemMapper.mapToSimpleItemResponseDto(savedItem);
     }
 
     @Override
@@ -65,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
         Item savedItem = itemRepository.save(updatedItem);
 
         ItemServiceLoggerHelper.itemUpdated(log, savedItem);
-        return ItemDtoMapper.toSimpleItemResponseDto(savedItem);
+        return itemMapper.mapToSimpleItemResponseDto(savedItem);
     }
 
     @Override
@@ -76,11 +75,21 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getReferenceById(itemId);
 
         ItemDetailsResponseDto itemDto;
+        var comments = commentRepository.findAllByItemId(item.getId());
+        if (item.isOwner(currentUserId)) {
+            var now = LocalDateTime.now();
 
-        if (item.getOwner().getId().equals(currentUserId)) {
-            itemDto = getDetailedItemDto(item);
+            Booking lastBooking = bookingRepository
+                    .findFirstByItemIdAndEndTimeIsBeforeOrderByEndTimeDesc(item.getId(), now)
+                    .orElse(null);
+
+            Booking nextBooking = bookingRepository
+                    .findFirstByItemIdAndStartTimeIsAfter(item.getId(), now)
+                    .orElse(null);
+
+            itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments, lastBooking, nextBooking);
         } else {
-            itemDto = getDetailedItemDtoWithoutBookings(item);
+            itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments);
         }
 
         ItemServiceLoggerHelper.itemDtoReturned(log, itemDto);
@@ -92,29 +101,28 @@ public class ItemServiceImpl implements ItemService {
         userRepository.validateUserExistsById(ownerUserId);
 
         Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, PageRequest.of(from, size));
-        List<ItemDetailsResponseDto> ownerItemDtos = getItemDetailsResponseDtos(items.toList());
+        List<ItemDetailsResponseDto> ownerItemDtos = itemMapper.mapToItemDetailsResponseDto(items);
 
         ItemServiceLoggerHelper.itemDtosReturned(log, ownerItemDtos);
         return ownerItemDtos;
     }
 
     @Override
-    public List<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(
-            String text, Integer from, Integer size
-    ) {
+    public List<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
+                                                                                Integer from, Integer size) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
 
         List<Item> foundItems = findItemsByText(text, PageRequest.of(from, size));
-        List<SimpleItemResponseDto> itemDtos = ItemDtoMapper.toSimpleItemResponseDto(foundItems);
 
-        ItemServiceLoggerHelper.itemDtosByTextReturned(log, text, itemDtos);
-        return itemDtos;
+        var itemsDto = itemMapper.mapToSimpleItemResponseDto(foundItems);
+        ItemServiceLoggerHelper.itemDtosByTextReturned(log, text, itemsDto);
+        return itemsDto;
     }
 
     private Item getItem(ItemRequestDto itemDto, Long ownerUserId) {
-        Item item = ItemDtoMapper.toItem(itemDto);
+        Item item = itemMapper.mapToItem(itemDto);
 
         item.setOwner(userRepository.getReferenceById(ownerUserId));
 
@@ -139,34 +147,5 @@ public class ItemServiceImpl implements ItemService {
 
     private List<Item> findItemsByText(String text, Pageable page) {
         return itemRepository.findAllByText(text, page).toList();
-    }
-
-    private ItemDetailsResponseDto getDetailedItemDtoWithoutBookings(Item item) {
-        return ItemDtoMapper.toItemDetailsResponseDto(
-                item,
-                commentRepository.findAllByItemId(item.getId()),
-                null,
-                null);
-    }
-
-    private List<ItemDetailsResponseDto> getItemDetailsResponseDtos(List<Item> items) {
-        return items.stream()
-                .map(this::getDetailedItemDto)
-                .collect(Collectors.toList());
-    }
-
-    private ItemDetailsResponseDto getDetailedItemDto(Item item) {
-        List<Comment> comments = commentRepository.findAllByItemId(item.getId());
-        LocalDateTime time = LocalDateTime.now();
-
-        Booking lastBooking = bookingRepository
-                .findFirstByItemIdAndEndTimeIsBeforeOrderByEndTimeDesc(item.getId(), time)
-                .orElse(null);
-
-        Booking nextBooking = bookingRepository
-                .findFirstByItemIdAndStartTimeIsAfter(item.getId(), time)
-                .orElse(null);
-
-        return ItemDtoMapper.toItemDetailsResponseDto(item, comments, lastBooking, nextBooking);
     }
 }

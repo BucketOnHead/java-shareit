@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
@@ -8,113 +9,38 @@ import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * The {@link ItemDtoMapper} class provides methods to convert
- * between {@link Item}-related DTOs and {@link Item} entities.
- */
-@UtilityClass
-public final class ItemDtoMapper {
+@Mapper(componentModel = "spring")
+public interface ItemDtoMapper {
 
-    /**
-     * Converts an {@link ItemRequestDto} to an {@link Item} entity.
-     *
-     * @param itemDto The {@link ItemRequestDto} to convert.
-     * @return The resulting {@link Item} entity.
-     */
-    public static Item toItem(ItemRequestDto itemDto) {
-        Item item = new Item();
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isAvailable", source = "available")
+    Item mapToItem(ItemRequestDto itemDto);
 
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setIsAvailable(itemDto.getAvailable());
+    @Mapping(target = "available", source = "isAvailable")
+    @Mapping(target = "requestId", source = "item.itemRequest.id")
+    SimpleItemResponseDto mapToSimpleItemResponseDto(Item item);
 
-        return item;
-    }
+    List<SimpleItemResponseDto> mapToSimpleItemResponseDto(Iterable<Item> items);
 
-    /**
-     * Converts an {@link Item} entity to a {@link SimpleItemResponseDto}.
-     *
-     * @param item The {@link Item} entity to convert.
-     * @return The resulting {@link SimpleItemResponseDto}.
-     */
-    public static SimpleItemResponseDto toSimpleItemResponseDto(Item item) {
-        var itemDto = new SimpleItemResponseDto();
+    @Mapping(target = "authorName", source = "comment.author.name")
+    ItemDetailsResponseDto.CommentDto mapToCommentDto(Comment comment);
 
-        itemDto.setId(item.getId());
-        itemDto.setName(item.getName());
-        itemDto.setDescription(item.getDescription());
-        itemDto.setAvailable(item.getIsAvailable());
+    @Mapping(target = "bookerId", source = "booking.booker.id")
+    ItemDetailsResponseDto.BookingDto mapToBookingDto(Booking booking);
 
-        if (item.getItemRequest() != null) {
-            itemDto.setRequestId(item.getItemRequest().getId());
-        }
+    @Mapping(target = "available", source = "item.isAvailable")
+    ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item);
 
-        return itemDto;
-    }
+    List<ItemDetailsResponseDto> mapToItemDetailsResponseDto(Iterable<Item> items);
 
-    /**
-     * Converts an {@link Item} entity to an {@link ItemDetailsResponseDto}.
-     *
-     * @param item        The {@link Item} entity to convert.
-     * @param comments    The comments associated with the item.
-     * @param lastBooking The last booking associated with the item.
-     * @param nextBooking The next booking associated with the item.
-     * @return The resulting {@link ItemDetailsResponseDto}.
-     */
-    public static ItemDetailsResponseDto toItemDetailsResponseDto(
-            Item item,
-            List<Comment> comments,
-            Booking lastBooking,
-            Booking nextBooking
-    ) {
-        var itemDto = toItemDetailsResponseDto(item, comments);
+    @Mapping(target = "available", source = "item.isAvailable")
+    ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item, List<Comment> comments);
 
-        if (lastBooking != null) {
-            var bookingDto = ItemDetailsResponseDto.BookingDto.fromBooking(lastBooking);
-            itemDto.setLastBooking(bookingDto);
-        }
-
-        if (nextBooking != null) {
-            var bookingDto = ItemDetailsResponseDto.BookingDto.fromBooking(nextBooking);
-            itemDto.setNextBooking(bookingDto);
-        }
-
-        return itemDto;
-    }
-
-    /**
-     * Converts an {@link Item} entity to an {@link ItemDetailsResponseDto}.
-     *
-     * @param item     The {@link Item} entity to convert.
-     * @param comments The comments associated with the item.
-     * @return The resulting {@link ItemDetailsResponseDto}.
-     */
-    public static ItemDetailsResponseDto toItemDetailsResponseDto(Item item, List<Comment> comments) {
-        var itemDto = new ItemDetailsResponseDto();
-
-        itemDto.setId(item.getId());
-        itemDto.setName(item.getName());
-        itemDto.setDescription(item.getDescription());
-        itemDto.setAvailable(item.getIsAvailable());
-        itemDto.setComments(ItemDetailsResponseDto.CommentDto.fromComment(comments));
-
-        return itemDto;
-    }
-
-    /**
-     * Converts a collection of {@link Item} entities to a list
-     * of {@link SimpleItemResponseDto}s.
-     *
-     * @param items The collection of {@link Item} entities to convert.
-     * @return The resulting list of {@link SimpleItemResponseDto}s.
-     */
-    public static List<SimpleItemResponseDto> toSimpleItemResponseDto(Collection<Item> items) {
-        return items.stream()
-                .map(ItemDtoMapper::toSimpleItemResponseDto)
-                .collect(Collectors.toList());
-    }
+    @Mapping(target = "id", source = "item.id")
+    @Mapping(target = "available", source = "item.isAvailable")
+    @Mapping(target = "lastBooking", source = "last")
+    @Mapping(target = "nextBooking", source = "next")
+    ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item, List<Comment> comments, Booking last, Booking next);
 }
