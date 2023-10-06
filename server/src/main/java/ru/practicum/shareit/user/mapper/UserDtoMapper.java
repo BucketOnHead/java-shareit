@@ -1,43 +1,26 @@
 package ru.practicum.shareit.user.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.shareit.user.dto.request.UserRequestDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-@UtilityClass
-public final class UserDtoMapper {
+@Mapper(componentModel = "spring")
+public interface UserDtoMapper {
 
-    public static User toUser(UserRequestDto userDto) {
-        User user = new User();
+    @Mapping(target = "id", ignore = true)
+    User mapToUser(UserRequestDto userRequestDto);
 
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
+    UserResponseDto mapToUserResponseDto(User user);
 
-        return user;
-    }
-
-    public static UserResponseDto toUserResponseDto(User user) {
-        var userDto = new UserResponseDto();
-
-        userDto.setId(user.getId());
-        userDto.setName(user.getName());
-        userDto.setEmail(user.getEmail());
-
-        return userDto;
-    }
-
-    public static List<UserResponseDto> toUserResponseDto(Iterable<User> users) {
-        var userDtos = new ArrayList<UserResponseDto>();
-
-        for (User user : users) {
-            var userDto = toUserResponseDto(user);
-            userDtos.add(userDto);
-        }
-
-        return userDtos;
+    default List<UserResponseDto> mapToUserResponseDto(Iterable<User> users) {
+        return StreamSupport.stream(users.spliterator(), false)
+                .map(this::mapToUserResponseDto)
+                .collect(Collectors.toList());
     }
 }

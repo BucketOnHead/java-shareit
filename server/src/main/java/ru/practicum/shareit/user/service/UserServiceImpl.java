@@ -22,14 +22,15 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserDtoMapper userMapper;
 
     @Override
     @Transactional
     public UserResponseDto addUser(UserRequestDto userDto) {
-        User user = UserDtoMapper.toUser(userDto);
+        User user = userMapper.mapToUser(userDto);
         User savedUser = userRepository.save(user);
         UserServiceLoggerHelper.userSaved(log, savedUser);
-        return UserDtoMapper.toUserResponseDto(savedUser);
+        return userMapper.mapToUserResponseDto(savedUser);
     }
 
     @Override
@@ -39,14 +40,14 @@ public class UserServiceImpl implements UserService {
         User updatedUser = getUpdatedUser(userId, userDto);
         User savedUser = userRepository.save(updatedUser);
         UserServiceLoggerHelper.userUpdated(log, savedUser);
-        return UserDtoMapper.toUserResponseDto(savedUser);
+        return userMapper.mapToUserResponseDto(savedUser);
     }
 
     @Override
     public UserResponseDto getUserById(Long userId) {
         userRepository.validateUserExistsById(userId);
         User user = userRepository.getReferenceById(userId);
-        UserResponseDto userDto = UserDtoMapper.toUserResponseDto(user);
+        UserResponseDto userDto = userMapper.mapToUserResponseDto(user);
         UserServiceLoggerHelper.userDtoByIdReturned(log, userDto);
         return userDto;
     }
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDto> getUsers(Integer from, Integer size) {
         Page<User> users = userRepository.findAll(PageRequest.of(from, size));
-        List<UserResponseDto> usersDto = UserDtoMapper.toUserResponseDto(users);
+        List<UserResponseDto> usersDto = userMapper.mapToUserResponseDto(users);
         UserServiceLoggerHelper.userDtoPageReturned(log, from, size, usersDto);
         return usersDto;
     }
