@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
 import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
 import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
 import ru.practicum.shareit.item.logger.comment.CommentServiceLoggerHelper;
-import ru.practicum.shareit.item.mapper.comment.CommentDtoMapper;
+import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
@@ -26,6 +26,7 @@ public class CommentServiceImpl implements CommentService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final CommentDtoMapper commentMapper;
 
     @Override
     @Transactional
@@ -38,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         CommentServiceLoggerHelper.commentSaved(log, savedComment);
-        return CommentDtoMapper.toSimpleCommentResponseDto(savedComment);
+        return commentMapper.mapToSimpleCommentResponseDto(savedComment);
     }
 
     private void checkUserBookingByUserIdAndItemId(Long userId, Long itemId) {
@@ -49,10 +50,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Comment getComment(CommentRequestDto commentRequestDto, Long authorId, Long itemId) {
-        return CommentDtoMapper.toComment(
+        return commentMapper.mapToComment(
                 commentRequestDto,
                 userRepository.getReferenceById(authorId),
-                itemRepository.getReferenceById(itemId),
-                LocalDateTime.now());
+                itemRepository.getReferenceById(itemId));
     }
 }

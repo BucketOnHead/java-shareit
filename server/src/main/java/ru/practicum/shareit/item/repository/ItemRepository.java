@@ -25,12 +25,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * @param page The page of results to retrieve.
      * @return A {@link Page} of available {@link Item} entities that match the given search text.
      */
-    @Query(""
-            + "SELECT items FROM Item AS items "
-            + "WHERE "
-            + "  (items.isAvailable IS TRUE) "
-            + "AND "
-            + "  ((LOWER(items.name) LIKE %:text%) OR (LOWER(items.description) LIKE %:text%))")
+    @Query("" +
+            "SELECT i FROM Item i " +
+            "WHERE (i.isAvailable = TRUE) " +
+            "AND (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%')" +
+            "     OR (LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')))")
     Page<Item> findAllByText(@Param("text") String text, Pageable page);
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);

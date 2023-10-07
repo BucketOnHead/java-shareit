@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.logger.ItemRequestServiceLoggerHelper;
 import ru.practicum.shareit.request.mapper.ItemRequestDtoMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -32,6 +31,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final ItemRequestDtoMapper itemRequestMapper;
 
     @Override
     @Transactional
@@ -42,7 +42,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
 
         ItemRequestServiceLoggerHelper.itemRequestSaved(log, savedItemRequest);
-        return ItemRequestDtoMapper.toItemRequestDtoWithoutItems(savedItemRequest);
+        return itemRequestMapper.mapToItemRequestDto(savedItemRequest);
     }
 
     @Override
@@ -79,10 +79,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return itemRequestDto;
     }
 
-    private static ItemRequestDto getItemRequestDto(ItemRequest itemRequest,
+    private ItemRequestDto getItemRequestDto(ItemRequest itemRequest,
                                                     Map<Long, List<Item>> itemsByItemRequestId) {
         List<Item> items = itemsByItemRequestId.getOrDefault(itemRequest.getId(), new ArrayList<>());
-        return ItemRequestDtoMapper.toItemRequestDto(itemRequest, items);
+        return itemRequestMapper.mapToItemRequestDto(itemRequest, items);
     }
 
     private List<ItemRequestDto> getItemRequestsDto(List<ItemRequest> itemRequests) {
@@ -96,7 +96,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = itemRequestRepository.getReferenceById(itemRequestId);
         List<Item> items = itemRepository.findAllByItemRequestId(itemRequestId);
 
-        return ItemRequestDtoMapper.toItemRequestDto(itemRequest, items);
+        return itemRequestMapper.mapToItemRequestDto(itemRequest, items);
     }
 
     private List<ItemRequestDto> getItemRequestsByRequesterIdWithPagination(Long userId,
@@ -108,8 +108,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     private ItemRequest getItemRequest(RequestItemRequestDto requestItemDto, Long requesterId) {
-        User requester = userRepository.getReferenceById(requesterId);
-        return ItemRequestDtoMapper.toItemRequest(requestItemDto, requester, LocalDateTime.now());
+        var now = LocalDateTime.now();
+        var requester = userRepository.getReferenceById(requesterId);
+        return itemRequestMapper.mapToItemRequest(requestItemDto, requester, now);
     }
 
     private Map<Long, List<Item>> getItemsByItemRequestId() {
