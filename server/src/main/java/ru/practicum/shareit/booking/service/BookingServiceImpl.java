@@ -31,6 +31,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final BookingDtoMapper bookingMapper;
 
     @Override
     @Transactional
@@ -44,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
         BookingServiceLoggerHelper.bookingSaved(log, savedBooking);
-        return BookingDtoMapper.toBookingDto(savedBooking);
+        return bookingMapper.mapToBookingResponseDto(savedBooking);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
         BookingServiceLoggerHelper.bookingUpdated(log, updatedBooking);
-        return BookingDtoMapper.toBookingDto(updatedBooking);
+        return bookingMapper.mapToBookingResponseDto(updatedBooking);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.getReferenceById(bookingId);
         validateUserIsOwnerOrBooker(booking, userId);
 
-        BookingResponseDto bookingDto = BookingDtoMapper.toBookingDto(booking);
+        BookingResponseDto bookingDto = bookingMapper.mapToBookingResponseDto(booking);
         BookingServiceLoggerHelper.bookingReturned(log, bookingDto, userId);
         return bookingDto;
     }
@@ -84,7 +85,7 @@ public class BookingServiceImpl implements BookingService {
         State state = State.valueOf(stateStr);
 
         Page<Booking> bookingsByBookerId = getBookingsByBookerIdAndState(bookerId, state, from, size);
-        List<BookingResponseDto> bookingDtos = BookingDtoMapper.toBookingDto(bookingsByBookerId);
+        List<BookingResponseDto> bookingDtos = bookingMapper.mapToBookingResponseDto(bookingsByBookerId);
 
         BookingServiceLoggerHelper.bookingByBookerIdPageReturned(log, from, size, bookingDtos, stateStr, bookerId);
         return bookingDtos;
@@ -97,7 +98,7 @@ public class BookingServiceImpl implements BookingService {
         State state = State.valueOf(stateStr);
 
         Page<Booking> bookingsByBookerItems = getBookingsForUserItemsByState(ownerId, state, from, size);
-        List<BookingResponseDto> bookingDtos = BookingDtoMapper.toBookingDto(bookingsByBookerItems);
+        List<BookingResponseDto> bookingDtos = bookingMapper.mapToBookingResponseDto(bookingsByBookerItems);
 
         BookingServiceLoggerHelper.bookingPageForUserItemsReturned(log, from, size, stateStr, bookingDtos, ownerId);
         return bookingDtos;
@@ -137,7 +138,7 @@ public class BookingServiceImpl implements BookingService {
     private Booking getBooking(BookItemRequestDto bookingDto, Long userId) {
         User booker = userRepository.getReferenceById(userId);
         Item item = itemRepository.getReferenceById(bookingDto.getItemId());
-        return BookingDtoMapper.toBooking(bookingDto, booker, item);
+        return bookingMapper.mapToBooking(bookingDto, booker, item);
     }
 
     private Page<Booking> getBookingsByBookerIdAndState(Long bookerId, State state, Integer from, Integer size) {
