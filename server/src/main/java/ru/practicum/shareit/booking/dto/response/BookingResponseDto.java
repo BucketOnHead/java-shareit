@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.model.Booking.Status;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -26,15 +24,6 @@ public class BookingResponseDto {
     public static class ItemDto {
         private Long id;
         private String name;
-
-        public static ItemDto fromItem(Item item) {
-            var itemDto = new ItemDto();
-
-            itemDto.setId(item.getId());
-            itemDto.setName(item.getName());
-
-            return itemDto;
-        }
     }
 
     @Setter
@@ -42,13 +31,5 @@ public class BookingResponseDto {
     @NoArgsConstructor
     public static class UserDto {
         private Long id;
-
-        public static UserDto fromUser(User user) {
-            var userDto = new UserDto();
-
-            userDto.setId(user.getId());
-
-            return userDto;
-        }
     }
 }
