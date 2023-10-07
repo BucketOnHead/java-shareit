@@ -15,6 +15,8 @@ import java.util.List;
 public interface ItemDtoMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", ignore = true)
+    @Mapping(target = "itemRequest", ignore = true)
     @Mapping(target = "isAvailable", source = "available")
     Item mapToItem(ItemRequestDto itemDto);
 
@@ -30,11 +32,19 @@ public interface ItemDtoMapper {
     @Mapping(target = "bookerId", source = "booking.booker.id")
     ItemDetailsResponseDto.BookingDto mapToBookingDto(Booking booking);
 
+    @Mapping(target = "lastBooking", ignore = true)
+    @Mapping(target = "nextBooking", ignore = true)
+    @Mapping(target = "comments", ignore = true)
     @Mapping(target = "available", source = "item.isAvailable")
     ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item);
 
+    @Mapping(target = "lastBooking", ignore = true)
+    @Mapping(target = "nextBooking", ignore = true)
+    @Mapping(target = "comments", ignore = true)
     List<ItemDetailsResponseDto> mapToItemDetailsResponseDto(Iterable<Item> items);
 
+    @Mapping(target = "lastBooking", ignore = true)
+    @Mapping(target = "nextBooking", ignore = true)
     @Mapping(target = "available", source = "item.isAvailable")
     ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item, List<Comment> comments);
 

@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.model.User;
 public interface CommentDtoMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created", ignore = true)
     Comment mapToComment(CommentRequestDto commentDto, User author, Item item);
 
     @Mapping(target = "authorName", source = "comment.author.name")
