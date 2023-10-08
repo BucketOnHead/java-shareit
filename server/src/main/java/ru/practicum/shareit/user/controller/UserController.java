@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.request.UserRequestDto;
-
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.logger.UserControllerLoggerHelper;
 import ru.practicum.shareit.user.service.UserService;
