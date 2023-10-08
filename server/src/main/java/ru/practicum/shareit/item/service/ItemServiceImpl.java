@@ -104,7 +104,8 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
         userRepository.validateUserExistsById(ownerUserId);
 
-        Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, PageRequest.of(from, size));
+        var page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"));
+        Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, page);
         List<ItemDetailsResponseDto> ownerItemDtos = itemMapper.mapToItemDetailsResponseDto(items);
 
         ItemServiceLoggerHelper.itemDtosReturned(log, ownerItemDtos);
