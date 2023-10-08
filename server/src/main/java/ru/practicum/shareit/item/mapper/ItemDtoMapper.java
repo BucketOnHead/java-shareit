@@ -36,14 +36,6 @@ public interface ItemDtoMapper {
 
     @Mapping(target = "lastBooking", ignore = true)
     @Mapping(target = "nextBooking", ignore = true)
-    @Mapping(target = "comments", ignore = true)
-    @Mapping(target = "available", source = "item.isAvailable")
-    ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item);
-
-    List<ItemDetailsResponseDto> mapToItemDetailsResponseDto(Iterable<Item> items);
-
-    @Mapping(target = "lastBooking", ignore = true)
-    @Mapping(target = "nextBooking", ignore = true)
     @Mapping(target = "available", source = "item.isAvailable")
     ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item, Iterable<Comment> comments);
 
@@ -53,4 +45,11 @@ public interface ItemDtoMapper {
     @Mapping(target = "nextBooking", source = "next")
     ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item, Iterable<Comment> comments,
                                                        Booking last, Booking next);
+
+    @Mapping(target = "id", source = "item.id")
+    @Mapping(target = "available", source = "item.isAvailable")
+    @Mapping(target = "lastBooking", source = "last")
+    @Mapping(target = "nextBooking", source = "next")
+    @Mapping(target = "comments", ignore = true)
+    ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item, Booking last, Booking next);
 }

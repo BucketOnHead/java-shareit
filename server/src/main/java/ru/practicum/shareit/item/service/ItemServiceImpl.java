@@ -3,10 +3,8 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -20,6 +18,7 @@ import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
+import ru.practicum.shareit.item.utils.ItemUtils;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -27,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -81,14 +81,12 @@ public class ItemServiceImpl implements ItemService {
         if (item.isOwner(userId)) {
             var now = LocalDateTime.now();
 
-            var lastSort = Sort.by(Sort.Direction.DESC, "startTime");
             Booking lastBooking = bookingRepository
-                    .findTopByItemIdAndStartTimeLessThanAndStatus(itemId, now, Status.APPROVED, lastSort)
+                    .findLastBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
 
-            var nextSort = Sort.by(Sort.Direction.ASC, "startTime");
             Booking nextBooking = bookingRepository
-                    .findTopByItemIdAndStartTimeGreaterThanEqualAndStatus(itemId, now, Status.APPROVED, nextSort)
+                    .findNextBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments, lastBooking, nextBooking);
@@ -104,12 +102,21 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
         userRepository.validateUserExistsById(ownerUserId);
 
-        var page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"));
-        Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, page);
-        List<ItemDetailsResponseDto> ownerItemDtos = itemMapper.mapToItemDetailsResponseDto(items);
+        var now = LocalDateTime.now();
+        var page = PageRequest.of(from / size, size);
+        var items = itemRepository.findAllByOwnerId(ownerUserId, page);
+        var lastBookings = bookingRepository.findAllLastBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
+        var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
 
-        ItemServiceLoggerHelper.itemDtosReturned(log, ownerItemDtos);
-        return ownerItemDtos;
+        var itemsDto = items.stream()
+                .map(i -> itemMapper.mapToItemDetailsResponseDto(
+                        i,
+                        lastBookings.getOrDefault(i.getId(), null).orElse(null),
+                        nextBookings.getOrDefault(i.getId(), null).orElse(null)))
+                .collect(Collectors.toList());
+
+        ItemServiceLoggerHelper.itemDtosReturned(log, itemsDto);
+        return itemsDto;
     }
 
     @Override
