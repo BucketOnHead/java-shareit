@@ -22,8 +22,10 @@ public interface BookingDtoMapper {
     @Mapping(target = "start", source = "booking.startTime")
     @Mapping(target = "end", source = "booking.endTime")
     BookingResponseDto mapToBookingResponseDto(Booking booking);
+
     List<BookingResponseDto> mapToBookingResponseDto(Iterable<Booking> bookings);
 
     BookingResponseDto.UserDto mapToBookingResponseUserDto(User user);
+
     BookingResponseDto.ItemDto mapToBookingResponseDto(Item item);
 }

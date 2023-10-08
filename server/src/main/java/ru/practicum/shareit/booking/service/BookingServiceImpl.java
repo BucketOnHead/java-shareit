@@ -153,7 +153,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             case CURRENT:
                 bookingsByState = bookingRepository.findAllByBookerIdAndStartTimeBeforeAndEndTimeAfter(
-                        bookerId , time, time, page);
+                        bookerId, time, time, page);
                 break;
             case PAST:
                 bookingsByState = bookingRepository.findAllByBookerIdAndEndTimeBefore(bookerId, time, page);
