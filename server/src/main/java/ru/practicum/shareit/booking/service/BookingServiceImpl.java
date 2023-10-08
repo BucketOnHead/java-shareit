@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
@@ -105,7 +107,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private static void validateBookingStatusNotApprove(Booking booking) {
-        if (booking.getStatus() == Status.APPROVED) {
+        if (!booking.getStatus().equals(Status.WAITING)) {
             throw BookingAlreadyApprovedException.getFromBookingId(booking.getId());
         }
     }
@@ -117,21 +119,20 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private static void validateUserIsOwnerOrBooker(Booking booking, Long userId) {
-        Long ownerId = booking.getItem().getOwner().getId();
         Long bookerId = booking.getBooker().getId();
 
-        boolean isOwner = ownerId.equals(userId);
+        boolean isOwner = booking.getItem().isOwner(userId);
         boolean isBooker = bookerId.equals(userId);
 
-        if (!(isOwner || isBooker)) {
+        if (!isOwner && !isBooker) {
             throw BookingNotFoundException.getFromBookingIdAndUserId(booking.getId(), userId);
         }
     }
 
     private void validateUserNotOwnerByItemIdAndUserId(Long itemId, Long userId) {
-        Long ownerId = itemRepository.getReferenceById(itemId).getOwner().getId();
-        if (ownerId.equals(userId)) {
-            throw BookingLogicException.getFromOwnerIdAndItemId(ownerId, itemId);
+        var item = itemRepository.getReferenceById(itemId);
+        if (item.isOwner(userId)) {
+            throw BookingLogicException.getFromOwnerIdAndItemId(userId, itemId);
         }
     }
 
@@ -143,27 +144,28 @@ public class BookingServiceImpl implements BookingService {
 
     private Page<Booking> getBookingsByBookerIdAndState(Long bookerId, State state, Integer from, Integer size) {
         LocalDateTime time = LocalDateTime.now();
-        Pageable page = PageRequest.of(from / size, size);
+        Pageable page = PageRequest.of(from / size, size, Sort.by(Direction.DESC, "endTime"));
 
         Page<Booking> bookingsByState;
         switch (state) {
             case ALL:
-                bookingsByState = getAllBookingsByBookerId(bookerId, page);
+                bookingsByState = bookingRepository.findAllByBookerId(bookerId, page);
                 break;
             case CURRENT:
-                bookingsByState = getCurrentBookingsByBookerId(bookerId, time, page);
+                bookingsByState = bookingRepository.findAllByBookerIdAndStartTimeBeforeAndEndTimeAfter(
+                        bookerId, time, time, page);
                 break;
             case PAST:
-                bookingsByState = getPastBookingsByBookerId(bookerId, time, page);
+                bookingsByState = bookingRepository.findAllByBookerIdAndEndTimeBefore(bookerId, time, page);
                 break;
             case FUTURE:
-                bookingsByState = getFutureBookingsByBookerId(bookerId, time, page);
+                bookingsByState = bookingRepository.findAllByBookerIdAndStartTimeAfter(bookerId, time, page);
                 break;
             case WAITING:
-                bookingsByState = getBookingsByBookerIdAndStatus(bookerId, Status.WAITING, page);
+                bookingsByState = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.WAITING, page);
                 break;
             case REJECTED:
-                bookingsByState = getBookingsByBookerIdAndStatus(bookerId, Status.REJECTED, page);
+                bookingsByState = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.REJECTED, page);
                 break;
             default:
                 throw StateNotImplementedException.fromState(state);
@@ -174,102 +176,34 @@ public class BookingServiceImpl implements BookingService {
 
     private Page<Booking> getBookingsForUserItemsByState(Long ownerId, State state, Integer from, Integer size) {
         LocalDateTime time = LocalDateTime.now();
-        Pageable page = PageRequest.of(from / size, size);
+        Pageable page = PageRequest.of(from / size, size, Sort.by(Direction.DESC, "endTime"));
 
-        Page<Booking> bookingsForUserItemsByState;
+        Page<Booking> bookings;
         switch (state) {
             case ALL:
-                bookingsForUserItemsByState = getAllBookingsForUserItems(ownerId, page);
+                bookings = bookingRepository.findAllByItemOwnerId(ownerId, page);
                 break;
             case CURRENT:
-                bookingsForUserItemsByState = getCurrentBookingsForUserItems(ownerId, time, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartTimeBeforeAndEndTimeAfter(
+                        ownerId, time, time, page);
                 break;
             case PAST:
-                bookingsForUserItemsByState = getPastBookingsForUserItems(ownerId, time, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndEndTimeBefore(ownerId, time, page);
                 break;
             case FUTURE:
-                bookingsForUserItemsByState = getFutureBookingsForUserItems(ownerId, time, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
+                        ownerId, time, page);
                 break;
             case WAITING:
-                bookingsForUserItemsByState = getBookingsForUserItemsAndStatus(ownerId, Status.WAITING, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, Status.WAITING, page);
                 break;
             case REJECTED:
-                bookingsForUserItemsByState = getBookingsForUserItemsAndStatus(ownerId, Status.REJECTED, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, Status.REJECTED, page);
                 break;
             default:
                 throw StateNotImplementedException.fromState(state);
         }
 
-        return bookingsForUserItemsByState;
-    }
-
-    private Page<Booking> getAllBookingsByBookerId(Long bookerId, Pageable page) {
-        return bookingRepository.findAllByBookerIdOrderByStartTimeDesc(
-                bookerId,
-                page);
-    }
-
-    private Page<Booking> getCurrentBookingsByBookerId(Long bookerId, LocalDateTime time, Pageable page) {
-        return bookingRepository.findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
-                bookerId,
-                time,
-                time,
-                page);
-    }
-
-    private Page<Booking> getPastBookingsByBookerId(Long bookerId, LocalDateTime time, Pageable page) {
-        return bookingRepository.findAllByBookerIdAndEndTimeIsBefore(
-                bookerId,
-                time,
-                page);
-    }
-
-    private Page<Booking> getFutureBookingsByBookerId(Long bookerId, LocalDateTime time, Pageable page) {
-        return bookingRepository.findAllByBookerIdAndStartTimeIsAfterOrderByStartTimeDesc(
-                bookerId,
-                time,
-                page);
-    }
-
-    private Page<Booking> getBookingsByBookerIdAndStatus(Long bookerId, Status status, Pageable page) {
-        return bookingRepository.findAllByBookerIdAndStatusEquals(
-                bookerId,
-                status,
-                page);
-    }
-
-    private Page<Booking> getAllBookingsForUserItems(Long ownerId, Pageable page) {
-        return bookingRepository.findAllByItemOwnerIdOrderByStartTimeDesc(
-                ownerId,
-                page);
-    }
-
-    private Page<Booking> getCurrentBookingsForUserItems(Long ownerId, LocalDateTime time, Pageable page) {
-        return bookingRepository.findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsAfter(
-                ownerId,
-                time,
-                time,
-                page);
-    }
-
-    private Page<Booking> getPastBookingsForUserItems(Long ownerId, LocalDateTime time, Pageable page) {
-        return bookingRepository.findAllByItemOwnerIdAndEndTimeIsBefore(
-                ownerId,
-                time,
-                page);
-    }
-
-    private Page<Booking> getFutureBookingsForUserItems(Long ownerId, LocalDateTime time, Pageable page) {
-        return bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
-                ownerId,
-                time,
-                page);
-    }
-
-    private Page<Booking> getBookingsForUserItemsAndStatus(Long ownerId, Status status, Pageable page) {
-        return bookingRepository.findAllByItemOwnerIdAndStatusEquals(
-                ownerId,
-                status,
-                page);
+        return bookings;
     }
 }

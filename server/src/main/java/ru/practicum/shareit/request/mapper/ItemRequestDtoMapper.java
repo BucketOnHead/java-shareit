@@ -28,6 +28,6 @@ public interface ItemRequestDtoMapper {
     @Mapping(target = "available", source = "item.isAvailable")
     @Mapping(target = "requestId", source = "item.itemRequest.id")
     ItemRequestDto.ItemDto mapToItemRequestItemDto(Item item);
-    List<ItemRequestDto.ItemDto> mapToItemRequestItemDto(Iterable<Item> item);
 
+    List<ItemRequestDto.ItemDto> mapToItemRequestItemDto(Iterable<Item> item);
 }

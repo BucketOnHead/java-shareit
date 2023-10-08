@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -68,23 +69,25 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDetailsResponseDto getItemById(Long itemId, Long currentUserId) {
-        userRepository.validateUserExistsById(currentUserId);
+    public ItemDetailsResponseDto getItemById(Long itemId, Long userId) {
+        userRepository.validateUserExistsById(userId);
         itemRepository.validateItemExistsById(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
 
         ItemDetailsResponseDto itemDto;
         var comments = commentRepository.findAllByItemId(item.getId());
-        if (item.isOwner(currentUserId)) {
+        if (item.isOwner(userId)) {
             var now = LocalDateTime.now();
 
+            var lastSort = Sort.by(Sort.Direction.DESC, "startTime");
             Booking lastBooking = bookingRepository
-                    .findFirstByItemIdAndEndTimeIsBeforeOrderByEndTimeDesc(item.getId(), now)
+                    .findTopByItemIdAndStartTimeBeforeAndStatus(item.getId(), now, Booking.Status.APPROVED, lastSort)
                     .orElse(null);
 
+            var nextSort = Sort.by(Sort.Direction.ASC, "startTime");
             Booking nextBooking = bookingRepository
-                    .findFirstByItemIdAndStartTimeIsAfter(item.getId(), now)
+                    .findTopByItemIdAndStartTimeAfterAndStatus(item.getId(), now, Booking.Status.APPROVED, nextSort)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments, lastBooking, nextBooking);
