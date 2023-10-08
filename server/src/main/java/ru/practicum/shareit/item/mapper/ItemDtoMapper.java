@@ -23,10 +23,12 @@ public interface ItemDtoMapper {
     @Mapping(target = "available", source = "isAvailable")
     @Mapping(target = "requestId", source = "item.itemRequest.id")
     SimpleItemResponseDto mapToSimpleItemResponseDto(Item item);
+
     List<SimpleItemResponseDto> mapToSimpleItemResponseDto(Iterable<Item> items);
 
     @Mapping(target = "authorName", source = "comment.author.name")
     ItemDetailsResponseDto.CommentDto mapToCommentDto(Comment comment);
+
     List<ItemDetailsResponseDto.CommentDto> mapToCommentDto(Iterable<Comment> comment);
 
     @Mapping(target = "bookerId", source = "booking.booker.id")
@@ -37,6 +39,7 @@ public interface ItemDtoMapper {
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "available", source = "item.isAvailable")
     ItemDetailsResponseDto mapToItemDetailsResponseDto(Item item);
+
     List<ItemDetailsResponseDto> mapToItemDetailsResponseDto(Iterable<Item> items);
 
     @Mapping(target = "lastBooking", ignore = true)
