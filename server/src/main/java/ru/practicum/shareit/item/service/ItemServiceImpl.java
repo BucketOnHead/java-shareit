@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
@@ -82,12 +83,12 @@ public class ItemServiceImpl implements ItemService {
 
             var lastSort = Sort.by(Sort.Direction.DESC, "startTime");
             Booking lastBooking = bookingRepository
-                    .findTopByItemIdAndStartTimeBeforeAndStatus(item.getId(), now, Booking.Status.APPROVED, lastSort)
+                    .findTopByItemIdAndStartTimeLessThanAndStatus(itemId, now, Status.APPROVED, lastSort)
                     .orElse(null);
 
             var nextSort = Sort.by(Sort.Direction.ASC, "startTime");
             Booking nextBooking = bookingRepository
-                    .findTopByItemIdAndStartTimeAfterAndStatus(item.getId(), now, Booking.Status.APPROVED, nextSort)
+                    .findTopByItemIdAndStartTimeGreaterThanEqualAndStatus(itemId, now, Status.APPROVED, nextSort)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments, lastBooking, nextBooking);

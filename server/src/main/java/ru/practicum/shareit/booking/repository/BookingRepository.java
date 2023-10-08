@@ -37,11 +37,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean existsByBookerIdAndItemIdAndEndTimeIsBefore(
             Long bookerId, Long itemId, LocalDateTime time);
 
-    Optional<Booking> findTopByItemIdAndStartTimeBeforeAndStatus(Long id, LocalDateTime now,
-                                                                 Booking.Status status, Sort sort);
+    Optional<Booking> findTopByItemIdAndStartTimeLessThanAndStatus(Long id, LocalDateTime now,
+                                                                   Booking.Status status, Sort sort);
 
-    Optional<Booking> findTopByItemIdAndStartTimeAfterAndStatus(Long id, LocalDateTime now,
-                                                                Booking.Status status, Sort sort);
+    Optional<Booking> findTopByItemIdAndStartTimeGreaterThanEqualAndStatus(Long id, LocalDateTime now,
+                                                                           Booking.Status status, Sort sort);
 
     default void validateBookingExistsById(Long bookingId) {
         if (!existsById(bookingId)) {
