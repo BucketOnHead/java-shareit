@@ -25,15 +25,6 @@ public class UserController {
         return userService.addUser(userDto);
     }
 
-    @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(
-            @RequestBody UserRequestDto userDto,
-            @PathVariable Long userId
-    ) {
-        UserControllerLoggerHelper.updateUser(log, userDto, userId);
-        return userService.updateUser(userDto, userId);
-    }
-
     @GetMapping("/{userId}")
     public UserResponseDto getUserById(
             @PathVariable Long userId
@@ -49,6 +40,15 @@ public class UserController {
     ) {
         UserControllerLoggerHelper.getUserDtoPage(log, from, size);
         return userService.getUsers(from, size);
+    }
+
+    @PatchMapping("/{userId}")
+    public UserResponseDto updateUser(
+            @RequestBody UserRequestDto userDto,
+            @PathVariable Long userId
+    ) {
+        UserControllerLoggerHelper.updateUser(log, userDto, userId);
+        return userService.updateUser(userDto, userId);
     }
 
     @DeleteMapping("/{userId}")
