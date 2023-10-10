@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.user.dto.request.UserRequestDto;
+import ru.practicum.shareit.user.dto.request.UserCreationDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.logger.UserServiceLoggerHelper;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto addUser(UserRequestDto userDto) {
+    public UserResponseDto addUser(UserCreationDto userDto) {
         User user = userMapper.mapToUser(userDto);
         User savedUser = userRepository.save(user);
         UserServiceLoggerHelper.userSaved(log, savedUser);
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto updateUser(UserRequestDto userDto, Long userId) {
+    public UserResponseDto updateUser(UserCreationDto userDto, Long userId) {
         userRepository.validateUserExistsById(userId);
         User updatedUser = getUpdatedUser(userId, userDto);
         User savedUser = userRepository.save(updatedUser);
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
         UserServiceLoggerHelper.userByIdDeleted(log, userId);
     }
 
-    private User getUpdatedUser(Long userId, UserRequestDto userDto) {
+    private User getUpdatedUser(Long userId, UserCreationDto userDto) {
         User user = userRepository.getReferenceById(userId);
 
         Optional.ofNullable(userDto.getName()).ifPresent(user::setName);

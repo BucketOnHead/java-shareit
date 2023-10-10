@@ -2,14 +2,14 @@ package ru.practicum.shareit.user.logger;
 
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
-import ru.practicum.shareit.user.dto.request.UserRequestDto;
+import ru.practicum.shareit.user.dto.request.UserCreationDto;
 
 @UtilityClass
 public final class UserControllerLoggerHelper {
 
     public static void addUser(
             Logger log,
-            UserRequestDto userDto
+            UserCreationDto userDto
     ) {
         log.info("add USER["
                         + "name='{}', "
@@ -21,7 +21,7 @@ public final class UserControllerLoggerHelper {
 
     public static void updateUser(
             Logger log,
-            UserRequestDto userDto,
+            UserCreationDto userDto,
             Long userId
     ) {
         log.info("update USER["

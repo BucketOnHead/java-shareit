@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.request.UserRequestDto;
+import ru.practicum.shareit.user.dto.request.UserCreationDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
 import ru.practicum.shareit.user.logger.UserControllerLoggerHelper;
 import ru.practicum.shareit.user.service.UserService;
@@ -19,7 +19,7 @@ public class UserController {
 
     @PostMapping
     public UserResponseDto addUser(
-            @RequestBody UserRequestDto userDto
+            @RequestBody UserCreationDto userDto
     ) {
         UserControllerLoggerHelper.addUser(log, userDto);
         return userService.addUser(userDto);
@@ -44,7 +44,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public UserResponseDto updateUser(
-            @RequestBody UserRequestDto userDto,
+            @RequestBody UserCreationDto userDto,
             @PathVariable Long userId
     ) {
         UserControllerLoggerHelper.updateUser(log, userDto, userId);
