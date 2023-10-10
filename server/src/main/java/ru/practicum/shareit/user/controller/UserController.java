@@ -20,7 +20,9 @@ public class UserController {
     public UserResponseDto addUser(
             @RequestBody UserCreationDto userDto
     ) {
-        log.info("Adding user: {}", userDto);
+        log.info("Adding user");
+        log.debug("Adding user: {}", userDto);
+
         return userService.addUser(userDto);
     }
 
@@ -29,6 +31,7 @@ public class UserController {
             @PathVariable Long userId
     ) {
         log.info("Getting user by id: {}", userId);
+
         return userService.getUserById(userId);
     }
 
@@ -38,6 +41,7 @@ public class UserController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("Getting users with pagination: (from: {}, size: {})", from, size);
+
         return userService.getUsers(from, size);
     }
 
@@ -46,7 +50,9 @@ public class UserController {
             @RequestBody UserCreationDto userDto,
             @PathVariable Long userId
     ) {
-        log.info("Updating user with id: {}, {}", userId, userDto);
+        log.info("Updating user with id: {}", userId);
+        log.debug("Updating user with id: {}, {}", userId, userDto);
+
         return userService.updateUser(userDto, userId);
     }
 
@@ -55,6 +61,7 @@ public class UserController {
             @PathVariable Long userId
     ) {
         log.info("Deleting user by id: {}", userId);
+
         userService.deleteUserById(userId);
     }
 }
