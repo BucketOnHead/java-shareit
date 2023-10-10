@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
+import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
 import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
 import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
 import ru.practicum.shareit.item.logger.comment.CommentServiceLoggerHelper;
@@ -30,12 +30,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public SimpleCommentResponseDto addComment(CommentRequestDto commentRequestDto, Long authorUserId, Long itemId) {
+    public SimpleCommentResponseDto addComment(CommentCreationDto commentCreationDto, Long authorUserId, Long itemId) {
         userRepository.existsByIdOrThrow(authorUserId);
         itemRepository.validateItemExistsById(itemId);
         checkUserBookingByUserIdAndItemId(authorUserId, itemId);
 
-        Comment comment = getComment(commentRequestDto, authorUserId, itemId);
+        Comment comment = getComment(commentCreationDto, authorUserId, itemId);
         Comment savedComment = commentRepository.save(comment);
 
         CommentServiceLoggerHelper.commentSaved(log, savedComment);
@@ -49,9 +49,9 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    private Comment getComment(CommentRequestDto commentRequestDto, Long authorId, Long itemId) {
+    private Comment getComment(CommentCreationDto commentCreationDto, Long authorId, Long itemId) {
         return commentMapper.mapToComment(
-                commentRequestDto,
+                commentCreationDto,
                 userRepository.getReferenceById(authorId),
                 itemRepository.getReferenceById(itemId));
     }
