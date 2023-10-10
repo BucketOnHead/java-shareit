@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
-import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
+import ru.practicum.shareit.item.dto.response.comment.CommentDto;
 import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
 import ru.practicum.shareit.item.logger.comment.CommentServiceLoggerHelper;
 import ru.practicum.shareit.item.mapper.CommentDtoMapper;
@@ -30,7 +30,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public SimpleCommentResponseDto addComment(CommentCreationDto commentCreationDto, Long authorUserId, Long itemId) {
+    public CommentDto addComment(CommentCreationDto commentCreationDto, Long authorUserId, Long itemId) {
         userRepository.existsByIdOrThrow(authorUserId);
         itemRepository.validateItemExistsById(itemId);
         checkUserBookingByUserIdAndItemId(authorUserId, itemId);

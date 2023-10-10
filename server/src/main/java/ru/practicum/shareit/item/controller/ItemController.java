@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
-import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
+import ru.practicum.shareit.item.dto.response.comment.CommentDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
 
@@ -34,7 +34,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public SimpleCommentResponseDto addComment(
+    public CommentDto addComment(
             @RequestBody CommentCreationDto commentDto,
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
