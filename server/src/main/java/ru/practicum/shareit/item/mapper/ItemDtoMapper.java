@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.request.ItemRequestDto;
+import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -18,7 +18,7 @@ public interface ItemDtoMapper {
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "itemRequest", ignore = true)
     @Mapping(target = "isAvailable", source = "available")
-    Item mapToItem(ItemRequestDto itemDto);
+    Item mapToItem(ItemCreationDto itemDto);
 
     @Mapping(target = "available", source = "isAvailable")
     @Mapping(target = "requestId", source = "item.itemRequest.id")

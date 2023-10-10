@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-public class ItemRequestDto {
+public class ItemCreationDto {
     private String name;
     private String description;
     private Boolean available;

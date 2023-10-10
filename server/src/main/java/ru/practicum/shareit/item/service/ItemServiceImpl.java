@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.request.ItemRequestDto;
+import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.logger.ItemServiceLoggerHelper;
@@ -42,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
+    public SimpleItemResponseDto addItem(ItemCreationDto itemDto, Long ownerUserId) {
         userRepository.existsByIdOrThrow(ownerUserId);
         if (itemDto.getRequestId() != null) {
             itemRepository.validateItemExistsById(itemDto.getRequestId());
@@ -57,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public SimpleItemResponseDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
+    public SimpleItemResponseDto updateItem(ItemCreationDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
         userRepository.existsByIdOrThrow(currentUserId);
         itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
@@ -133,7 +133,7 @@ public class ItemServiceImpl implements ItemService {
         return itemsDto;
     }
 
-    private Item getItem(ItemRequestDto itemDto, Long ownerUserId) {
+    private Item getItem(ItemCreationDto itemDto, Long ownerUserId) {
         Item item = itemMapper.mapToItem(itemDto);
 
         item.setOwner(userRepository.getReferenceById(ownerUserId));
@@ -145,7 +145,7 @@ public class ItemServiceImpl implements ItemService {
         return item;
     }
 
-    private Item getUpdatedItem(ItemRequestDto itemDto, Long itemId, Long ownerUserId) {
+    private Item getUpdatedItem(ItemCreationDto itemDto, Long itemId, Long ownerUserId) {
         Item item = itemRepository.getReferenceById(itemId);
 
         item.setOwner(userRepository.getReferenceById(ownerUserId));
