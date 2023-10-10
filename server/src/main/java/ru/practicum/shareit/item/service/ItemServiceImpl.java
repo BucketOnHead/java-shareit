@@ -45,7 +45,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addItem(ItemCreationDto itemDto, Long ownerUserId) {
         userRepository.existsByIdOrThrow(ownerUserId);
         if (itemDto.getRequestId() != null) {
-            itemRepository.validateItemExistsById(itemDto.getRequestId());
+            itemRepository.existsByIdOrThrow(itemDto.getRequestId());
         }
 
         Item item = getItem(itemDto, ownerUserId);
@@ -58,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long currentUserId) {
-        itemRepository.validateItemExistsById(itemId);
+        itemRepository.existsByIdOrThrow(itemId);
         userRepository.existsByIdOrThrow(currentUserId);
         itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
 
@@ -72,7 +72,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDetailsDto getItemById(Long itemId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
-        itemRepository.validateItemExistsById(itemId);
+        itemRepository.existsByIdOrThrow(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
 

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,7 +34,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
 
-    default void validateItemExistsById(Long itemId) {
+    default void existsByIdOrThrow(@NonNull Long itemId) {
         if (!existsById(itemId)) {
             throw ItemNotFoundException.byId(itemId);
         }

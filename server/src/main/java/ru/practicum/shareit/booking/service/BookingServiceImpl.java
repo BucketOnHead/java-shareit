@@ -39,7 +39,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
         userRepository.existsByIdOrThrow(userId);
-        itemRepository.validateItemExistsById(bookingDto.getItemId());
+        itemRepository.existsByIdOrThrow(bookingDto.getItemId());
         validateUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
 
         Booking booking = getBooking(bookingDto, userId);

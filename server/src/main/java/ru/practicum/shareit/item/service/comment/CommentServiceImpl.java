@@ -30,12 +30,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentDto addComment(CommentCreationDto commentCreationDto, Long authorUserId, Long itemId) {
-        userRepository.existsByIdOrThrow(authorUserId);
-        itemRepository.validateItemExistsById(itemId);
-        checkUserBookingByUserIdAndItemId(authorUserId, itemId);
+    public CommentDto addComment(CommentCreationDto commentCreationDto, Long userId, Long itemId) {
+        userRepository.existsByIdOrThrow(userId);
+        itemRepository.existsByIdOrThrow(itemId);
+        checkUserBookingByUserIdAndItemId(userId, itemId);
 
-        Comment comment = getComment(commentCreationDto, authorUserId, itemId);
+        Comment comment = getComment(commentCreationDto, userId, itemId);
         Comment savedComment = commentRepository.save(comment);
 
         CommentServiceLoggerHelper.commentSaved(log, savedComment);
