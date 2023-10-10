@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.client.comment.CommentClient;
 import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.request.comment.CreateCommentRequestDto;
-import ru.practicum.shareit.item.dto.response.DetailedItemResponseDto;
+import ru.practicum.shareit.item.dto.response.DetailedItemDto;
 import ru.practicum.shareit.item.dto.response.ItemResponseDto;
 import ru.practicum.shareit.item.dto.response.comment.CommentResponseDto;
 import ru.practicum.shareit.validation.group.CreationGroup;
@@ -44,7 +44,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public DetailedItemResponseDto getItemById(
+    public DetailedItemDto getItemById(
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
@@ -52,7 +52,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<DetailedItemResponseDto> getItemsByOwnerId(
+    public List<DetailedItemDto> getItemsByOwnerId(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size

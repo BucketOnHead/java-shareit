@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
-import ru.practicum.shareit.item.dto.response.DetailedItemResponseDto;
+import ru.practicum.shareit.item.dto.response.DetailedItemDto;
 import ru.practicum.shareit.item.dto.response.ItemResponseDto;
 
 import java.util.Comparator;
@@ -39,24 +39,24 @@ public class ItemClient {
                 .block();
     }
 
-    public DetailedItemResponseDto getItemById(Long itemId, Long userId) {
+    public DetailedItemDto getItemById(Long itemId, Long userId) {
         return client.get()
                 .uri("/items/{id}", itemId)
                 .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
-                .bodyToMono(DetailedItemResponseDto.class)
+                .bodyToMono(DetailedItemDto.class)
                 .block();
     }
 
-    public List<DetailedItemResponseDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
+    public List<DetailedItemDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
         return client.get()
                 .uri("/items")
                 .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .header("from", from.toString())
                 .header("size", size.toString())
                 .retrieve()
-                .bodyToFlux(DetailedItemResponseDto.class)
-                .sort(Comparator.comparingLong(DetailedItemResponseDto::getId))
+                .bodyToFlux(DetailedItemDto.class)
+                .sort(Comparator.comparingLong(DetailedItemDto::getId))
                 .collectList()
                 .block();
     }
