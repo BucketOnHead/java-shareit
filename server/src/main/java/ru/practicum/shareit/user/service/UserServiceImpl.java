@@ -2,13 +2,11 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.request.UserCreationDto;
 import ru.practicum.shareit.user.dto.response.UserResponseDto;
-import ru.practicum.shareit.user.logger.UserServiceLoggerHelper;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -27,9 +25,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto addUser(UserCreationDto userDto) {
-        User user = userMapper.mapToUser(userDto);
-        User savedUser = userRepository.save(user);
-        UserServiceLoggerHelper.userSaved(log, savedUser);
+        var user = userMapper.mapToUser(userDto);
+        var savedUser = userRepository.save(user);
+
+        log.info("User with id: {} added", savedUser.getId());
+        log.debug("User added: {}", savedUser);
+
         return userMapper.mapToUserResponseDto(savedUser);
     }
 
@@ -37,26 +38,36 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDto updateUser(UserCreationDto userDto, Long userId) {
         userRepository.validateUserExistsById(userId);
-        User updatedUser = getUpdatedUser(userId, userDto);
-        User savedUser = userRepository.save(updatedUser);
-        UserServiceLoggerHelper.userUpdated(log, savedUser);
+        var user = userRepository.getReferenceById(userId);
+        var updatedUser = updateUser(user, userDto);
+        var savedUser = userRepository.save(updatedUser);
+
+        log.info("User with id: {} updated", savedUser.getId());
+        log.debug("User updated: {}", savedUser);
+
         return userMapper.mapToUserResponseDto(savedUser);
     }
 
     @Override
     public UserResponseDto getUserById(Long userId) {
         userRepository.validateUserExistsById(userId);
-        User user = userRepository.getReferenceById(userId);
-        UserResponseDto userDto = userMapper.mapToUserResponseDto(user);
-        UserServiceLoggerHelper.userDtoByIdReturned(log, userDto);
+        var user = userRepository.getReferenceById(userId);
+        var userDto = userMapper.mapToUserResponseDto(user);
+
+        log.info("User with id: {} retrieved", user.getId());
+        log.debug("User retrieved: {}", userDto);
+
         return userDto;
     }
 
     @Override
     public List<UserResponseDto> getUsers(Integer from, Integer size) {
-        Page<User> users = userRepository.findAll(PageRequest.of(from, size));
-        List<UserResponseDto> usersDto = userMapper.mapToUserResponseDto(users);
-        UserServiceLoggerHelper.userDtoPageReturned(log, from, size, usersDto);
+        var users = userRepository.findAll(PageRequest.of(from, size));
+        var usersDto = userMapper.mapToUserResponseDto(users);
+
+        log.info("Users with pagination retrieved: (from: {}, size: {}), count: {}", from, size, usersDto.size());
+        log.debug("Users with pagination retrieved: {}", usersDto);
+
         return usersDto;
     }
 
@@ -65,12 +76,11 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(Long userId) {
         userRepository.validateUserExistsById(userId);
         userRepository.deleteById(userId);
-        UserServiceLoggerHelper.userByIdDeleted(log, userId);
+
+        log.info("User with id: {} deleted", userId);
     }
 
-    private User getUpdatedUser(Long userId, UserCreationDto userDto) {
-        User user = userRepository.getReferenceById(userId);
-
+    private User updateUser(User user, UserCreationDto userDto) {
         Optional.ofNullable(userDto.getName()).ifPresent(user::setName);
         Optional.ofNullable(userDto.getEmail()).ifPresent(user::setEmail);
 
