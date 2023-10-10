@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import ru.practicum.shareit.user.dto.request.UserCreationDto;
 
 @UtilityClass
-public final class UserControllerLoggerHelper {
+public class UserControllerLoggerHelper {
 
-    public static void addUser(
+    public void addUser(
             Logger log,
             UserCreationDto userDto
     ) {
@@ -19,7 +19,7 @@ public final class UserControllerLoggerHelper {
                 userDto.getEmail());
     }
 
-    public static void updateUser(
+    public void updateUser(
             Logger log,
             UserCreationDto userDto,
             Long userId
@@ -34,7 +34,7 @@ public final class UserControllerLoggerHelper {
                 userId);
     }
 
-    public static void getUserDtoById(
+    public void getUserDtoById(
             Logger log,
             Long userId
     ) {
@@ -44,7 +44,7 @@ public final class UserControllerLoggerHelper {
                 userId);
     }
 
-    public static void getUserDtoPage(
+    public void getUserDtoPage(
             Logger log,
             Integer from,
             Integer size
@@ -57,7 +57,7 @@ public final class UserControllerLoggerHelper {
                 size);
     }
 
-    public static void deleteUserById(
+    public void deleteUserById(
             Logger log,
             Long userId
     ) {
