@@ -24,39 +24,39 @@ public class ItemController {
     @PostMapping
     public SimpleItemResponseDto addItem(
             @RequestBody ItemRequestDto itemDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.addItem(log, itemDto, ownerUserId);
-        return itemService.addItem(itemDto, ownerUserId);
+        ItemControllerLoggerHelper.addItem(log, itemDto, userId);
+        return itemService.addItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public SimpleItemResponseDto updateItem(
             @RequestBody ItemRequestDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.updateItem(log, itemDto, itemId, currentUserId);
-        return itemService.updateItem(itemDto, itemId, currentUserId);
+        ItemControllerLoggerHelper.updateItem(log, itemDto, itemId, userId);
+        return itemService.updateItem(itemDto, itemId, userId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDetailsResponseDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.getItemById(log, itemId, currentUserId);
-        return itemService.getItemById(itemId, currentUserId);
+        ItemControllerLoggerHelper.getItemById(log, itemId, userId);
+        return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping
     public Iterable<ItemDetailsResponseDto> getItemsByOwnerUserId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        ItemControllerLoggerHelper.getItemsByOwnerUserId(log, ownerUserId, from, size);
-        return itemService.getItemsByOwnerUserId(ownerUserId, from, size);
+        ItemControllerLoggerHelper.getItemsByOwnerUserId(log, userId, from, size);
+        return itemService.getItemsByOwnerUserId(userId, from, size);
     }
 
     @GetMapping("/search")
@@ -73,9 +73,9 @@ public class ItemController {
     public SimpleCommentResponseDto addComment(
             @RequestBody CommentRequestDto commentDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long authorUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.addComment(log, commentDto, itemId, authorUserId);
-        return commentService.addComment(commentDto, authorUserId, itemId);
+        ItemControllerLoggerHelper.addComment(log, commentDto, itemId, userId);
+        return commentService.addComment(commentDto, userId, itemId);
     }
 }
