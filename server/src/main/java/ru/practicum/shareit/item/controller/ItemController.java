@@ -13,6 +13,8 @@ import ru.practicum.shareit.item.logger.ItemControllerLoggerHelper;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/items")
 @Slf4j
@@ -50,7 +52,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Iterable<ItemDetailsResponseDto> getItemsByUserId(
+    public List<ItemDetailsResponseDto> getItemsByUserId(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
@@ -60,7 +62,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Iterable<SimpleItemResponseDto> getItemsByText(
+    public List<SimpleItemResponseDto> getItemsByText(
             @RequestParam String text,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
