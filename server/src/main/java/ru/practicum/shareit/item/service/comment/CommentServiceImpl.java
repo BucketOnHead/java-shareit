@@ -31,7 +31,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public SimpleCommentResponseDto addComment(CommentRequestDto commentRequestDto, Long authorUserId, Long itemId) {
-        userRepository.validateUserExistsById(authorUserId);
+        userRepository.existsByIdOrThrow(authorUserId);
         itemRepository.validateItemExistsById(itemId);
         checkUserBookingByUserIdAndItemId(authorUserId, itemId);
 
