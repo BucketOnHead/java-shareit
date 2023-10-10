@@ -7,7 +7,7 @@ import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
+import ru.practicum.shareit.item.dto.response.ItemDto;
 import ru.practicum.shareit.item.dto.response.comment.CommentDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
@@ -23,7 +23,7 @@ public class ItemController {
     private final CommentService commentService;
 
     @PostMapping
-    public SimpleItemResponseDto addItem(
+    public ItemDto addItem(
             @RequestBody ItemCreationDto itemDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
@@ -67,7 +67,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<SimpleItemResponseDto> getItemsByText(
+    public List<ItemDto> getItemsByText(
             @RequestParam String text,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
@@ -78,7 +78,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public SimpleItemResponseDto updateItem(
+    public ItemDto updateItem(
             @RequestBody ItemCreationDto itemDto,
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId

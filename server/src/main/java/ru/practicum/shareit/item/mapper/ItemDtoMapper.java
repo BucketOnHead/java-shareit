@@ -5,7 +5,7 @@ import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
+import ru.practicum.shareit.item.dto.response.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
@@ -22,9 +22,9 @@ public interface ItemDtoMapper {
 
     @Mapping(target = "available", source = "isAvailable")
     @Mapping(target = "requestId", source = "item.itemRequest.id")
-    SimpleItemResponseDto mapToSimpleItemResponseDto(Item item);
+    ItemDto mapToSimpleItemResponseDto(Item item);
 
-    List<SimpleItemResponseDto> mapToSimpleItemResponseDto(Iterable<Item> items);
+    List<ItemDto> mapToSimpleItemResponseDto(Iterable<Item> items);
 
     @Mapping(target = "authorName", source = "comment.author.name")
     ItemDetailsDto.CommentDto mapToCommentDto(Comment comment);

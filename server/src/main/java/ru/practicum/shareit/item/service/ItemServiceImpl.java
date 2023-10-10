@@ -12,7 +12,7 @@ import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
+import ru.practicum.shareit.item.dto.response.ItemDto;
 import ru.practicum.shareit.item.logger.ItemServiceLoggerHelper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -42,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public SimpleItemResponseDto addItem(ItemCreationDto itemDto, Long ownerUserId) {
+    public ItemDto addItem(ItemCreationDto itemDto, Long ownerUserId) {
         userRepository.existsByIdOrThrow(ownerUserId);
         if (itemDto.getRequestId() != null) {
             itemRepository.validateItemExistsById(itemDto.getRequestId());
@@ -57,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public SimpleItemResponseDto updateItem(ItemCreationDto itemDto, Long itemId, Long currentUserId) {
+    public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
         userRepository.existsByIdOrThrow(currentUserId);
         itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
@@ -120,8 +120,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
-                                                                                Integer from, Integer size) {
+    public List<ItemDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
+                                                                  Integer from, Integer size) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
