@@ -50,7 +50,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Iterable<ItemDetailsResponseDto> getItemsByOwnerUserId(
+    public Iterable<ItemDetailsResponseDto> getItemsByUserId(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
@@ -60,7 +60,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Iterable<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(
+    public Iterable<SimpleItemResponseDto> getItemsByText(
             @RequestParam String text,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
