@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     default void validateUserExistsById(Long userId) {
         if (!existsById(userId)) {
-            throw UserNotFoundException.byId(userId.toString());
+            throw UserNotFoundException.byId(userId);
         }
     }
 }

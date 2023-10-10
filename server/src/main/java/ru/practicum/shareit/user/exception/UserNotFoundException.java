@@ -10,7 +10,7 @@ public class UserNotFoundException extends EntityNotFoundException {
         super(message);
     }
 
-    public static UserNotFoundException byId(@NonNull String userId) {
+    public static UserNotFoundException byId(@NonNull Long userId) {
         String message = String.format("User not found with id: %s", userId);
         return new UserNotFoundException(message);
     }
