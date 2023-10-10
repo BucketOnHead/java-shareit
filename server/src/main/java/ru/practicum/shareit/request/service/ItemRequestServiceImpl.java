@@ -36,7 +36,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public ItemRequestDto addItemRequest(RequestItemRequestDto requestItemDto, Long requesterId) {
-        userRepository.validateUserExistsById(requesterId);
+        userRepository.existsByIdOrThrow(requesterId);
 
         ItemRequest itemRequest = getItemRequest(requestItemDto, requesterId);
         ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
@@ -47,7 +47,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId) {
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(userId);
         List<ItemRequestDto> itemRequestsDto = getItemRequestsDto(itemRequests);
@@ -59,7 +59,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId,
                                                              Integer from, Integer size) {
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
 
         List<ItemRequestDto> itemRequestDtos
                 = getItemRequestsByRequesterIdWithPagination(userId, from, size);
@@ -71,7 +71,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto getItemRequestById(Long itemRequestId, Long userId) {
         itemRequestRepository.validateItemRequestExistsById(itemRequestId);
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
 
         ItemRequestDto itemRequestDto = getItemRequestDto(itemRequestId);
 
