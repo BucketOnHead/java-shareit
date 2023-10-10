@@ -11,7 +11,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
-import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
+import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.logger.ItemServiceLoggerHelper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
@@ -70,13 +70,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDetailsResponseDto getItemById(Long itemId, Long userId) {
+    public ItemDetailsDto getItemById(Long itemId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
         itemRepository.validateItemExistsById(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
 
-        ItemDetailsResponseDto itemDto;
+        ItemDetailsDto itemDto;
         var comments = commentRepository.findAllByItemId(item.getId());
         if (item.isOwner(userId)) {
             var now = LocalDateTime.now();
@@ -99,7 +99,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
+    public List<ItemDetailsDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
         userRepository.existsByIdOrThrow(ownerUserId);
 
         var now = LocalDateTime.now();

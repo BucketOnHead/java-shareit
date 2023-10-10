@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
-import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
+import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.dto.response.comment.CommentDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -46,7 +46,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDetailsResponseDto getItemById(
+    public ItemDetailsDto getItemById(
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
@@ -56,7 +56,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDetailsResponseDto> getItemsByUserId(
+    public List<ItemDetailsDto> getItemsByUserId(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size

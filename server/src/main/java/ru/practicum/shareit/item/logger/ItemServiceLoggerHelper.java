@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.logger;
 
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
-import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
+import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -23,7 +23,7 @@ public final class ItemServiceLoggerHelper {
 
     public static void itemDtoReturned(
             Logger log,
-            ItemDetailsResponseDto itemDto
+            ItemDetailsDto itemDto
     ) {
         log.debug("ITEM<DTO>["
                         + "id={}"
@@ -33,7 +33,7 @@ public final class ItemServiceLoggerHelper {
 
     public static void itemDtosReturned(
             Logger log,
-            List<ItemDetailsResponseDto> itemDtos
+            List<ItemDetailsDto> itemDtos
     ) {
         log.debug("ITEMS<DTO>["
                         + "size={}"
