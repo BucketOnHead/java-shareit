@@ -43,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
-        userRepository.validateUserExistsById(ownerUserId);
+        userRepository.existsByIdOrThrow(ownerUserId);
         if (itemDto.getRequestId() != null) {
             itemRepository.validateItemExistsById(itemDto.getRequestId());
         }
@@ -59,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public SimpleItemResponseDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
-        userRepository.validateUserExistsById(currentUserId);
+        userRepository.existsByIdOrThrow(currentUserId);
         itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
 
         Item updatedItem = getUpdatedItem(itemDto, itemId, currentUserId);
@@ -71,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDetailsResponseDto getItemById(Long itemId, Long userId) {
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
         itemRepository.validateItemExistsById(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
@@ -100,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
-        userRepository.validateUserExistsById(ownerUserId);
+        userRepository.existsByIdOrThrow(ownerUserId);
 
         var now = LocalDateTime.now();
         var page = PageRequest.of(from / size, size);

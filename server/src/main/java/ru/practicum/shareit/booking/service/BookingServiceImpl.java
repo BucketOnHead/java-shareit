@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
         itemRepository.validateItemExistsById(bookingDto.getItemId());
         validateUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
 
@@ -54,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
         bookingRepository.validateBookingExistsById(bookingId);
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         itemRepository.validateUserIdIsItemOwner(booking.getItem().getId(), userId);
@@ -70,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
         bookingRepository.validateBookingExistsById(bookingId);
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         validateUserIsOwnerOrBooker(booking, userId);
@@ -83,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getBookingPageByBookerId(Long bookerId, String stateStr,
                                                              Integer from, Integer size) {
-        userRepository.validateUserExistsById(bookerId);
+        userRepository.existsByIdOrThrow(bookerId);
         State state = State.valueOf(stateStr);
 
         Page<Booking> bookingsByBookerId = getBookingsByBookerIdAndState(bookerId, state, from, size);
@@ -96,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getBookingsForUserItems(Long ownerId, String stateStr,
                                                             Integer from, Integer size) {
-        userRepository.validateUserExistsById(ownerId);
+        userRepository.existsByIdOrThrow(ownerId);
         State state = State.valueOf(stateStr);
 
         Page<Booking> bookingsByBookerItems = getBookingsForUserItemsByState(ownerId, state, from, size);
