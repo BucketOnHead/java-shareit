@@ -30,14 +30,14 @@ public class ItemController {
         return itemService.addItem(itemDto, userId);
     }
 
-    @PatchMapping("/{itemId}")
-    public SimpleItemResponseDto updateItem(
-            @RequestBody ItemRequestDto itemDto,
+    @PostMapping("/{itemId}/comment")
+    public SimpleCommentResponseDto addComment(
+            @RequestBody CommentRequestDto commentDto,
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.updateItem(log, itemDto, itemId, userId);
-        return itemService.updateItem(itemDto, itemId, userId);
+        ItemControllerLoggerHelper.addComment(log, commentDto, itemId, userId);
+        return commentService.addComment(commentDto, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
@@ -69,13 +69,13 @@ public class ItemController {
         return itemService.searchItemsByNameOrDescriptionIgnoreCase(text, from, size);
     }
 
-    @PostMapping("/{itemId}/comment")
-    public SimpleCommentResponseDto addComment(
-            @RequestBody CommentRequestDto commentDto,
+    @PatchMapping("/{itemId}")
+    public SimpleItemResponseDto updateItem(
+            @RequestBody ItemRequestDto itemDto,
             @PathVariable Long itemId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.addComment(log, commentDto, itemId, userId);
-        return commentService.addComment(commentDto, userId, itemId);
+        ItemControllerLoggerHelper.updateItem(log, itemDto, itemId, userId);
+        return itemService.updateItem(itemDto, itemId, userId);
     }
 }
