@@ -7,63 +7,23 @@ import ru.practicum.shareit.user.dto.request.UserCreationDto;
 @UtilityClass
 public class UserControllerLoggerHelper {
 
-    public void addUser(
-            Logger log,
-            UserCreationDto userDto
-    ) {
-        log.info("add USER["
-                        + "name='{}', "
-                        + "email='{}'"
-                        + "].",
-                userDto.getName(),
-                userDto.getEmail());
+    public void addUser(Logger log, UserCreationDto userDto) {
+        log.info("Adding user: {}", userDto);
     }
 
-    public void updateUser(
-            Logger log,
-            UserCreationDto userDto,
-            Long userId
-    ) {
-        log.info("update USER["
-                        + "name='{}', "
-                        + "email='{}', "
-                        + "user_id={}"
-                        + "].",
-                userDto.getName(),
-                userDto.getEmail(),
-                userId);
+    public void updateUser(Logger log, UserCreationDto userDto, Long userId) {
+        log.info("Updating user with id: {}, {}", userId, userDto);
     }
 
-    public void getUserDtoById(
-            Logger log,
-            Long userId
-    ) {
-        log.info("get USER["
-                        + "id={}"
-                        + "] by id.",
-                userId);
+    public void getUserDtoById(Logger log, Long userId) {
+        log.info("Getting user by id: {}", userId);
     }
 
-    public void getUserDtoPage(
-            Logger log,
-            Integer from,
-            Integer size
-    ) {
-        log.info("get USER_PAGE<DTO>["
-                        + "from={}, "
-                        + "size={}"
-                        + "].",
-                from,
-                size);
+    public void getUserDtoPage(Logger log, Integer from, Integer size) {
+        log.info("Getting users with pagination: (from: {}, size: {})", from, size);
     }
 
-    public void deleteUserById(
-            Logger log,
-            Long userId
-    ) {
-        log.info("delete USER["
-                        + "id={}"
-                        + "] by id.",
-                userId);
+    public void deleteUserById(Logger log, Long userId) {
+        log.info("Deleting user by id: {}", userId);
     }
 }
