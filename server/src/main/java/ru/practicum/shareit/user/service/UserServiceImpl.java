@@ -36,8 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto updateUser(UserCreationDto userDto, Long userId) {
-        userRepository.validateUserExistsById(userId);
-        var user = userRepository.getReferenceById(userId);
+        var user = userRepository.findByIdOrThrow(userId);
         var updatedUser = updateUser(user, userDto);
         var savedUser = userRepository.save(updatedUser);
 
@@ -49,8 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserById(Long userId) {
-        userRepository.validateUserExistsById(userId);
-        var user = userRepository.getReferenceById(userId);
+        var user = userRepository.findByIdOrThrow(userId);
         var userDto = userMapper.mapToUserResponseDto(user);
 
         log.info("User with id: {} retrieved", user.getId());
@@ -61,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getUsers(Integer from, Integer size) {
-        var users = userRepository.findAll(PageRequest.of(from, size));
+        var users = userRepository.findAll(PageRequest.of(from / size, size));
         var usersDto = userMapper.mapToUserResponseDto(users);
 
         log.info("Users with pagination retrieved: (from: {}, size: {}), count: {}", from, size, usersDto.size());
