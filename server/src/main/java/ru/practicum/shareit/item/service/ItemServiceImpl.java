@@ -3,12 +3,12 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemRequestDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
@@ -18,6 +18,7 @@ import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
+import ru.practicum.shareit.item.utils.ItemUtils;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public SimpleItemResponseDto addItem(ItemRequestDto itemDto, Long ownerUserId) {
-        userRepository.validateUserExistsById(ownerUserId);
+        userRepository.existsByIdOrThrow(ownerUserId);
         if (itemDto.getRequestId() != null) {
             itemRepository.validateItemExistsById(itemDto.getRequestId());
         }
@@ -57,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public SimpleItemResponseDto updateItem(ItemRequestDto itemDto, Long itemId, Long currentUserId) {
         itemRepository.validateItemExistsById(itemId);
-        userRepository.validateUserExistsById(currentUserId);
+        userRepository.existsByIdOrThrow(currentUserId);
         itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
 
         Item updatedItem = getUpdatedItem(itemDto, itemId, currentUserId);
@@ -68,23 +70,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDetailsResponseDto getItemById(Long itemId, Long currentUserId) {
-        userRepository.validateUserExistsById(currentUserId);
+    public ItemDetailsResponseDto getItemById(Long itemId, Long userId) {
+        userRepository.existsByIdOrThrow(userId);
         itemRepository.validateItemExistsById(itemId);
 
         Item item = itemRepository.getReferenceById(itemId);
 
         ItemDetailsResponseDto itemDto;
         var comments = commentRepository.findAllByItemId(item.getId());
-        if (item.isOwner(currentUserId)) {
+        if (item.isOwner(userId)) {
             var now = LocalDateTime.now();
 
             Booking lastBooking = bookingRepository
-                    .findFirstByItemIdAndEndTimeIsBeforeOrderByEndTimeDesc(item.getId(), now)
+                    .findLastBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
 
             Booking nextBooking = bookingRepository
-                    .findFirstByItemIdAndStartTimeIsAfter(item.getId(), now)
+                    .findNextBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments, lastBooking, nextBooking);
@@ -98,13 +100,23 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDetailsResponseDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
-        userRepository.validateUserExistsById(ownerUserId);
+        userRepository.existsByIdOrThrow(ownerUserId);
 
-        Page<Item> items = itemRepository.findAllByOwnerId(ownerUserId, PageRequest.of(from, size));
-        List<ItemDetailsResponseDto> ownerItemDtos = itemMapper.mapToItemDetailsResponseDto(items);
+        var now = LocalDateTime.now();
+        var page = PageRequest.of(from / size, size);
+        var items = itemRepository.findAllByOwnerId(ownerUserId, page);
+        var lastBookings = bookingRepository.findAllLastBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
+        var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
 
-        ItemServiceLoggerHelper.itemDtosReturned(log, ownerItemDtos);
-        return ownerItemDtos;
+        var itemsDto = items.stream()
+                .map(i -> itemMapper.mapToItemDetailsResponseDto(
+                        i,
+                        lastBookings.getOrDefault(i.getId(), null).orElse(null),
+                        nextBookings.getOrDefault(i.getId(), null).orElse(null)))
+                .collect(Collectors.toList());
+
+        ItemServiceLoggerHelper.itemDtosReturned(log, itemsDto);
+        return itemsDto;
     }
 
     @Override

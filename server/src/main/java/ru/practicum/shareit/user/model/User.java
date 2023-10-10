@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -10,6 +11,7 @@ import javax.persistence.*;
 @Table(name = "users")
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 public class User {
     @Id

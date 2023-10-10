@@ -28,8 +28,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("" +
             "SELECT i FROM Item i " +
             "WHERE (i.isAvailable = TRUE) " +
-            "AND (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%')" +
-            "     OR (LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')))")
+            "AND (UPPER(i.name) LIKE CONCAT('%', UPPER(:text) , '%')" +
+            "     OR (UPPER(i.description) LIKE CONCAT('%', UPPER(:text) , '%')))")
     Page<Item> findAllByText(@Param("text") String text, Pageable page);
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
