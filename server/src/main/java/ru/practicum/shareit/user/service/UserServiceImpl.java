@@ -81,8 +81,17 @@ public class UserServiceImpl implements UserService {
     }
 
     private User updateUser(User user, UserCreationDto userDto) {
-        Optional.ofNullable(userDto.getName()).ifPresent(user::setName);
-        Optional.ofNullable(userDto.getEmail()).ifPresent(user::setEmail);
+        var name = userDto.getName();
+        if (name != null) {
+            user.setName(name);
+            log.trace("User name updated: {}", user);
+        }
+
+        var email = userDto.getEmail();
+        if (email != null) {
+            user.setEmail(email);
+            log.trace("User email updated: {}", user);
+        }
 
         return user;
     }
