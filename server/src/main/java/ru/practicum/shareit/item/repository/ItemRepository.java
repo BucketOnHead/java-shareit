@@ -25,8 +25,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * @param page The page of results to retrieve.
      * @return A {@link Page} of available {@link Item} entities that match the given search text.
      */
-    @Query("" +
-            "SELECT i FROM Item i " +
+    @Query("SELECT i FROM Item i " +
             "WHERE (i.isAvailable = TRUE) " +
             "AND (UPPER(i.name) LIKE CONCAT('%', UPPER(:text) , '%')" +
             "     OR (UPPER(i.description) LIKE CONCAT('%', UPPER(:text) , '%')))")
@@ -43,7 +42,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      */
     default void validateItemExistsById(Long itemId) {
         if (!existsById(itemId)) {
-            throw ItemNotFoundException.fromItemId(itemId);
+            throw ItemNotFoundException.byId(itemId);
         }
     }
 
