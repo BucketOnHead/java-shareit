@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
         if (!isItemAvailableForCommenting(authorId, itemId, now)) {
             throw new CommentNotAllowedException(itemId, authorId);
         }
-        
+
         var author = userRepository.findByIdOrThrow(authorId);
         var item = itemRepository.findByIdOrThrow(itemId);
         var comment = commentMapper.mapToComment(commentDto, author, item);

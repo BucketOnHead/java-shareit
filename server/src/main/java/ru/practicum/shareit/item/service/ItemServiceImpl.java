@@ -11,7 +11,7 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.ItemDto;
-import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.exception.ItemAccessException;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -132,7 +132,7 @@ public class ItemServiceImpl implements ItemService {
         userRepository.existsByIdOrThrow(userId);
         var item = itemRepository.findByIdOrThrow(itemId);
         if (!isOwner(itemId, userId)) {
-            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
+            throw new ItemAccessException(itemId, userId);
         }
 
         var updatedItem = updateItem(item, itemDto);

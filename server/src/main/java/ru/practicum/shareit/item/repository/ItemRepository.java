@@ -37,14 +37,14 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     default void existsByIdOrThrow(@NonNull Long itemId) {
         if (!existsById(itemId)) {
-            throw ItemNotFoundException.byId(itemId);
+            throw new ItemNotFoundException(itemId);
         }
     }
 
     default Item findByIdOrThrow(Long itemId) {
         var optionalItem = findById(itemId);
         if (optionalItem.isEmpty()) {
-            throw ItemNotFoundException.byId(itemId);
+            throw new ItemNotFoundException(itemId);
         }
 
         return optionalItem.get();
@@ -52,7 +52,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     default void validateUserIdIsItemOwner(Long itemId, Long userId) {
         if (!existsByIdAndOwnerId(itemId, userId)) {
-            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
+            // throw new ItemAccessException(itemId, userId);
+            // TODO: исправить на booking-refactoring
+            throw new ItemNotFoundException(itemId);
         }
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.exception.LogicException;
+import ru.practicum.shareit.item.exception.ItemAccessException;
 import ru.practicum.shareit.item.exception.comment.CommentNotAllowedException;
 
 import javax.validation.ConstraintViolationException;
@@ -25,6 +26,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse missingRequestHeaderExceptionHandler(final MissingRequestHeaderException ex) {
         log.error("[REQUEST HEADER ERROR]: {}", ex.getMessage());
+        return ErrorResponse.getFromException(ex);
+    }
+
+    @ExceptionHandler(ItemAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse forbiddenHandler(final RuntimeException ex) {
+        log.error("[ACCESS ERROR]: {}", ex.getMessage());
         return ErrorResponse.getFromException(ex);
     }
 
