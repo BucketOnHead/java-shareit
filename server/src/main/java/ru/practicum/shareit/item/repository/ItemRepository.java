@@ -10,11 +10,14 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByItemRequestId(Long itemRequestId);
+
+    List<Item> findAllByItemRequestIdIn(Collection<Long> requestIds);
 
     Page<Item> findAllByOwnerId(Long ownerId, Pageable page);
 

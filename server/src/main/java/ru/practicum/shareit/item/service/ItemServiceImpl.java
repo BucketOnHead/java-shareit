@@ -17,8 +17,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.item.utils.ItemUtils;
-import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.itemrequest.model.ItemRequest;
+import ru.practicum.shareit.itemrequest.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
