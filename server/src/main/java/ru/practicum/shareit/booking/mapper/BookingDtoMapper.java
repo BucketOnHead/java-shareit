@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.dto.request.BookingCreationDto;
-import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.response.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -21,11 +21,11 @@ public interface BookingDtoMapper {
 
     @Mapping(target = "start", source = "booking.startTime")
     @Mapping(target = "end", source = "booking.endTime")
-    BookingResponseDto mapToBookingResponseDto(Booking booking);
+    BookingDto mapToBookingResponseDto(Booking booking);
 
-    List<BookingResponseDto> mapToBookingResponseDto(Iterable<Booking> bookings);
+    List<BookingDto> mapToBookingResponseDto(Iterable<Booking> bookings);
 
-    BookingResponseDto.UserDto mapToBookingResponseUserDto(User user);
+    BookingDto.UserDto mapToBookingResponseUserDto(User user);
 
-    BookingResponseDto.ItemDto mapToBookingResponseDto(Item item);
+    BookingDto.ItemDto mapToBookingResponseDto(Item item);
 }

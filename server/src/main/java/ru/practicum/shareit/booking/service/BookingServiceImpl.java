@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.request.BookingCreationDto;
-import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.response.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.logger.BookingServiceLoggerHelper;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponseDto addBooking(BookingCreationDto bookingDto, Long userId) {
+    public BookingDto addBooking(BookingCreationDto bookingDto, Long userId) {
         userRepository.existsByIdOrThrow(userId);
         itemRepository.existsByIdOrThrow(bookingDto.getItemId());
         validateUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
@@ -53,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponseDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
+    public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
         bookingRepository.validateBookingExistsById(bookingId);
         userRepository.existsByIdOrThrow(userId);
 
@@ -69,39 +69,39 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
+    public BookingDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
         bookingRepository.validateBookingExistsById(bookingId);
         userRepository.existsByIdOrThrow(userId);
 
         Booking booking = bookingRepository.getReferenceById(bookingId);
         validateUserIsOwnerOrBooker(booking, userId);
 
-        BookingResponseDto bookingDto = bookingMapper.mapToBookingResponseDto(booking);
+        BookingDto bookingDto = bookingMapper.mapToBookingResponseDto(booking);
         BookingServiceLoggerHelper.bookingReturned(log, bookingDto, userId);
         return bookingDto;
     }
 
     @Override
-    public List<BookingResponseDto> getBookingPageByBookerId(Long bookerId, String stateStr,
-                                                             Integer from, Integer size) {
+    public List<BookingDto> getBookingPageByBookerId(Long bookerId, String stateStr,
+                                                     Integer from, Integer size) {
         userRepository.existsByIdOrThrow(bookerId);
         State state = State.valueOf(stateStr);
 
         Page<Booking> bookingsByBookerId = getBookingsByBookerIdAndState(bookerId, state, from, size);
-        List<BookingResponseDto> bookingDtos = bookingMapper.mapToBookingResponseDto(bookingsByBookerId);
+        List<BookingDto> bookingDtos = bookingMapper.mapToBookingResponseDto(bookingsByBookerId);
 
         BookingServiceLoggerHelper.bookingByBookerIdPageReturned(log, from, size, bookingDtos, stateStr, bookerId);
         return bookingDtos;
     }
 
     @Override
-    public List<BookingResponseDto> getBookingsForUserItems(Long ownerId, String stateStr,
-                                                            Integer from, Integer size) {
+    public List<BookingDto> getBookingsForUserItems(Long ownerId, String stateStr,
+                                                    Integer from, Integer size) {
         userRepository.existsByIdOrThrow(ownerId);
         State state = State.valueOf(stateStr);
 
         Page<Booking> bookingsByBookerItems = getBookingsForUserItemsByState(ownerId, state, from, size);
-        List<BookingResponseDto> bookingDtos = bookingMapper.mapToBookingResponseDto(bookingsByBookerItems);
+        List<BookingDto> bookingDtos = bookingMapper.mapToBookingResponseDto(bookingsByBookerItems);
 
         BookingServiceLoggerHelper.bookingPageForUserItemsReturned(log, from, size, stateStr, bookingDtos, ownerId);
         return bookingDtos;

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.request.BookingCreationDto;
-import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.response.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 
@@ -18,7 +18,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingResponseDto addBooking(
+    public BookingDto addBooking(
             @RequestBody BookingCreationDto bookingDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
@@ -29,7 +29,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingResponseDto getBookingById(
+    public BookingDto getBookingById(
             @PathVariable Long bookingId,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
@@ -39,7 +39,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingResponseDto> getBookingsByBookerId(
+    public List<BookingDto> getBookingsByBookerId(
             @RequestParam String state,
             @RequestParam Integer from,
             @RequestParam Integer size,
@@ -52,7 +52,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingResponseDto> getBookingsForUserItems(
+    public List<BookingDto> getBookingsForUserItems(
             @RequestParam String state,
             @RequestParam Integer from,
             @RequestParam Integer size,
@@ -65,7 +65,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingResponseDto approveOrRejectBooking(
+    public BookingDto approveOrRejectBooking(
             @PathVariable Long bookingId,
             @RequestParam Boolean approved,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId

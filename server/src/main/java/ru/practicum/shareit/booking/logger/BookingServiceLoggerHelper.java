@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.logger;
 
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
-import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.response.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public final class BookingServiceLoggerHelper {
 
     public static void bookingReturned(
             Logger log,
-            BookingResponseDto bookingDto,
+            BookingDto bookingDto,
             Long userId
     ) {
         log.debug("BOOKING<DTO>["
@@ -48,7 +48,7 @@ public final class BookingServiceLoggerHelper {
             Logger log,
             Integer from,
             Integer size,
-            List<BookingResponseDto> bookingDtos,
+            List<BookingDto> bookingDtos,
             String state,
             Long bookerId
     ) {
@@ -72,7 +72,7 @@ public final class BookingServiceLoggerHelper {
             Integer from,
             Integer size,
             String state,
-            List<BookingResponseDto> bookingsByBookerItems,
+            List<BookingDto> bookingsByBookerItems,
             Long userId
     ) {
         log.debug("BOOKING_PAGE<DTO>["
