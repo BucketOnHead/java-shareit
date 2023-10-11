@@ -77,8 +77,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getReferenceById(itemId);
 
         ItemDetailsDto itemDto;
-        var comments = commentRepository.findAllByItemId(item.getId());
-        if (item.isOwner(userId)) {
+        if (ItemUtils.isOwner(item, userId)) {
             var now = LocalDateTime.now();
 
             Booking lastBooking = bookingRepository

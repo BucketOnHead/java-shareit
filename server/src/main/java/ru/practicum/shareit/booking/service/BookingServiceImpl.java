@@ -19,6 +19,7 @@ import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.utils.ItemUtils;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -121,7 +122,7 @@ public class BookingServiceImpl implements BookingService {
     private static void validateUserIsOwnerOrBooker(Booking booking, Long userId) {
         Long bookerId = booking.getBooker().getId();
 
-        boolean isOwner = booking.getItem().isOwner(userId);
+        boolean isOwner = ItemUtils.isOwner(booking.getItem(), userId);
         boolean isBooker = bookerId.equals(userId);
 
         if (!isOwner && !isBooker) {
@@ -131,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateUserNotOwnerByItemIdAndUserId(Long itemId, Long userId) {
         var item = itemRepository.getReferenceById(itemId);
-        if (item.isOwner(userId)) {
+        if (ItemUtils.isOwner(item, userId)) {
             throw BookingLogicException.getFromOwnerIdAndItemId(userId, itemId);
         }
     }

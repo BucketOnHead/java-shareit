@@ -15,4 +15,22 @@ public class ItemUtils {
                 .map(Item::getId)
                 .collect(Collectors.toSet());
     }
+
+    public boolean isOwner(Item item, Long userId) {
+        if (userId == null || item == null) {
+            return false;
+        }
+
+        var owner = item.getOwner();
+        if (owner == null) {
+            return false;
+        }
+
+        var ownerId = owner.getId();
+        if (ownerId == null) {
+            return false;
+        }
+
+        return ownerId.equals(userId);
+    }
 }
