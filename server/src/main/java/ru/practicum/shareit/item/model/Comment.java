@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.shareit.user.model.User;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 public class Comment {
     @Id
