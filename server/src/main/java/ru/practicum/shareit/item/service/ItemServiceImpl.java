@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.model.Booking.Status;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
@@ -70,10 +70,10 @@ public class ItemServiceImpl implements ItemService {
         if (ItemUtils.isOwner(item, userId)) {
             var now = LocalDateTime.now();
             var lastBooking = bookingRepository
-                    .findLastBookingByTime(itemId, Status.APPROVED, now)
+                    .findLastBookingByTime(itemId, BookingStatus.APPROVED, now)
                     .orElse(null);
             var nextBooking = bookingRepository
-                    .findNextBookingByTime(itemId, Status.APPROVED, now)
+                    .findNextBookingByTime(itemId, BookingStatus.APPROVED, now)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsDto(item, comments, lastBooking, nextBooking);
@@ -94,8 +94,8 @@ public class ItemServiceImpl implements ItemService {
         var now = LocalDateTime.now();
         var page = PageRequest.of(from / size, size);
         var items = itemRepository.findAllByOwnerId(userId, page);
-        var lastBookings = bookingRepository.findAllLastBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
-        var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
+        var lastBookings = bookingRepository.findAllLastBookingByTime(ItemUtils.toIdsSet(items), BookingStatus.APPROVED, now);
+        var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), BookingStatus.APPROVED, now);
 
         var itemsDto = items.stream()
                 .map(item -> itemMapper.mapToItemDetailsDto(item,
