@@ -3,10 +3,8 @@ package ru.practicum.shareit.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.request.UserRequestDto;
-
-import ru.practicum.shareit.user.dto.response.UserResponseDto;
-import ru.practicum.shareit.user.logger.UserControllerLoggerHelper;
+import ru.practicum.shareit.user.dto.request.UserCreationDto;
+import ru.practicum.shareit.user.dto.response.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
@@ -19,44 +17,51 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserResponseDto addUser(
-            @RequestBody UserRequestDto userDto
+    public UserDto addUser(
+            @RequestBody UserCreationDto userDto
     ) {
-        UserControllerLoggerHelper.addUser(log, userDto);
+        log.info("Adding user");
+        log.debug("Adding user: {}", userDto);
+
         return userService.addUser(userDto);
     }
 
-    @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(
-            @RequestBody UserRequestDto userDto,
-            @PathVariable Long userId
-    ) {
-        UserControllerLoggerHelper.updateUser(log, userDto, userId);
-        return userService.updateUser(userDto, userId);
-    }
-
     @GetMapping("/{userId}")
-    public UserResponseDto getUserById(
+    public UserDto getUserById(
             @PathVariable Long userId
     ) {
-        UserControllerLoggerHelper.getUserDtoById(log, userId);
+        log.info("Getting user by id: {}", userId);
+
         return userService.getUserById(userId);
     }
 
     @GetMapping
-    public List<UserResponseDto> getUsers(
+    public List<UserDto> getUsers(
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        UserControllerLoggerHelper.getUserDtoPage(log, from, size);
+        log.info("Getting users with pagination: (from: {}, size: {})", from, size);
+
         return userService.getUsers(from, size);
+    }
+
+    @PatchMapping("/{userId}")
+    public UserDto updateUser(
+            @RequestBody UserCreationDto userDto,
+            @PathVariable Long userId
+    ) {
+        log.info("Updating user with id: {}", userId);
+        log.debug("Updating user with id: {}, {}", userId, userDto);
+
+        return userService.updateUser(userDto, userId);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUserById(
             @PathVariable Long userId
     ) {
-        UserControllerLoggerHelper.deleteUserById(log, userId);
+        log.info("Deleting user by id: {}", userId);
+
         userService.deleteUserById(userId);
     }
 }

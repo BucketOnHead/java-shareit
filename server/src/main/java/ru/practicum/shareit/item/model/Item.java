@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
@@ -12,6 +13,7 @@ import javax.persistence.*;
 @Table(name = "items")
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 public class Item {
     @Id
@@ -35,12 +37,4 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "request_id")
     private ItemRequest itemRequest;
-
-    public boolean isOwner(Long userId) {
-        if (userId == null || owner == null || owner.getId() == null) {
-            return false;
-        }
-
-        return owner.getId().equals(userId);
-    }
 }

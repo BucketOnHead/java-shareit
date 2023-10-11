@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,43 +26,35 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * @param page The page of results to retrieve.
      * @return A {@link Page} of available {@link Item} entities that match the given search text.
      */
-    @Query("" +
-            "SELECT i FROM Item i " +
+    @Query("SELECT i FROM Item i " +
             "WHERE (i.isAvailable = TRUE) " +
-            "AND (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%')" +
-            "     OR (LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')))")
+            "AND (UPPER(i.name) LIKE CONCAT('%', UPPER(:text), '%')" +
+            "     OR (UPPER(i.description) LIKE CONCAT('%', UPPER(:text), '%')))")
     Page<Item> findAllByText(@Param("text") String text, Pageable page);
+
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
 
-    /**
-     * Validates if an item with the given itemId exists.
-     * If it does not exist, throws an {@link ItemNotFoundException}.
-     *
-     * @param itemId The ID of the item to validate.
-     * @throws ItemNotFoundException If the item with the given ID does not exist.
-     */
-    default void validateItemExistsById(Long itemId) {
+    default void existsByIdOrThrow(@NonNull Long itemId) {
         if (!existsById(itemId)) {
-            throw ItemNotFoundException.fromItemId(itemId);
+            throw new ItemNotFoundException(itemId);
         }
     }
 
-    /**
-     * Validates if a user with the given userId
-     * is the owner of the item with the given itemId.
-     * If the user is not the owner of the item
-     * or the item does not exist, throws an ItemNotFoundException.
-     *
-     * @param itemId The ID of the item to validate.
-     * @param userId The ID of the user to validate.
-     * @throws ItemNotFoundException If the item with the given ID
-     *                               does not exist or the user
-     *                               is not the owner of the item.
-     */
+    default Item findByIdOrThrow(Long itemId) {
+        var optionalItem = findById(itemId);
+        if (optionalItem.isEmpty()) {
+            throw new ItemNotFoundException(itemId);
+        }
+
+        return optionalItem.get();
+    }
+
     default void validateUserIdIsItemOwner(Long itemId, Long userId) {
         if (!existsByIdAndOwnerId(itemId, userId)) {
-            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
+            // throw new ItemAccessException(itemId, userId);
+            // TODO: исправить на booking-refactoring
+            throw new ItemNotFoundException(itemId);
         }
     }
 }

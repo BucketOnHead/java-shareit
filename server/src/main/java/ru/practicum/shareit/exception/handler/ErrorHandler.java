@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.exception.LogicException;
+import ru.practicum.shareit.item.exception.ItemAccessException;
+import ru.practicum.shareit.item.exception.comment.CommentNotAllowedException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.stream.Collectors;
@@ -19,10 +21,18 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse missingRequestHeaderExceptionHandler(final MissingRequestHeaderException ex) {
         log.error("[REQUEST HEADER ERROR]: {}", ex.getMessage());
+        return ErrorResponse.getFromException(ex);
+    }
+
+    @ExceptionHandler(ItemAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse forbiddenHandler(final RuntimeException ex) {
+        log.error("[ACCESS ERROR]: {}", ex.getMessage());
         return ErrorResponse.getFromException(ex);
     }
 
@@ -56,9 +66,12 @@ public class ErrorHandler {
         return ErrorResponse.getFromExceptionAndMessage(ex, message);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({
+            IncorrectDataException.class,
+            CommentNotAllowedException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse incorrectDataHandler(final IncorrectDataException ex) {
+    public ErrorResponse incorrectDataHandler(final RuntimeException ex) {
         log.error("[DATA ERROR]: {}.", ex.getMessage());
         return ErrorResponse.getFromException(ex);
     }
