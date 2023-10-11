@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
-import ru.practicum.shareit.itemrequest.dto.request.RequestItemRequestDto;
+import ru.practicum.shareit.itemrequest.dto.request.ItemRequestCreationDto;
 import ru.practicum.shareit.itemrequest.dto.response.ItemRequestDto;
 import ru.practicum.shareit.itemrequest.service.ItemRequestService;
 
@@ -19,7 +19,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ItemRequestDto addItemRequest(
-            @RequestBody RequestItemRequestDto requestDto,
+            @RequestBody ItemRequestCreationDto requestDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Adding item request from user with id: {}", userId);

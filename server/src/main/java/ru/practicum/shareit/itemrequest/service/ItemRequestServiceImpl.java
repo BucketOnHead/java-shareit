@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.itemrequest.dto.request.RequestItemRequestDto;
+import ru.practicum.shareit.itemrequest.dto.request.ItemRequestCreationDto;
 import ru.practicum.shareit.itemrequest.dto.response.ItemRequestDto;
 import ru.practicum.shareit.itemrequest.logger.ItemRequestServiceLoggerHelper;
 import ru.practicum.shareit.itemrequest.mapper.ItemRequestDtoMapper;
@@ -35,7 +35,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional
-    public ItemRequestDto addItemRequest(RequestItemRequestDto requestItemDto, Long requesterId) {
+    public ItemRequestDto addItemRequest(ItemRequestCreationDto requestItemDto, Long requesterId) {
         userRepository.existsByIdOrThrow(requesterId);
 
         ItemRequest itemRequest = getItemRequest(requestItemDto, requesterId);
@@ -107,7 +107,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return getItemRequestsDto(itemRequestsPage.toList());
     }
 
-    private ItemRequest getItemRequest(RequestItemRequestDto requestItemDto, Long requesterId) {
+    private ItemRequest getItemRequest(ItemRequestCreationDto requestItemDto, Long requesterId) {
         var now = LocalDateTime.now();
         var requester = userRepository.getReferenceById(requesterId);
         return itemRequestMapper.mapToItemRequest(requestItemDto, requester, now);

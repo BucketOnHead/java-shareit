@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-public class RequestItemRequestDto {
+public class ItemRequestCreationDto {
     private String description;
 }
