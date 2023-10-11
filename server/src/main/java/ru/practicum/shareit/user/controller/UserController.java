@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.request.UserCreationDto;
-import ru.practicum.shareit.user.dto.response.UserResponseDto;
+import ru.practicum.shareit.user.dto.response.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserResponseDto addUser(
+    public UserDto addUser(
             @RequestBody UserCreationDto userDto
     ) {
         log.info("Adding user");
@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserResponseDto getUserById(
+    public UserDto getUserById(
             @PathVariable Long userId
     ) {
         log.info("Getting user by id: {}", userId);
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponseDto> getUsers(
+    public List<UserDto> getUsers(
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(
+    public UserDto updateUser(
             @RequestBody UserCreationDto userDto,
             @PathVariable Long userId
     ) {

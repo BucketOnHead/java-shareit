@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.request.UserCreationDto;
-import ru.practicum.shareit.user.dto.response.UserResponseDto;
+import ru.practicum.shareit.user.dto.response.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto addUser(UserCreationDto userDto) {
+    public UserDto addUser(UserCreationDto userDto) {
         var user = userMapper.mapToUser(userDto);
         var savedUser = userRepository.save(user);
 
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto updateUser(UserCreationDto userDto, Long userId) {
+    public UserDto updateUser(UserCreationDto userDto, Long userId) {
         var user = userRepository.findByIdOrThrow(userId);
         var updatedUser = updateUser(user, userDto);
         var savedUser = userRepository.save(updatedUser);
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(Long userId) {
+    public UserDto getUserById(Long userId) {
         var user = userRepository.findByIdOrThrow(userId);
         var userDto = userMapper.mapToUserResponseDto(user);
 
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getUsers(Integer from, Integer size) {
+    public List<UserDto> getUsers(Integer from, Integer size) {
         var users = userRepository.findAll(PageRequest.of(from / size, size));
         var usersDto = userMapper.mapToUserResponseDto(users);
 
