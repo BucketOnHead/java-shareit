@@ -17,14 +17,14 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> 
 
     default void validateItemRequestExistsById(Long requestId) {
         if (!existsById(requestId)) {
-            throw ItemRequestNotFoundException.getFromId(requestId);
+            throw new ItemRequestNotFoundException(requestId);
         }
     }
 
     default ItemRequest findByIdOrThrow(Long requestId) {
         var optionalRequest = findById(requestId);
         if (optionalRequest.isEmpty()) {
-            throw ItemRequestNotFoundException.getFromId(requestId);
+            throw new ItemRequestNotFoundException(requestId);
         }
 
         return optionalRequest.get();

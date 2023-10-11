@@ -3,14 +3,9 @@ package ru.practicum.shareit.itemrequest.exception;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 
 public class ItemRequestNotFoundException extends EntityNotFoundException {
-    private static final String ITEM_REQUEST_NOT_FOUND = "ITEM_REQUEST[ID_%d] not found";
+    private static final long serialVersionUID = 5833045847077036042L;
 
-    public ItemRequestNotFoundException(String message) {
-        super(message);
-    }
-
-    public static ItemRequestNotFoundException getFromId(Long itemRequestId) {
-        String message = String.format(ITEM_REQUEST_NOT_FOUND, itemRequestId);
-        return new ItemRequestNotFoundException(message);
+    public ItemRequestNotFoundException(Long requestId) {
+        super(String.format("Item request with id: %d not found", requestId));
     }
 }
