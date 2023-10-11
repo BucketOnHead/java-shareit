@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.request.BookingCreationDto;
 import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
@@ -19,7 +19,7 @@ public class BookingController {
 
     @PostMapping
     public BookingResponseDto addBooking(
-            @RequestBody BookItemRequestDto bookingDto,
+            @RequestBody BookingCreationDto bookingDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Adding booking from user with id: {}", userId);

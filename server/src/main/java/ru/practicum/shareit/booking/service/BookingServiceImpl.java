@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.request.BookingCreationDto;
 import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.logger.BookingServiceLoggerHelper;
@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponseDto addBooking(BookItemRequestDto bookingDto, Long userId) {
+    public BookingResponseDto addBooking(BookingCreationDto bookingDto, Long userId) {
         userRepository.existsByIdOrThrow(userId);
         itemRepository.existsByIdOrThrow(bookingDto.getItemId());
         validateUserNotOwnerByItemIdAndUserId(bookingDto.getItemId(), userId);
@@ -137,7 +137,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private Booking getBooking(BookItemRequestDto bookingDto, Long userId) {
+    private Booking getBooking(BookingCreationDto bookingDto, Long userId) {
         User booker = userRepository.getReferenceById(userId);
         Item item = itemRepository.getReferenceById(bookingDto.getItemId());
         return bookingMapper.mapToBooking(bookingDto, booker, item);
