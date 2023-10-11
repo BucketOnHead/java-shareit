@@ -10,14 +10,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     default void existsByIdOrThrow(Long userId) {
         if (!existsById(userId)) {
-            throw UserNotFoundException.byId(userId);
+            throw new UserNotFoundException(userId);
         }
     }
 
     default User findByIdOrThrow(Long userId) {
         var optionalUser = findById(userId);
         if (optionalUser.isEmpty()) {
-            throw UserNotFoundException.byId(userId);
+            throw new UserNotFoundException(userId);
         }
 
         return optionalUser.get();
