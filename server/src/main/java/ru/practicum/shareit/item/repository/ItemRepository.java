@@ -28,9 +28,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      */
     @Query("SELECT i FROM Item i " +
             "WHERE (i.isAvailable = TRUE) " +
-            "AND (UPPER(i.name) LIKE CONCAT('%', UPPER(:text) , '%')" +
-            "     OR (UPPER(i.description) LIKE CONCAT('%', UPPER(:text) , '%')))")
+            "AND (UPPER(i.name) LIKE CONCAT('%', UPPER(:text), '%')" +
+            "     OR (UPPER(i.description) LIKE CONCAT('%', UPPER(:text), '%')))")
     Page<Item> findAllByText(@Param("text") String text, Pageable page);
+
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
 
@@ -38,6 +39,15 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         if (!existsById(itemId)) {
             throw ItemNotFoundException.byId(itemId);
         }
+    }
+
+    default Item findByIdOrThrow(Long itemId) {
+        var optionalItem = findById(itemId);
+        if (optionalItem.isEmpty()) {
+            throw ItemNotFoundException.byId(itemId);
+        }
+
+        return optionalItem.get();
     }
 
     default void validateUserIdIsItemOwner(Long itemId, Long userId) {

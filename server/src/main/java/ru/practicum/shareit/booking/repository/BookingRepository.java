@@ -42,7 +42,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findAllByItemOwnerIdAndStatus(Long ownerId, Booking.Status status, Pageable page);
 
-    boolean existsByBookerIdAndItemIdAndEndTimeIsBefore(Long bookerId, Long itemId, LocalDateTime time);
+    boolean existsByBookerIdAndItemIdAndStatusAndEndTimeBefore(Long itemId, Long bookerId, Booking.Status status,
+                                                               LocalDateTime time);
 
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.id = :itemId " +
