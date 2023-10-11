@@ -8,6 +8,8 @@ import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
@@ -15,10 +17,10 @@ import java.util.List;
 public interface ItemDtoMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "owner", ignore = true)
-    @Mapping(target = "itemRequest", ignore = true)
-    @Mapping(target = "isAvailable", source = "available")
-    Item mapToItem(ItemCreationDto itemDto);
+    @Mapping(target = "isAvailable", source = "itemDto.available")
+    @Mapping(target = "name", source = "itemDto.name")
+    @Mapping(target = "description", source = "itemDto.description")
+    Item mapToItem(ItemCreationDto itemDto, User owner, ItemRequest itemRequest);
 
     @Mapping(target = "available", source = "isAvailable")
     @Mapping(target = "requestId", source = "item.itemRequest.id")

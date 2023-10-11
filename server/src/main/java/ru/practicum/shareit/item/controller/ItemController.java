@@ -63,7 +63,7 @@ public class ItemController {
     ) {
         log.info("Getting items for user with ID: {}, with pagination: (from: {}, size: {})", userId, from, size);
 
-        return itemService.getItemsByOwnerUserId(userId, from, size);
+        return itemService.getItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
@@ -74,7 +74,7 @@ public class ItemController {
     ) {
         log.info("Getting items with text: {}, with pagination: (from: {}, size: {})", text, from, size);
 
-        return itemService.searchItemsByNameOrDescriptionIgnoreCase(text, from, size);
+        return itemService.getItemsByText(text, from, size);
     }
 
     @PatchMapping("/{itemId}")

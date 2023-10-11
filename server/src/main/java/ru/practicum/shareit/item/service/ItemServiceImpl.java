@@ -4,28 +4,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.ItemDto;
-import ru.practicum.shareit.item.logger.ItemServiceLoggerHelper;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.item.utils.ItemUtils;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,49 +40,57 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto addItem(ItemCreationDto itemDto, Long ownerUserId) {
-        userRepository.existsByIdOrThrow(ownerUserId);
+    public ItemDto addItem(ItemCreationDto itemDto, Long ownerId) {
+        var owner = userRepository.findByIdOrThrow(ownerId);
+
+        // 'itemRequest,' the rebellious teenager in my 'var' family portrait!
+        ItemRequest itemRequest = null; // Come on, 'var', let's take a family photo!
+
         if (itemDto.getRequestId() != null) {
-            itemRepository.existsByIdOrThrow(itemDto.getRequestId());
+            itemRequest = itemRequestRepository.findByIdOrThrow(itemDto.getRequestId());
         }
 
-        Item item = getItem(itemDto, ownerUserId);
-        Item savedItem = itemRepository.save(item);
+        var item = itemMapper.mapToItem(itemDto, owner, itemRequest);
+        var savedItem = itemRepository.save(item);
 
-        ItemServiceLoggerHelper.itemSaved(log, savedItem);
+        log.info("item with id: {} added", savedItem.getId());
+        log.debug("Item added: {}", savedItem);
+
         return itemMapper.mapToSimpleItemResponseDto(savedItem);
     }
 
     @Override
     @Transactional
-    public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long currentUserId) {
-        itemRepository.existsByIdOrThrow(itemId);
-        userRepository.existsByIdOrThrow(currentUserId);
-        itemRepository.validateUserIdIsItemOwner(itemId, currentUserId);
+    public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long userId) {
+        userRepository.existsByIdOrThrow(userId);
+        var item = itemRepository.findByIdOrThrow(itemId);
+        if (!isOwner(itemId, userId)) {
+            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
+        }
 
-        Item updatedItem = getUpdatedItem(itemDto, itemId, currentUserId);
-        Item savedItem = itemRepository.save(updatedItem);
+        var updatedItem = updateItem(item, itemDto);
+        var savedItem = itemRepository.save(updatedItem);
 
-        ItemServiceLoggerHelper.itemUpdated(log, savedItem);
+        log.info("Item with id: {} updated", savedItem.getId());
+        log.debug("Item updated: {}", savedItem);
+
         return itemMapper.mapToSimpleItemResponseDto(savedItem);
     }
 
     @Override
     public ItemDetailsDto getItemById(Long itemId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
-        itemRepository.existsByIdOrThrow(itemId);
 
-        Item item = itemRepository.getReferenceById(itemId);
+        var item = itemRepository.findByIdOrThrow(itemId);
+        var comments = commentRepository.findAllByItemId(itemId);
 
         ItemDetailsDto itemDto;
         if (ItemUtils.isOwner(item, userId)) {
             var now = LocalDateTime.now();
-
-            Booking lastBooking = bookingRepository
+            var lastBooking = bookingRepository
                     .findLastBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
-
-            Booking nextBooking = bookingRepository
+            var nextBooking = bookingRepository
                     .findNextBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
 
@@ -93,70 +99,78 @@ public class ItemServiceImpl implements ItemService {
             itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments);
         }
 
-        ItemServiceLoggerHelper.itemDtoReturned(log, itemDto);
+        log.info("Item with id: {} retrieved", item.getId());
+        log.debug("Item retrieved: {}", itemDto);
+
         return itemDto;
     }
 
     @Override
-    public List<ItemDetailsDto> getItemsByOwnerUserId(Long ownerUserId, Integer from, Integer size) {
-        userRepository.existsByIdOrThrow(ownerUserId);
+    public List<ItemDetailsDto> getItemsByUserId(Long userId, Integer from, Integer size) {
+        userRepository.existsByIdOrThrow(userId);
 
         var now = LocalDateTime.now();
         var page = PageRequest.of(from / size, size);
-        var items = itemRepository.findAllByOwnerId(ownerUserId, page);
+        var items = itemRepository.findAllByOwnerId(userId, page);
         var lastBookings = bookingRepository.findAllLastBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
         var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
 
         var itemsDto = items.stream()
-                .map(i -> itemMapper.mapToItemDetailsResponseDto(
-                        i,
-                        lastBookings.getOrDefault(i.getId(), null).orElse(null),
-                        nextBookings.getOrDefault(i.getId(), null).orElse(null)))
+                .map(item -> itemMapper.mapToItemDetailsResponseDto(item,
+                        lastBookings.getOrDefault(item.getId(), null).orElse(null),
+                        nextBookings.getOrDefault(item.getId(), null).orElse(null)))
                 .collect(Collectors.toList());
 
-        ItemServiceLoggerHelper.itemDtosReturned(log, itemsDto);
+        log.info("Item with pagination retrieved: (from: {}, size: {}), count: {}", from, size, itemsDto.size());
+        log.debug("Item with pagination retrieved: {}", itemsDto);
+
         return itemsDto;
     }
 
     @Override
-    public List<ItemDto> searchItemsByNameOrDescriptionIgnoreCase(String text,
-                                                                  Integer from, Integer size) {
+    public List<ItemDto> getItemsByText(String text, Integer from, Integer size) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
 
-        List<Item> foundItems = findItemsByText(text, PageRequest.of(from, size));
+        var page = PageRequest.of(from / size, size);
+        var items = itemRepository.findAllByText(text, page);
+        var itemsDto = itemMapper.mapToSimpleItemResponseDto(items);
 
-        var itemsDto = itemMapper.mapToSimpleItemResponseDto(foundItems);
-        ItemServiceLoggerHelper.itemDtosByTextReturned(log, text, itemsDto);
+        log.info("Items by text with pagination retrieved: (from: {}, size: {}), count: {}", from, size,
+                itemsDto.size());
+        log.debug("Items by text with pagination retrieved: {}", itemsDto);
+
         return itemsDto;
     }
 
-    private Item getItem(ItemCreationDto itemDto, Long ownerUserId) {
-        Item item = itemMapper.mapToItem(itemDto);
+    private Item updateItem(Item item, ItemCreationDto itemDto) {
+        var name = itemDto.getName();
+        if (name != null) {
+            item.setName(name);
+            log.trace("Item name updated: {}", item);
+        }
 
-        item.setOwner(userRepository.getReferenceById(ownerUserId));
+        var description = itemDto.getDescription();
+        if (description != null) {
+            item.setDescription(description);
+            log.trace("Item description updated: {}", item);
+        }
 
-        if (itemDto.getRequestId() != null) {
-            item.setItemRequest(itemRequestRepository.getReferenceById(itemDto.getRequestId()));
+        var available = itemDto.getAvailable();
+        if (available != null) {
+            item.setIsAvailable(available);
+            log.trace("Item isAvailable updated: {}", item);
         }
 
         return item;
     }
 
-    private Item getUpdatedItem(ItemCreationDto itemDto, Long itemId, Long ownerUserId) {
-        Item item = itemRepository.getReferenceById(itemId);
+    private boolean isOwner(Long itemId, Long userId) {
+        var isOwner = itemRepository.existsByIdAndOwnerId(itemId, userId);
 
-        item.setOwner(userRepository.getReferenceById(ownerUserId));
+        log.trace("User with id: {} is {} owner of item with id: {}", userId, (isOwner ? "" : "not"), itemId);
 
-        Optional.ofNullable(itemDto.getName()).ifPresent(item::setName);
-        Optional.ofNullable(itemDto.getDescription()).ifPresent(item::setDescription);
-        Optional.ofNullable(itemDto.getAvailable()).ifPresent(item::setIsAvailable);
-
-        return item;
-    }
-
-    private List<Item> findItemsByText(String text, Pageable page) {
-        return itemRepository.findAllByText(text, page).toList();
+        return isOwner;
     }
 }

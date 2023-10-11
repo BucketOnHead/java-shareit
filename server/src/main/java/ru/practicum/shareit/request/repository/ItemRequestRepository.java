@@ -20,4 +20,13 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> 
             throw ItemRequestNotFoundException.getFromId(requestId);
         }
     }
+
+    default ItemRequest findByIdOrThrow(Long requestId) {
+        var optionalRequest = findById(requestId);
+        if (optionalRequest.isEmpty()) {
+            throw ItemRequestNotFoundException.getFromId(requestId);
+        }
+
+        return optionalRequest.get();
+    }
 }
