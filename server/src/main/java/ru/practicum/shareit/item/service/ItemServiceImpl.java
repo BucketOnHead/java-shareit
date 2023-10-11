@@ -60,24 +60,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
-    public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long userId) {
-        userRepository.existsByIdOrThrow(userId);
-        var item = itemRepository.findByIdOrThrow(itemId);
-        if (!isOwner(itemId, userId)) {
-            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
-        }
-
-        var updatedItem = updateItem(item, itemDto);
-        var savedItem = itemRepository.save(updatedItem);
-
-        log.info("Item with id: {} updated", savedItem.getId());
-        log.debug("Item updated: {}", savedItem);
-
-        return itemMapper.mapToSimpleItemResponseDto(savedItem);
-    }
-
-    @Override
     public ItemDetailsDto getItemById(Long itemId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
 
@@ -142,6 +124,24 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Items by text with pagination retrieved: {}", itemsDto);
 
         return itemsDto;
+    }
+
+    @Override
+    @Transactional
+    public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long userId) {
+        userRepository.existsByIdOrThrow(userId);
+        var item = itemRepository.findByIdOrThrow(itemId);
+        if (!isOwner(itemId, userId)) {
+            throw ItemNotFoundException.fromItemIdAndUserId(itemId, userId);
+        }
+
+        var updatedItem = updateItem(item, itemDto);
+        var savedItem = itemRepository.save(updatedItem);
+
+        log.info("Item with id: {} updated", savedItem.getId());
+        log.debug("Item updated: {}", savedItem);
+
+        return itemMapper.mapToSimpleItemResponseDto(savedItem);
     }
 
     private Item updateItem(Item item, ItemCreationDto itemDto) {
