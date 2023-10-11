@@ -35,10 +35,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional
-    public ItemRequestDto addItemRequest(ItemRequestCreationDto requestItemDto, Long requesterId) {
+    public ItemRequestDto addItemRequest(ItemRequestCreationDto requestDto, Long requesterId) {
         userRepository.existsByIdOrThrow(requesterId);
 
-        ItemRequest itemRequest = getItemRequest(requestItemDto, requesterId);
+        ItemRequest itemRequest = getItemRequest(requestDto, requesterId);
         ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
 
         ItemRequestServiceLoggerHelper.itemRequestSaved(log, savedItemRequest);
@@ -46,19 +46,29 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId) {
+    public ItemRequestDto getItemRequestById(Long requestId, Long userId) {
+        itemRequestRepository.validateItemRequestExistsById(requestId);
         userRepository.existsByIdOrThrow(userId);
 
-        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(userId);
+        ItemRequestDto itemRequestDto = getItemRequestDto(requestId);
+
+        ItemRequestServiceLoggerHelper.itemRequestReturned(log, itemRequestDto, userId);
+        return itemRequestDto;
+    }
+
+    @Override
+    public List<ItemRequestDto> getItemRequestsByRequesterId(Long requesterId) {
+        userRepository.existsByIdOrThrow(requesterId);
+
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(requesterId);
         List<ItemRequestDto> itemRequestsDto = getItemRequestsDto(itemRequests);
 
-        ItemRequestServiceLoggerHelper.itemRequestByRequesterIdReturned(log, itemRequestsDto, userId);
+        ItemRequestServiceLoggerHelper.itemRequestByRequesterIdReturned(log, itemRequestsDto, requesterId);
         return itemRequestsDto;
     }
 
     @Override
-    public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId,
-                                                             Integer from, Integer size) {
+    public List<ItemRequestDto> getItemRequests(Long userId, Integer from, Integer size) {
         userRepository.existsByIdOrThrow(userId);
 
         List<ItemRequestDto> itemRequestDtos
@@ -68,19 +78,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return itemRequestDtos;
     }
 
-    @Override
-    public ItemRequestDto getItemRequestById(Long itemRequestId, Long userId) {
-        itemRequestRepository.validateItemRequestExistsById(itemRequestId);
-        userRepository.existsByIdOrThrow(userId);
-
-        ItemRequestDto itemRequestDto = getItemRequestDto(itemRequestId);
-
-        ItemRequestServiceLoggerHelper.itemRequestReturned(log, itemRequestDto, userId);
-        return itemRequestDto;
-    }
-
-    private ItemRequestDto getItemRequestDto(ItemRequest itemRequest,
-                                                    Map<Long, List<Item>> itemsByItemRequestId) {
+    private ItemRequestDto getItemRequestDto(ItemRequest itemRequest, Map<Long, List<Item>> itemsByItemRequestId) {
         List<Item> items = itemsByItemRequestId.getOrDefault(itemRequest.getId(), new ArrayList<>());
         return itemRequestMapper.mapToItemRequestDto(itemRequest, items);
     }

@@ -55,6 +55,6 @@ public class ItemRequestController {
     ) {
         log.info("Getting item requests with pagination: (from: {}, size: {}) for user with id: {}", from, size, userId);
 
-        return itemRequestService.getItemRequestsByRequesterId(userId, from, size);
+        return itemRequestService.getItemRequests(userId, from, size);
     }
 }
