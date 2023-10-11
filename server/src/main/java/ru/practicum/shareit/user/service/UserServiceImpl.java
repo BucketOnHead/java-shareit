@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         log.info("User with id: {} added", savedUser.getId());
         log.debug("User added: {}", savedUser);
 
-        return userMapper.mapToUserResponseDto(savedUser);
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
@@ -43,13 +43,13 @@ public class UserServiceImpl implements UserService {
         log.info("User with id: {} updated", savedUser.getId());
         log.debug("User updated: {}", savedUser);
 
-        return userMapper.mapToUserResponseDto(savedUser);
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) {
         var user = userRepository.findByIdOrThrow(userId);
-        var userDto = userMapper.mapToUserResponseDto(user);
+        var userDto = userMapper.mapToUserDto(user);
 
         log.info("User with id: {} retrieved", user.getId());
         log.debug("User retrieved: {}", userDto);
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsers(Integer from, Integer size) {
         var users = userRepository.findAll(PageRequest.of(from / size, size));
-        var usersDto = userMapper.mapToUserResponseDto(users);
+        var usersDto = userMapper.mapToUserDto(users);
 
         log.info("Users with pagination retrieved: (from: {}, size: {}), count: {}", from, size, usersDto.size());
         log.debug("Users with pagination retrieved: {}", usersDto);

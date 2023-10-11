@@ -14,7 +14,7 @@ public interface UserDtoMapper {
     @Mapping(target = "id", ignore = true)
     User mapToUser(UserCreationDto userCreationDto);
 
-    UserDto mapToUserResponseDto(User user);
+    UserDto mapToUserDto(User user);
 
-    List<UserDto> mapToUserResponseDto(Iterable<User> users);
+    List<UserDto> mapToUserDto(Iterable<User> users);
 }
