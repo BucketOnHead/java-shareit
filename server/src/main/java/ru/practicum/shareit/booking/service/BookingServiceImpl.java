@@ -109,13 +109,13 @@ public class BookingServiceImpl implements BookingService {
 
     private static void validateBookingStatusNotApprove(Booking booking) {
         if (!booking.getStatus().equals(Status.WAITING)) {
-            throw BookingAlreadyApprovedException.getFromBookingId(booking.getId());
+            throw new BookingNotAwaitingApprovalException(booking.getId());
         }
     }
 
     private static void validateItemAvailableForBooking(Item item) {
         if (item.getIsAvailable() == Boolean.FALSE) {
-            throw ItemNotAvailableForBookingException.getFromItemId(item.getId());
+            throw new ItemUnavailableException(item.getId());
         }
     }
 
@@ -126,14 +126,14 @@ public class BookingServiceImpl implements BookingService {
         boolean isBooker = bookerId.equals(userId);
 
         if (!isOwner && !isBooker) {
-            throw BookingNotFoundException.getFromBookingIdAndUserId(booking.getId(), userId);
+            throw new BookingAccessException(booking.getId(), userId);
         }
     }
 
     private void validateUserNotOwnerByItemIdAndUserId(Long itemId, Long userId) {
         var item = itemRepository.getReferenceById(itemId);
         if (ItemUtils.isOwner(item, userId)) {
-            throw BookingLogicException.getFromOwnerIdAndItemId(userId, itemId);
+            throw new SelfBookingAttemptException(userId, itemId);
         }
     }
 
@@ -169,7 +169,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingsByState = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.REJECTED, page);
                 break;
             default:
-                throw StateNotImplementedException.fromState(state);
+                throw new StateNotImplementedException(state);
         }
 
         return bookingsByState;
@@ -202,7 +202,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, Status.REJECTED, page);
                 break;
             default:
-                throw StateNotImplementedException.fromState(state);
+                throw new StateNotImplementedException(state);
         }
 
         return bookings;

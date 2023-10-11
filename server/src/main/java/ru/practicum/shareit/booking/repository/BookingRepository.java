@@ -97,7 +97,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     default void validateBookingExistsById(Long bookingId) {
         if (!existsById(bookingId)) {
-            throw BookingNotFoundException.getFromBookingId(bookingId);
+            throw new BookingNotFoundException(bookingId);
         }
     }
 }
