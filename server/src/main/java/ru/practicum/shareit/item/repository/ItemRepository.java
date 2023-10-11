@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.repository;
 
-import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,12 +37,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);
 
-    default void existsByIdOrThrow(@NonNull Long itemId) {
-        if (!existsById(itemId)) {
-            throw new ItemNotFoundException(itemId);
-        }
-    }
-
     default Item findByIdOrThrow(Long itemId) {
         var optionalItem = findById(itemId);
         if (optionalItem.isEmpty()) {
@@ -51,13 +44,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         }
 
         return optionalItem.get();
-    }
-
-    default void validateUserIdIsItemOwner(Long itemId, Long userId) {
-        if (!existsByIdAndOwnerId(itemId, userId)) {
-            // throw new ItemAccessException(itemId, userId);
-            // TODO: исправить на booking-refactoring
-            throw new ItemNotFoundException(itemId);
-        }
     }
 }

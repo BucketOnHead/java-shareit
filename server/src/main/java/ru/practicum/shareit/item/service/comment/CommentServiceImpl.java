@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
 import ru.practicum.shareit.item.dto.response.comment.CommentDto;
@@ -47,7 +47,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private boolean isItemAvailableForCommenting(Long userId, Long itemId, LocalDateTime time) {
-        var status = Booking.Status.APPROVED;
+        var status = BookingStatus.APPROVED;
         var bool = bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndTimeBefore(userId, itemId, status, time);
 
         log.trace("User with id: {} can{} comment item with id: {} at moment: {}", userId, ((bool) ? "" : "not"),

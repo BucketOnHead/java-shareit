@@ -33,4 +33,16 @@ public class ItemUtils {
 
         return ownerId.equals(userId);
     }
+
+    public boolean isNotOwner(Item item, Long userId) {
+        return !isOwner(item, userId);
+    }
+
+    public boolean isUnavailable(Item item) {
+        if (item == null) {
+            return false;
+        }
+
+        return item.getIsAvailable() == Boolean.FALSE;
+    }
 }

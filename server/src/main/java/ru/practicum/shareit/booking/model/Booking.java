@@ -19,10 +19,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Booking {
 
-    public enum Status {
-        WAITING, APPROVED, REJECTED
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
@@ -44,5 +40,5 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private Status status = Status.WAITING;
+    private BookingStatus status = BookingStatus.WAITING;
 }

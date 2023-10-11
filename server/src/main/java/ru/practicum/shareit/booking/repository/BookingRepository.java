@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -28,7 +29,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findAllByBookerIdAndStartTimeAfter(Long bookerId, LocalDateTime time, Pageable page);
 
-    Page<Booking> findAllByBookerIdAndStatus(Long bookerId, Booking.Status status, Pageable page);
+    Page<Booking> findAllByBookerIdAndStatus(Long bookerId, BookingStatus status, Pageable page);
 
     Page<Booking> findAllByItemOwnerId(Long ownerId, Pageable page);
 
@@ -40,9 +41,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Page<Booking> findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(
             Long ownerId, LocalDateTime time, Pageable page);
 
-    Page<Booking> findAllByItemOwnerIdAndStatus(Long ownerId, Booking.Status status, Pageable page);
+    Page<Booking> findAllByItemOwnerIdAndStatus(Long ownerId, BookingStatus status, Pageable page);
 
-    boolean existsByBookerIdAndItemIdAndStatusAndEndTimeBefore(Long itemId, Long bookerId, Booking.Status status,
+    boolean existsByBookerIdAndItemIdAndStatusAndEndTimeBefore(Long itemId, Long bookerId, BookingStatus status,
                                                                LocalDateTime time);
 
     @Query("SELECT b FROM Booking b " +
@@ -51,18 +52,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND (b.status IS NULL OR b.status = :status) " +
             "ORDER BY b.startTime DESC")
     Page<Booking> findAllLastBookingByTime(@Param("itemId") Long itemId,
-                                           @Param("status") Booking.Status status,
+                                           @Param("status") BookingStatus status,
                                            @Param("time") LocalDateTime time,
                                            Pageable page);
 
-    default Optional<Booking> findLastBookingByTime(Long itemId, Booking.Status status, LocalDateTime time) {
+    default Optional<Booking> findLastBookingByTime(Long itemId, BookingStatus status, LocalDateTime time) {
         return findAllLastBookingByTime(itemId, status, time, LIMIT_1)
                 .stream()
                 .findFirst();
     }
 
     default Map<Long, Optional<Booking>> findAllLastBookingByTime(Iterable<Long> ids,
-                                                                  Booking.Status status,
+                                                                  BookingStatus status,
                                                                   LocalDateTime time) {
         return StreamSupport.stream(ids.spliterator(), false)
                 .collect(Collectors.toMap(
@@ -76,18 +77,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND (b.status IS NULL OR b.status = :status) " +
             "ORDER BY b.startTime ASC")
     Page<Booking> findAllNextBookingByTime(@Param("itemId") Long itemId,
-                                           @Param("status") Booking.Status status,
+                                           @Param("status") BookingStatus status,
                                            @Param("time") LocalDateTime time,
                                            Pageable page);
 
-    default Optional<Booking> findNextBookingByTime(Long itemId, Booking.Status status, LocalDateTime time) {
+    default Optional<Booking> findNextBookingByTime(Long itemId, BookingStatus status, LocalDateTime time) {
         return findAllNextBookingByTime(itemId, status, time, LIMIT_1)
                 .stream()
                 .findFirst();
     }
 
     default Map<Long, Optional<Booking>> findAllNextBookingByTime(Iterable<Long> ids,
-                                                                  Booking.Status status,
+                                                                  BookingStatus status,
                                                                   LocalDateTime time) {
         return StreamSupport.stream(ids.spliterator(), false)
                 .collect(Collectors.toMap(
@@ -95,9 +96,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                         id -> findNextBookingByTime(id, status, time)));
     }
 
-    default void validateBookingExistsById(Long bookingId) {
-        if (!existsById(bookingId)) {
+    default Booking findByIdOrThrow(Long bookingId) {
+        var optionalBooking = findById(bookingId);
+        if (optionalBooking.isEmpty()) {
             throw new BookingNotFoundException(bookingId);
         }
+
+        return optionalBooking.get();
     }
 }
