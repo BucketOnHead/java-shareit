@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -24,6 +25,7 @@ public class ItemRequest {
     @Column(nullable = false, length = 1000)
     private String description;
 
+    @CreationTimestamp
     @Column(nullable = false, name = "creation_time")
     private LocalDateTime creationTime;
 

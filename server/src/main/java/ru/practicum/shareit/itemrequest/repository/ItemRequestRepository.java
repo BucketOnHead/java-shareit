@@ -15,12 +15,6 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> 
 
     Page<ItemRequest> findAllByRequesterIdIsNot(Long requesterId, Pageable pageable);
 
-    default void validateItemRequestExistsById(Long requestId) {
-        if (!existsById(requestId)) {
-            throw new ItemRequestNotFoundException(requestId);
-        }
-    }
-
     default ItemRequest findByIdOrThrow(Long requestId) {
         var optionalRequest = findById(requestId);
         if (optionalRequest.isEmpty()) {

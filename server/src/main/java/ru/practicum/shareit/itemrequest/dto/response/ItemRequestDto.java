@@ -3,12 +3,14 @@ package ru.practicum.shareit.itemrequest.dto.response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 public class ItemRequestDto {
     private Long id;
@@ -18,6 +20,7 @@ public class ItemRequestDto {
 
     @Setter
     @Getter
+    @ToString
     @NoArgsConstructor
     public static class ItemDto {
         private Long id;
