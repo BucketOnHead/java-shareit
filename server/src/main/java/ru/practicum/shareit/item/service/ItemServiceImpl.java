@@ -56,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("item with id: {} added", savedItem.getId());
         log.debug("Item added: {}", savedItem);
 
-        return itemMapper.mapToSimpleItemResponseDto(savedItem);
+        return itemMapper.mapToItemDto(savedItem);
     }
 
     @Override
@@ -76,9 +76,9 @@ public class ItemServiceImpl implements ItemService {
                     .findNextBookingByTime(itemId, Status.APPROVED, now)
                     .orElse(null);
 
-            itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments, lastBooking, nextBooking);
+            itemDto = itemMapper.mapToItemDetailsDto(item, comments, lastBooking, nextBooking);
         } else {
-            itemDto = itemMapper.mapToItemDetailsResponseDto(item, comments);
+            itemDto = itemMapper.mapToItemDetailsDto(item, comments);
         }
 
         log.info("Item with id: {} retrieved", item.getId());
@@ -98,7 +98,7 @@ public class ItemServiceImpl implements ItemService {
         var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), Status.APPROVED, now);
 
         var itemsDto = items.stream()
-                .map(item -> itemMapper.mapToItemDetailsResponseDto(item,
+                .map(item -> itemMapper.mapToItemDetailsDto(item,
                         lastBookings.getOrDefault(item.getId(), null).orElse(null),
                         nextBookings.getOrDefault(item.getId(), null).orElse(null)))
                 .collect(Collectors.toList());
@@ -117,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
 
         var page = PageRequest.of(from / size, size);
         var items = itemRepository.findAllByText(text, page);
-        var itemsDto = itemMapper.mapToSimpleItemResponseDto(items);
+        var itemsDto = itemMapper.mapToItemDto(items);
 
         log.info("Items by text with pagination retrieved: (from: {}, size: {}), count: {}", from, size,
                 itemsDto.size());
@@ -141,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Item with id: {} updated", savedItem.getId());
         log.debug("Item updated: {}", savedItem);
 
-        return itemMapper.mapToSimpleItemResponseDto(savedItem);
+        return itemMapper.mapToItemDto(savedItem);
     }
 
     private Item updateItem(Item item, ItemCreationDto itemDto) {

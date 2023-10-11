@@ -16,5 +16,5 @@ public interface CommentDtoMapper {
     Comment mapToComment(CommentCreationDto commentDto, User author, Item item);
 
     @Mapping(target = "authorName", source = "comment.author.name")
-    CommentDto mapToSimpleCommentResponseDto(Comment comment);
+    CommentDto mapToCommentDto(Comment comment);
 }

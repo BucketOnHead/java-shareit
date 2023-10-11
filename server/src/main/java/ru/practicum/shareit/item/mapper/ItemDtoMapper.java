@@ -24,9 +24,9 @@ public interface ItemDtoMapper {
 
     @Mapping(target = "available", source = "isAvailable")
     @Mapping(target = "requestId", source = "item.itemRequest.id")
-    ItemDto mapToSimpleItemResponseDto(Item item);
+    ItemDto mapToItemDto(Item item);
 
-    List<ItemDto> mapToSimpleItemResponseDto(Iterable<Item> items);
+    List<ItemDto> mapToItemDto(Iterable<Item> items);
 
     @Mapping(target = "authorName", source = "comment.author.name")
     ItemDetailsDto.CommentDto mapToCommentDto(Comment comment);
@@ -39,19 +39,19 @@ public interface ItemDtoMapper {
     @Mapping(target = "lastBooking", ignore = true)
     @Mapping(target = "nextBooking", ignore = true)
     @Mapping(target = "available", source = "item.isAvailable")
-    ItemDetailsDto mapToItemDetailsResponseDto(Item item, Iterable<Comment> comments);
+    ItemDetailsDto mapToItemDetailsDto(Item item, Iterable<Comment> comments);
 
     @Mapping(target = "id", source = "item.id")
     @Mapping(target = "available", source = "item.isAvailable")
     @Mapping(target = "lastBooking", source = "last")
     @Mapping(target = "nextBooking", source = "next")
-    ItemDetailsDto mapToItemDetailsResponseDto(Item item, Iterable<Comment> comments,
-                                               Booking last, Booking next);
+    ItemDetailsDto mapToItemDetailsDto(Item item, Iterable<Comment> comments,
+                                       Booking last, Booking next);
 
     @Mapping(target = "id", source = "item.id")
     @Mapping(target = "available", source = "item.isAvailable")
     @Mapping(target = "lastBooking", source = "last")
     @Mapping(target = "nextBooking", source = "next")
     @Mapping(target = "comments", ignore = true)
-    ItemDetailsDto mapToItemDetailsResponseDto(Item item, Booking last, Booking next);
+    ItemDetailsDto mapToItemDetailsDto(Item item, Booking last, Booking next);
 }

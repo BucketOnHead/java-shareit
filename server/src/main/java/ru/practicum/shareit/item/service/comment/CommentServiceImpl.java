@@ -43,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Comment with id: {} added", savedComment.getId());
         log.debug("Comment added: {}", savedComment);
 
-        return commentMapper.mapToSimpleCommentResponseDto(savedComment);
+        return commentMapper.mapToCommentDto(savedComment);
     }
 
     private boolean isItemAvailableForCommenting(Long userId, Long itemId, LocalDateTime time) {
