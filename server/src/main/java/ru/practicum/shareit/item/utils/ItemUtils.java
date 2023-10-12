@@ -35,7 +35,21 @@ public class ItemUtils {
     }
 
     public boolean isNotOwner(Item item, Long userId) {
-        return !isOwner(item, userId);
+        if (userId == null || item == null) {
+            return false;
+        }
+
+        var owner = item.getOwner();
+        if (owner == null) {
+            return false;
+        }
+
+        var ownerId = owner.getId();
+        if (ownerId == null) {
+            return false;
+        }
+
+        return !ownerId.equals(userId);
     }
 
     public boolean isUnavailable(Item item) {
