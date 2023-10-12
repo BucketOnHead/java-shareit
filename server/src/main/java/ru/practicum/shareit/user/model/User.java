@@ -14,14 +14,15 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50, nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(length = 100, unique = true, nullable = false)
     private String email;
 }

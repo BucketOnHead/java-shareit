@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -32,7 +31,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "WHERE (i.isAvailable = TRUE) " +
             "AND (UPPER(i.name) LIKE CONCAT('%', UPPER(:text), '%')" +
             "     OR (UPPER(i.description) LIKE CONCAT('%', UPPER(:text), '%')))")
-    Page<Item> findAllByText(@Param("text") String text, Pageable page);
+    Page<Item> findAllByText(String text, Pageable page);
 
 
     boolean existsByIdAndOwnerId(Long itemId, Long ownerId);

@@ -15,12 +15,8 @@ public interface BookingDtoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "startTime", source = "bookingDto.start")
-    @Mapping(target = "endTime", source = "bookingDto.end")
     Booking mapToBooking(BookingCreationDto bookingDto, User booker, Item item);
 
-    @Mapping(target = "start", source = "booking.startTime")
-    @Mapping(target = "end", source = "booking.endTime")
     BookingDto mapToBookingDto(Booking booking);
 
     List<BookingDto> mapToBookingDto(Iterable<Booking> bookings);

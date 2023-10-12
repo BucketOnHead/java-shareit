@@ -48,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
 
     private boolean isItemAvailableForCommenting(Long userId, Long itemId, LocalDateTime time) {
         var status = BookingStatus.APPROVED;
-        var bool = bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndTimeBefore(userId, itemId, status, time);
+        var bool = bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndBefore(userId, itemId, status, time);
 
         log.trace("User with id: {} can{} comment item with id: {} at moment: {}", userId, ((bool) ? "" : "not"),
                 itemId, time);

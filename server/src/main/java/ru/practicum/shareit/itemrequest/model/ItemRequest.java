@@ -17,17 +17,18 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 public class ItemRequest {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "request_id")
     private Long id;
 
-    @Column(nullable = false, length = 1000)
+    @Column(length = 1000, nullable = false)
     private String description;
 
     @CreationTimestamp
-    @Column(nullable = false, name = "creation_time")
-    private LocalDateTime creationTime;
+    @Column(name = "creation_time", nullable = false)
+    private LocalDateTime created;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "requester_id")

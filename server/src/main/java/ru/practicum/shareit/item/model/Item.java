@@ -16,15 +16,16 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 public class Item {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
     private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200, nullable = false)
     private String name;
 
-    @Column(nullable = false, length = 1000)
+    @Column(length = 1000, nullable = false)
     private String description;
 
     @Column(name = "is_available", nullable = false)

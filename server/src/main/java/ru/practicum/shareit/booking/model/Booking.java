@@ -25,20 +25,20 @@ public class Booking {
     private Long id;
 
     @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    private LocalDateTime start;
 
     @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    private LocalDateTime end;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "booker_id")
     private User booker;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(length = 50, nullable = false)
     private BookingStatus status = BookingStatus.WAITING;
 }

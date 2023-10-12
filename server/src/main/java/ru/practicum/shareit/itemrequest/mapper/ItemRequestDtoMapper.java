@@ -17,14 +17,12 @@ import java.util.stream.StreamSupport;
 @Mapper(componentModel = "spring")
 public interface ItemRequestDtoMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "creationTime", ignore = true)
+    @Mapping(target = "created", ignore = true)
     ItemRequest mapToItemRequest(ItemRequestCreationDto requestDto, User requester);
 
     @Mapping(target = "items", ignore = true)
-    @Mapping(target = "created", source = "creationTime")
     ItemRequestDto mapToItemRequestDto(ItemRequest request);
 
-    @Mapping(target = "created", source = "request.creationTime")
     ItemRequestDto mapToItemRequestDto(ItemRequest request, Iterable<Item> items);
 
     @Mapping(target = "available", source = "item.isAvailable")

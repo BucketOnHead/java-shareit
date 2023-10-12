@@ -135,16 +135,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Booking updateBooking(Booking booking, Boolean approved) {
-        booking.setStatus((approved == Boolean.TRUE) ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        var status = (approved == Boolean.TRUE) ? BookingStatus.APPROVED : BookingStatus.REJECTED;
+        booking.setStatus(status);
 
         log.trace("Booking status updated: {}", booking);
-
         return booking;
     }
 
     private Page<Booking> getBookingsByBookerIdAndState(Long bookerId, BookingState state, Integer from, Integer size) {
         var now = LocalDateTime.now();
-        var sort = Sort.by(Direction.DESC, "endTime");
+        var sort = Sort.by(Direction.DESC, "end");
         var page = PageRequest.of(from / size, size, sort);
 
         Page<Booking> bookings;
@@ -153,14 +153,14 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByBookerId(bookerId, page);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByBookerIdAndStartTimeBeforeAndEndTimeAfter(bookerId, now, now,
+                bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(bookerId, now, now,
                         page);
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByBookerIdAndEndTimeBefore(bookerId, now, page);
+                bookings = bookingRepository.findAllByBookerIdAndEndBefore(bookerId, now, page);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByBookerIdAndStartTimeAfter(bookerId, now, page);
+                bookings = bookingRepository.findAllByBookerIdAndStartAfter(bookerId, now, page);
                 break;
             case WAITING:
                 bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.WAITING, page);
@@ -179,7 +179,7 @@ public class BookingServiceImpl implements BookingService {
 
     private Page<Booking> getBookingsForUserItemsByState(Long ownerId, BookingState state, Integer from, Integer size) {
         var now = LocalDateTime.now();
-        var sort = Sort.by(Direction.DESC, "endTime");
+        var sort = Sort.by(Direction.DESC, "end");
         var page = PageRequest.of(from / size, size, sort);
 
         Page<Booking> bookings;
@@ -188,14 +188,14 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByItemOwnerId(ownerId, page);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStartTimeBeforeAndEndTimeAfter(ownerId, now, now,
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(ownerId, now, now,
                         page);
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByItemOwnerIdAndEndTimeBefore(ownerId, now, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, now, page);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfter(ownerId, now, page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartIsAfter(ownerId, now, page);
                 break;
             case WAITING:
                 bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, page);
