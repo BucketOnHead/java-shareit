@@ -52,7 +52,6 @@ public class CommentServiceImpl implements CommentService {
 
         log.trace("User with id: {} can{} comment item with id: {} at moment: {}", userId, ((bool) ? "" : "not"),
                 itemId, time);
-
         return bool;
     }
 }
