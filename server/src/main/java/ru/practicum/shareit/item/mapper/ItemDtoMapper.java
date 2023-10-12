@@ -28,14 +28,6 @@ public interface ItemDtoMapper {
 
     List<ItemDto> mapToItemDto(Iterable<Item> items);
 
-    @Mapping(target = "authorName", source = "comment.author.name")
-    ItemDetailsDto.CommentDto mapToCommentDto(Comment comment);
-
-    List<ItemDetailsDto.CommentDto> mapToCommentDto(Iterable<Comment> comment);
-
-    @Mapping(target = "bookerId", source = "booking.booker.id")
-    ItemDetailsDto.BookingDto mapToBookingDto(Booking booking);
-
     @Mapping(target = "lastBooking", ignore = true)
     @Mapping(target = "nextBooking", ignore = true)
     @Mapping(target = "available", source = "item.isAvailable")
@@ -54,4 +46,12 @@ public interface ItemDtoMapper {
     @Mapping(target = "nextBooking", source = "next")
     @Mapping(target = "comments", ignore = true)
     ItemDetailsDto mapToItemDetailsDto(Item item, Booking last, Booking next);
+
+    @Mapping(target = "authorName", source = "comment.author.name")
+    ItemDetailsDto.CommentDto mapToItemDetailsCommentDto(Comment comment);
+
+    List<ItemDetailsDto.CommentDto> mapToItemDetailsCommentDto(Iterable<Comment> comment);
+
+    @Mapping(target = "bookerId", source = "booking.booker.id")
+    ItemDetailsDto.BookingDto mapToItemDetailsBookingDto(Booking booking);
 }
