@@ -35,7 +35,6 @@ public interface ItemRequestDtoMapper {
 
     default List<ItemRequestDto> mapToItemRequestDto(Iterable<ItemRequest> requests, Iterable<Item> items) {
         var itemsByRequestId = ItemRequestUtils.toItemsByRequestId(items);
-
         return StreamSupport.stream(requests.spliterator(), false)
                 .map(request -> mapToItemRequestDto(
                         request,

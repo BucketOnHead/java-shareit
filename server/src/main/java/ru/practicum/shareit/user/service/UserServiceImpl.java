@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.findByIdOrThrow(userId);
         var userDto = userMapper.mapToUserDto(user);
 
-        log.info("User with id: {} retrieved", user.getId());
-        log.debug("User retrieved: {}", userDto);
+        log.info("User with id: {} returned", user.getId());
+        log.debug("User returned: {}", userDto);
 
         return userDto;
     }
@@ -62,8 +62,8 @@ public class UserServiceImpl implements UserService {
         var users = userRepository.findAll(PageRequest.of(from / size, size));
         var usersDto = userMapper.mapToUserDto(users);
 
-        log.info("Users with pagination retrieved: (from: {}, size: {}), count: {}", from, size, usersDto.size());
-        log.debug("Users with pagination retrieved: {}", usersDto);
+        log.info("Users page with from: {} and size: {} returned, count: {}", from, size, usersDto.size());
+        log.debug("Users page returned: {}", usersDto);
 
         return usersDto;
     }
@@ -73,7 +73,6 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(Long userId) {
         userRepository.existsByIdOrThrow(userId);
         userRepository.deleteById(userId);
-
         log.info("User with id: {} deleted", userId);
     }
 

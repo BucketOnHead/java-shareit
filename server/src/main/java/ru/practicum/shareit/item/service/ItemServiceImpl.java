@@ -81,8 +81,8 @@ public class ItemServiceImpl implements ItemService {
             itemDto = itemMapper.mapToItemDetailsDto(item, comments);
         }
 
-        log.info("Item with id: {} retrieved", item.getId());
-        log.debug("Item retrieved: {}", itemDto);
+        log.info("Item with id: {} returned", item.getId());
+        log.debug("Item returned: {}", itemDto);
 
         return itemDto;
     }
@@ -103,8 +103,8 @@ public class ItemServiceImpl implements ItemService {
                         nextBookings.getOrDefault(item.getId(), null).orElse(null)))
                 .collect(Collectors.toList());
 
-        log.info("Item with pagination retrieved: (from: {}, size: {}), count: {}", from, size, itemsDto.size());
-        log.debug("Item with pagination retrieved: {}", itemsDto);
+        log.info("Items page with from: {} and size: {}, returned, count: {}", from, size, itemsDto.size());
+        log.debug("Items page returned: {}", itemsDto);
 
         return itemsDto;
     }
@@ -119,9 +119,9 @@ public class ItemServiceImpl implements ItemService {
         var items = itemRepository.findAllByText(text, page);
         var itemsDto = itemMapper.mapToItemDto(items);
 
-        log.info("Items by text with pagination retrieved: (from: {}, size: {}), count: {}", from, size,
+        log.info("Items page with from: {}, size: {}, by text: {} returned: , count: {}", from, size, text,
                 itemsDto.size());
-        log.debug("Items by text with pagination retrieved: {}", itemsDto);
+        log.debug("Items returned: {}", itemsDto);
 
         return itemsDto;
     }

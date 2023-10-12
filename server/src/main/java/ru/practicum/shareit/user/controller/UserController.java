@@ -31,7 +31,6 @@ public class UserController {
             @PathVariable Long userId
     ) {
         log.info("Getting user by id: {}", userId);
-
         return userService.getUserById(userId);
     }
 
@@ -40,8 +39,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        log.info("Getting users with pagination: (from: {}, size: {})", from, size);
-
+        log.info("Getting users page with from: {} and size: {}", from, size);
         return userService.getUsers(from, size);
     }
 
@@ -61,7 +59,6 @@ public class UserController {
             @PathVariable Long userId
     ) {
         log.info("Deleting user by id: {}", userId);
-
         userService.deleteUserById(userId);
     }
 }

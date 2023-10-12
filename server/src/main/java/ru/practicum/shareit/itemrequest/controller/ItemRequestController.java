@@ -34,7 +34,6 @@ public class ItemRequestController {
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Getting item request with id: {} by user with id: {}", requestId, userId);
-
         return itemRequestService.getItemRequestById(requestId, userId);
     }
 
@@ -43,7 +42,6 @@ public class ItemRequestController {
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Getting item requests for requester with id: {}", userId);
-
         return itemRequestService.getItemRequestsByRequesterId(userId);
     }
 
@@ -53,8 +51,7 @@ public class ItemRequestController {
             @RequestParam Integer from,
             @RequestParam Integer size
     ) {
-        log.info("Getting item requests with pagination: (from: {}, size: {}) for user with id: {}", from, size, userId);
-
+        log.info("Getting item requests page with from: {} and size: {} for user with id: {}", from, size, userId);
         return itemRequestService.getItemRequests(userId, from, size);
     }
 }

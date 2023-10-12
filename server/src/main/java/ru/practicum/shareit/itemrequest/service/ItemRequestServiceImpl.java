@@ -46,8 +46,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         var items = itemRepository.findAllByItemRequestId(requestId);
         var requestDto = requestMapper.mapToItemRequestDto(request, items);
 
-        log.info("Item request with id: {} retrieved", request.getId());
-        log.debug("Item request retrieved: {}", requestDto);
+        log.info("Item request with id: {} returned", request.getId());
+        log.debug("Item request returned: {}", requestDto);
 
         return requestDto;
     }
@@ -77,7 +77,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         var items = itemRepository.findAllByItemRequestIdIn(requestsIds);
         var requestsDto = requestMapper.mapToItemRequestDto(requests, items);
 
-        log.info("Item requests page returned: (from: {}, size: {}), count: {}", from, size, requestsDto.size());
+        log.info("Item requests page with from: {} and size: {} returned, count: {}", from, size, requestsDto.size());
         log.debug("Item requests page returned: {}", requestsDto);
 
         return requestsDto;
