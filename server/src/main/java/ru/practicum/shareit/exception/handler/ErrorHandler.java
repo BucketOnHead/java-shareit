@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.booking.exception.*;
-import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.item.exception.ItemAccessException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.exception.comment.CommentNotAllowedException;
@@ -21,7 +20,6 @@ public class ErrorHandler {
 
     @ExceptionHandler({
             MissingRequestHeaderException.class,
-            IncorrectDataException.class,
             CommentNotAllowedException.class,
             BookingNotAwaitingApprovalException.class,
             ItemUnavailableException.class
