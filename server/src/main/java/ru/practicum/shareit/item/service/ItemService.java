@@ -7,13 +7,13 @@ import ru.practicum.shareit.item.dto.response.ItemDto;
 import java.util.List;
 
 public interface ItemService {
-    ItemDto addItem(ItemCreationDto itemDto, Long ownerUserId);
+    ItemDto addItem(ItemCreationDto itemDto, Long ownerId);
 
-    ItemDetailsDto getItemById(Long itemId, Long currentUserId);
+    ItemDetailsDto getItemById(Long itemId, Long userId);
 
-    List<ItemDetailsDto> getItemsByUserId(Long ownerUserId, Integer from, Integer size);
+    List<ItemDetailsDto> getItemsByUserId(Long userId, Integer from, Integer size);
 
     List<ItemDto> getItemsByText(String text, Integer from, Integer size);
 
-    ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long currentUserId);
+    ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long userId);
 }

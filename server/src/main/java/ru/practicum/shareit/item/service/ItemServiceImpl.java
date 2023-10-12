@@ -170,7 +170,6 @@ public class ItemServiceImpl implements ItemService {
         var isOwner = itemRepository.existsByIdAndOwnerId(itemId, userId);
 
         log.trace("User with id: {} is {} owner of item with id: {}", userId, (isOwner ? "" : "not"), itemId);
-
         return isOwner;
     }
 }
