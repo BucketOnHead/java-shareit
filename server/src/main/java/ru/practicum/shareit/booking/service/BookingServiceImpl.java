@@ -39,9 +39,11 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto addBooking(BookingCreationDto bookingDto, Long userId) {
         var item = itemRepository.findByIdOrThrow(bookingDto.getItemId());
         if (ItemUtils.isOwner(item, userId)) {
+            log.trace("User with id: {} is not owner of item with id: {}", userId, item.getId());
             throw new SelfBookingAttemptException(userId, item.getId());
         }
         if (ItemUtils.isUnavailable(item)) {
+            log.trace("Item with id: {} is not available for booking", item.getId());
             throw new ItemUnavailableException(item.getId());
         }
 
@@ -57,49 +59,50 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto getBookingByIdOnlyForOwnerOrBooker(Long bookingId, Long userId) {
+    public BookingDto getBookingById(Long bookingId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
 
         var booking = bookingRepository.findByIdOrThrow(bookingId);
         var item = booking.getItem();
         if (ItemUtils.isNotOwner(item, userId) && BookingUtils.isNotBooker(booking, userId)) {
+            log.trace("User with id: {} is not owner of item with id: {} or the booker", userId, item.getId());
             throw new BookingAccessException(booking.getId(), userId);
         }
 
         var bookingDto = bookingMapper.mapToBookingDto(booking);
 
-        log.info("Booking with id: {} returned", booking.getId());
-        log.debug("Booking returned: {}", bookingDto);
+        log.info("Booking with id: {} returned for user with id: {}", booking.getId(), userId);
+        log.debug("Booking returned for user with id: {}, {}", userId, bookingDto);
 
         return bookingDto;
     }
 
     @Override
-    public List<BookingDto> getBookingPageByBookerId(Long bookerId, String stateStr, Integer from, Integer size) {
+    public List<BookingDto> getBookingsByBookerId(Long bookerId, String stateStr, Integer from, Integer size) {
         userRepository.existsByIdOrThrow(bookerId);
         var state = BookingState.valueOf(stateStr);
 
         var bookings = getBookingsByBookerIdAndState(bookerId, state, from, size);
         var bookingsDto = bookingMapper.mapToBookingDto(bookings);
 
-        log.info("Bookings page(from: {}, size: {}) with state: {} for booker with id: {} returned, count: {}", from,
-                size, state, bookerId, bookingsDto.size());
+        log.info("Bookings page: from: {} and size: {}, with state: {} for booker with id: {} returned, count: {}",
+                from, size, state, bookerId, bookingsDto.size());
         log.debug("Booking page returned for booker with id: {}, {}", bookerId, bookingsDto);
 
         return bookingsDto;
     }
 
     @Override
-    public List<BookingDto> getBookingsForUserItems(Long ownerId, String stateStr,
-                                                    Integer from, Integer size) {
+    public List<BookingDto> getBookingsByOwnerId(Long ownerId, String stateStr,
+                                                 Integer from, Integer size) {
         userRepository.existsByIdOrThrow(ownerId);
         var state = BookingState.valueOf(stateStr);
 
         var bookings = getBookingsForUserItemsByState(ownerId, state, from, size);
         var bookingsDto = bookingMapper.mapToBookingDto(bookings);
 
-        log.info("Bookings page(from: {}, size: {}) with state: {} for owner with id: {} returned, count: {}", from,
-                size, state, ownerId, bookingsDto.size());
+        log.info("Bookings page with from: {} and size: {}, with state: {} for owner with id: {} returned, count: {}",
+                from, size, state, ownerId, bookingsDto.size());
         log.debug("Booking page returned for booker with id: {}, {}", ownerId, bookingsDto);
 
         return bookingsDto;
@@ -107,16 +110,18 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
+    public BookingDto approveOrRejectBooking(Long bookingId, Long userId, Boolean approved) {
         userRepository.existsByIdOrThrow(userId);
 
         var booking = bookingRepository.findByIdOrThrow(bookingId);
         if (BookingUtils.isNotWaiting(booking)) {
+            log.trace("Booking with id: {} is not waiting approval", booking.getId());
             throw new BookingNotAwaitingApprovalException(bookingId);
         }
 
         var item = booking.getItem();
         if (ItemUtils.isNotOwner(item, userId)) {
+            log.trace("User with id: {} is not owner of item with id: {}", userId, item.getId());
             throw new BookingAccessException(booking.getId(), item.getId());
         }
 
@@ -190,8 +195,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByItemOwnerIdAndEndTimeBefore(ownerId, now, page);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfterOrderByStartTimeDesc(ownerId, now,
-                        page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfter(ownerId, now, page);
                 break;
             case WAITING:
                 bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, page);

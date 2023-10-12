@@ -22,7 +22,7 @@ public class BookingController {
             @RequestBody BookingCreationDto bookingDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        log.info("Adding booking from user with id: {}", userId);
+        log.info("Adding booking to item with id: {} from user with id: {}", bookingDto.getItemId(), userId);
         log.info("Adding booking from user with id: {}, {}", userId, bookingDto);
 
         return bookingService.addBooking(bookingDto, userId);
@@ -35,7 +35,7 @@ public class BookingController {
     ) {
         log.info("Getting booking with id: {} for user with id: {}", bookingId, userId);
 
-        return bookingService.getBookingByIdOnlyForOwnerOrBooker(bookingId, userId);
+        return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
@@ -45,23 +45,23 @@ public class BookingController {
             @RequestParam Integer size,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        log.info("Getting bookings page(from: {}, size: {}) with state: {} for user with id: {}", from, size, state,
-                userId);
+        log.info("Getting bookings page with from: {} and size: {}, with state: {} for user with id: {}", from, size,
+                state, userId);
 
-        return bookingService.getBookingPageByBookerId(userId, state, from, size);
+        return bookingService.getBookingsByBookerId(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getBookingsForUserItems(
+    public List<BookingDto> getBookingsByOwnerId(
             @RequestParam String state,
             @RequestParam Integer from,
             @RequestParam Integer size,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        log.info("Getting bookings page(from: {}, size: {}) with state: {} for user items with id: {}", from, size,
-                state, userId);
+        log.info("Getting bookings page with from: {} and size: {}, with state: {} for user items with id: {}", from,
+                size, state, userId);
 
-        return bookingService.getBookingsForUserItems(userId, state, from, size);
+        return bookingService.getBookingsByOwnerId(userId, state, from, size);
     }
 
     @PatchMapping("/{bookingId}")
@@ -70,9 +70,9 @@ public class BookingController {
             @RequestParam Boolean approved,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        log.info("Updating booking status with id: {}, from user with id: {}, approved: {}", userId, bookingId,
+        log.info("Updating booking status with id: {} from user with id: {}, approved: {}", userId, bookingId,
                 approved);
 
-        return bookingService.updateBookingStatus(bookingId, approved, userId);
+        return bookingService.approveOrRejectBooking(bookingId, userId, approved);
     }
 }

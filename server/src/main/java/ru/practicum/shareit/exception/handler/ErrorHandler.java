@@ -9,10 +9,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.exception.BookingAccessException;
-import ru.practicum.shareit.booking.exception.BookingNotAwaitingApprovalException;
-import ru.practicum.shareit.booking.exception.ItemUnavailableException;
-import ru.practicum.shareit.booking.exception.SelfBookingAttemptException;
+import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.exception.LogicException;
@@ -85,7 +82,8 @@ public class ErrorHandler {
     @ExceptionHandler({
             EntityNotFoundException.class,
             SelfBookingAttemptException.class,
-            BookingAccessException.class
+            BookingAccessException.class,
+            BookingNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse entityNotFoundExceptionHandler(final RuntimeException ex) {
