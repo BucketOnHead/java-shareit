@@ -1,8 +1,6 @@
 package ru.practicum.shareit.user.exception;
 
-import ru.practicum.shareit.exception.EntityNotFoundException;
-
-public class UserNotFoundException extends EntityNotFoundException {
+public class UserNotFoundException extends RuntimeException {
     private static final long serialVersionUID = -2546797154273459251L;
 
     public UserNotFoundException(Long userId) {

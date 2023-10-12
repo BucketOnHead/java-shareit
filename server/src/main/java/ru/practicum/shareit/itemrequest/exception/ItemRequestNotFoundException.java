@@ -1,8 +1,6 @@
 package ru.practicum.shareit.itemrequest.exception;
 
-import ru.practicum.shareit.exception.EntityNotFoundException;
-
-public class ItemRequestNotFoundException extends EntityNotFoundException {
+public class ItemRequestNotFoundException extends RuntimeException {
     private static final long serialVersionUID = 5833045847077036042L;
 
     public ItemRequestNotFoundException(Long requestId) {
