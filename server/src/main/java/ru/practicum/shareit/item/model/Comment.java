@@ -1,9 +1,7 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.shareit.user.model.User;
 
@@ -12,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "item_comments")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Setter
 @Getter
 @ToString
@@ -21,20 +20,20 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_comment_id")
-    private Long id;
+    Long id;
 
     @Column(length = 1000, nullable = false)
-    private String text;
+    String text;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "author_id")
-    private User author;
+    User author;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "item_id")
-    private Item item;
+    Item item;
 
     @CreationTimestamp
     @Column(name = "creation_time", nullable = false)
-    private LocalDateTime created;
+    LocalDateTime created;
 }

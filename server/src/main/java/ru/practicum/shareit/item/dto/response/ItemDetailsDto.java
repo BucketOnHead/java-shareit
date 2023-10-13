@@ -1,43 +1,44 @@
 package ru.practicum.shareit.item.dto.response;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Setter
 @Getter
 @ToString
 @NoArgsConstructor
 public class ItemDetailsDto {
-    private Long id;
-    private String name;
-    private String description;
-    private Boolean available;
-    private BookingDto lastBooking;
-    private BookingDto nextBooking;
-    private List<CommentDto> comments;
+    Long id;
+    String name;
+    String description;
+    Boolean available;
+    BookingDto lastBooking;
+    BookingDto nextBooking;
+    List<CommentDto> comments;
 
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     @Setter
     @Getter
     @ToString
     @NoArgsConstructor
     public static class BookingDto {
-        private Long id;
-        private Long bookerId;
+        Long id;
+        Long bookerId;
     }
 
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     @Setter
     @Getter
     @ToString
     @NoArgsConstructor
     public static class CommentDto {
-        private Long id;
-        private String authorName;
-        private String text;
-        private LocalDateTime created;
+        Long id;
+        String authorName;
+        String text;
+        LocalDateTime created;
     }
 }

@@ -1,14 +1,13 @@
 package ru.practicum.shareit.item.dto.request.comment;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+@FieldDefaults(level = AccessLevel.PUBLIC)
 @Setter
 @Getter
 @ToString
 @NoArgsConstructor
 public class CommentCreationDto {
-    private String text;
+    String text;
 }

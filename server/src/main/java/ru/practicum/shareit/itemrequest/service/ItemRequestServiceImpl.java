@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.utils.ItemUtils;
 import ru.practicum.shareit.itemrequest.dto.request.ItemRequestCreationDto;
 import ru.practicum.shareit.itemrequest.dto.response.ItemRequestDto;
 import ru.practicum.shareit.itemrequest.mapper.ItemRequestDtoMapper;
@@ -57,8 +58,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userRepository.existsByIdOrThrow(requesterId);
 
         var requests = requestRepository.findAllByRequesterId(requesterId);
-        var items = itemRepository.findAllByItemRequestIdIn(ItemRequestUtils.toIdsSet(requests));
-        var requestsDto = requestMapper.mapToItemRequestDto(requests, items);
+        var requestIds = ItemRequestUtils.toIdsSet(requests);
+        var items = itemRepository.findAllByItemRequestIdIn(requestIds);
+
+        var itemsByRequestId = ItemUtils.toItemsByRequestId(items);
+        var requestsDto = requestMapper.mapToItemRequestDto(requests, itemsByRequestId);
 
         log.info("Item requests for user with id: {} returned, count: {}", requesterId, requestsDto.size());
         log.debug("Item requests for user with id: {} returned, {}", requesterId, requestsDto);
@@ -72,8 +76,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         var page = PageRequest.of(from / size, size);
         var requests = requestRepository.findAllByRequesterIdIsNot(userId, page);
-        var items = itemRepository.findAllByItemRequestIdIn(ItemRequestUtils.toIdsSet(requests));
-        var requestsDto = requestMapper.mapToItemRequestDto(requests, items);
+
+        var requestIds = ItemRequestUtils.toIdsSet(requests);
+        var items = itemRepository.findAllByItemRequestIdIn(requestIds);
+
+        var itemsByRequestId = ItemUtils.toItemsByRequestId(items);
+        var requestsDto = requestMapper.mapToItemRequestDto(requests, itemsByRequestId);
 
         log.info("Item requests page with from: {} and size: {} returned, count: {}", from, size, requestsDto.size());
         log.debug("Item requests page returned: {}", requestsDto);

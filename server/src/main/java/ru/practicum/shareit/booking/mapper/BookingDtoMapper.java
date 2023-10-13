@@ -10,7 +10,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.NullValueMappingStrategy.RETURN_DEFAULT;
+
+@Mapper(componentModel = "spring", nullValueMappingStrategy = RETURN_DEFAULT)
 public interface BookingDtoMapper {
 
     @Mapping(target = "id", ignore = true)

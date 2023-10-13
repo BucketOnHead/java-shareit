@@ -34,7 +34,6 @@ public class BookingController {
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Getting booking with id: {} for user with id: {}", bookingId, userId);
-
         return bookingService.getBookingById(bookingId, userId);
     }
 
@@ -47,7 +46,6 @@ public class BookingController {
     ) {
         log.info("Getting bookings page with from: {} and size: {}, with state: {} for user with id: {}", from, size,
                 state, userId);
-
         return bookingService.getBookingsByBookerId(userId, state, from, size);
     }
 
@@ -60,7 +58,6 @@ public class BookingController {
     ) {
         log.info("Getting bookings page with from: {} and size: {}, with state: {} for user items with id: {}", from,
                 size, state, userId);
-
         return bookingService.getBookingsByOwnerId(userId, state, from, size);
     }
 
@@ -72,7 +69,6 @@ public class BookingController {
     ) {
         log.info("Updating booking status with id: {} from user with id: {}, approved: {}", userId, bookingId,
                 approved);
-
         return bookingService.approveOrRejectBooking(bookingId, userId, approved);
     }
 }

@@ -3,12 +3,24 @@ package ru.practicum.shareit.item.utils;
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @UtilityClass
 public class ItemUtils {
+
+    public Map<Long, List<Item>> toItemsByRequestId(Iterable<Item> items) {
+        if (items == null) {
+            return Collections.emptyMap();
+        }
+
+        return StreamSupport.stream(items.spliterator(), true)
+                .filter(Objects::nonNull)
+                .filter(i -> i.getItemRequest() != null)
+                .filter(i -> i.getItemRequest().getId() != null)
+                .collect(Collectors.groupingBy(i -> i.getItemRequest().getId()));
+    }
 
     public Set<Long> toIdsSet(Iterable<Item> items) {
         return StreamSupport.stream(items.spliterator(), true)

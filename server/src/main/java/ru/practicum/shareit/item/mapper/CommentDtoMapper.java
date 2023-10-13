@@ -8,7 +8,9 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.NullValueMappingStrategy.RETURN_DEFAULT;
+
+@Mapper(componentModel = "spring", nullValueMappingStrategy = RETURN_DEFAULT)
 public interface CommentDtoMapper {
 
     @Mapping(target = "id", ignore = true)

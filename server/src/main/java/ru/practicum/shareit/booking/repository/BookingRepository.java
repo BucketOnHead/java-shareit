@@ -54,7 +54,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         return findItemLastBookings(itemId, status, time, LIMIT_1).get().findFirst();
     }
 
-    default List<Booking> findItemsLastBookingV2(Collection<Long> itemIds, BookingStatus status, LocalDateTime time) {
+    default List<Booking> findItemsLastBooking(Collection<Long> itemIds, BookingStatus status, LocalDateTime time) {
         return itemIds.stream()
                 .map(id -> findItemLastBooking(id, status, time))
                 .filter(Optional::isPresent)
@@ -75,7 +75,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 .findFirst();
     }
 
-    default List<Booking> findItemsNextBookingV2(Collection<Long> itemIds, BookingStatus status, LocalDateTime time) {
+    default List<Booking> findItemsNextBooking(Collection<Long> itemIds, BookingStatus status, LocalDateTime time) {
         return itemIds.stream()
                 .map(id -> findItemNextBooking(id, status, time))
                 .filter(Optional::isPresent)

@@ -61,8 +61,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBookingById(Long bookingId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
-
         var booking = bookingRepository.findByIdOrThrow(bookingId);
+
         var item = booking.getItem();
         if (ItemUtils.isNotOwner(item, userId) && BookingUtils.isNotBooker(booking, userId)) {
             log.trace("User with id: {} is not owner of item with id: {} or the booker", userId, item.getId());
@@ -96,8 +96,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getBookingsByOwnerId(Long ownerId, String stateStr,
                                                  Integer from, Integer size) {
         userRepository.existsByIdOrThrow(ownerId);
-        var state = BookingState.valueOf(stateStr);
 
+        var state = BookingState.valueOf(stateStr);
         var bookings = getBookingsForUserItemsByState(ownerId, state, from, size);
         var bookingsDto = bookingMapper.mapToBookingDto(bookings);
 
@@ -153,8 +153,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByBookerId(bookerId, page);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(bookerId, now, now,
-                        page);
+                bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(bookerId, now, now, page);
                 break;
             case PAST:
                 bookings = bookingRepository.findAllByBookerIdAndEndBefore(bookerId, now, page);
@@ -188,8 +187,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByItemOwnerId(ownerId, page);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(ownerId, now, now,
-                        page);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(ownerId, now, now, page);
                 break;
             case PAST:
                 bookings = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, now, page);
@@ -208,7 +206,6 @@ public class BookingServiceImpl implements BookingService {
         }
 
         log.trace("Bookings page by state: {} for owner_of_items with id: {} returned, {}", state, ownerId, bookings);
-
         return bookings;
     }
 }

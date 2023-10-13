@@ -6,16 +6,18 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.itemrequest.dto.request.ItemRequestCreationDto;
 import ru.practicum.shareit.itemrequest.dto.response.ItemRequestDto;
 import ru.practicum.shareit.itemrequest.model.ItemRequest;
-import ru.practicum.shareit.itemrequest.utils.ItemRequestUtils;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.Map;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.NullValueMappingStrategy.RETURN_DEFAULT;
+
+@Mapper(componentModel = "spring", nullValueMappingStrategy = RETURN_DEFAULT)
 public interface ItemRequestDtoMapper {
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
     ItemRequest mapToItemRequest(ItemRequestCreationDto requestDto, User requester);
@@ -31,12 +33,21 @@ public interface ItemRequestDtoMapper {
 
     List<ItemRequestDto.ItemDto> mapToItemRequestItemDto(Iterable<Item> item);
 
-    default List<ItemRequestDto> mapToItemRequestDto(Iterable<ItemRequest> requests, Iterable<Item> items) {
-        var itemsByRequestId = ItemRequestUtils.toItemsByRequestId(items);
-        return StreamSupport.stream(requests.spliterator(), false)
-                .map(request -> mapToItemRequestDto(
-                        request,
-                        itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList())))
-                .collect(Collectors.toList());
+    default List<ItemRequestDto> mapToItemRequestDto(Iterable<ItemRequest> requests,
+                                                     Map<Long, List<Item>> itemsByRequestId) {
+        if (requests == null) {
+            return Collections.emptyList();
+        }
+
+        List<ItemRequestDto> list = new ArrayList<>();
+        for (var request : requests) {
+            List<Item> items = null;
+            if (itemsByRequestId != null) {
+                items = itemsByRequestId.get(request.getId());
+            }
+            list.add(mapToItemRequestDto(request, items));
+        }
+
+        return list;
     }
 }

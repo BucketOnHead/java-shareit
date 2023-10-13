@@ -96,8 +96,8 @@ public class ItemServiceImpl implements ItemService {
 
         var now = LocalDateTime.now();
         var itemIds = ItemUtils.toIdsSet(items);
-        var lastBookings = bookingRepository.findItemsLastBookingV2(itemIds, BookingStatus.APPROVED, now);
-        var nextBookings = bookingRepository.findItemsNextBookingV2(itemIds, BookingStatus.APPROVED, now);
+        var lastBookings = bookingRepository.findItemsLastBooking(itemIds, BookingStatus.APPROVED, now);
+        var nextBookings = bookingRepository.findItemsNextBooking(itemIds, BookingStatus.APPROVED, now);
 
         var lastBookingByItemId = BookingUtils.toBookingByItemId(lastBookings);
         var nextBookingByItemId = BookingUtils.toBookingByItemId(nextBookings);
@@ -131,6 +131,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(ItemCreationDto itemDto, Long itemId, Long userId) {
         userRepository.existsByIdOrThrow(userId);
         var item = itemRepository.findByIdOrThrow(itemId);
+
         if (!isOwner(itemId, userId)) {
             throw new ItemAccessException(itemId, userId);
         }
@@ -168,8 +169,8 @@ public class ItemServiceImpl implements ItemService {
 
     private boolean isOwner(Long itemId, Long userId) {
         var isOwner = itemRepository.existsByIdAndOwnerId(itemId, userId);
-        log.trace("User with id: {} is {} owner of item with id: {}", userId, (isOwner ? "" : "not"), itemId);
 
+        log.trace("User with id: {} is {} owner of item with id: {}", userId, (isOwner ? "" : "not"), itemId);
         return isOwner;
     }
 }
