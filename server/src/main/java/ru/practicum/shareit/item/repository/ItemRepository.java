@@ -22,10 +22,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     /**
      * Finds all available {@link Item} entities that match the given search text
      * (case-insensitive) in either the item name or description.
-     *
-     * @param text The search text to match.
-     * @param page The page of results to retrieve.
-     * @return A {@link Page} of available {@link Item} entities that match the given search text.
      */
     @Query("SELECT i FROM Item i " +
             "WHERE (i.isAvailable = TRUE) " +

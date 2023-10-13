@@ -43,6 +43,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean existsByBookerIdAndItemIdAndStatusAndEndBefore(Long itemId, Long bookerId, BookingStatus status,
                                                            LocalDateTime time);
 
+    /**
+     * Retrieve the latest completed bookings based
+     * on specified parameters, searching across all
+     * statuses if "status" is null.
+     */
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.id = :itemId " +
             "AND b.start < :time " +
@@ -50,6 +55,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY b.start DESC")
     Page<Booking> findItemLastBookings(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
 
+    /**
+     * Retrieve the upcoming bookings based on specified
+     * parameters, searching across all statuses if
+     * 'status' is null.
+     */
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.item.id = :itemId " +
+            "AND b.start > :time " +
+            "AND (b.status IS NULL OR b.status = :status) " +
+            "ORDER BY b.start ASC")
+    Page<Booking> findItemNextBooking(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
+
+    /**
+     * Retrieve the nearest past booking based on specified parameters,
+     * searching across all statuses if 'status' is null.
+     * Utilizes {@link #findItemLastBookings(Long, BookingStatus, LocalDateTime, Pageable)}
+     */
     default Optional<Booking> findItemLastBooking(Long itemId, BookingStatus status, LocalDateTime time) {
         return findItemLastBookings(itemId, status, time, LIMIT_1).get().findFirst();
     }
@@ -62,13 +84,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 .collect(Collectors.toList());
     }
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.id = :itemId " +
-            "AND b.start > :time " +
-            "AND (b.status IS NULL OR b.status = :status) " +
-            "ORDER BY b.start ASC")
-    Page<Booking> findItemNextBooking(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
-
+    /**
+     * Retrieve the nearest past booking based on specified parameters,
+     * searching across all statuses if 'status' is null.
+     * Utilizes {@link #findItemNextBooking(Long, BookingStatus, LocalDateTime, Pageable)}
+     */
     default Optional<Booking> findItemNextBooking(Long itemId, BookingStatus status, LocalDateTime time) {
         return findItemNextBooking(itemId, status, time, LIMIT_1)
                 .stream()
