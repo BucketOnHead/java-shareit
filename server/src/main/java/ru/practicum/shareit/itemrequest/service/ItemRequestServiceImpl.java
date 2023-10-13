@@ -57,8 +57,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userRepository.existsByIdOrThrow(requesterId);
 
         var requests = requestRepository.findAllByRequesterId(requesterId);
-        var requestIds = ItemRequestUtils.toIdsSet(requests);
-        var items = itemRepository.findAllByItemRequestIdIn(requestIds);
+        var items = itemRepository.findAllByItemRequestIdIn(ItemRequestUtils.toIdsSet(requests));
         var requestsDto = requestMapper.mapToItemRequestDto(requests, items);
 
         log.info("Item requests for user with id: {} returned, count: {}", requesterId, requestsDto.size());
@@ -73,8 +72,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         var page = PageRequest.of(from / size, size);
         var requests = requestRepository.findAllByRequesterIdIsNot(userId, page);
-        var requestsIds = ItemRequestUtils.toIdsSet(requests);
-        var items = itemRepository.findAllByItemRequestIdIn(requestsIds);
+        var items = itemRepository.findAllByItemRequestIdIn(ItemRequestUtils.toIdsSet(requests));
         var requestsDto = requestMapper.mapToItemRequestDto(requests, items);
 
         log.info("Item requests page with from: {} and size: {} returned, count: {}", from, size, requestsDto.size());

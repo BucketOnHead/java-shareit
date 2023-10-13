@@ -49,19 +49,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.start < :time " +
             "AND (b.status IS NULL OR b.status = :status) " +
             "ORDER BY b.start DESC")
-    Page<Booking> findAllLastBookingByTime(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
+    Page<Booking> findItemLastBookings(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
 
-    default Optional<Booking> findLastBookingByTime(Long itemId, BookingStatus status, LocalDateTime time) {
-        return findAllLastBookingByTime(itemId, status, time, LIMIT_1)
+    default Optional<Booking> findItemLastBooking(Long itemId, BookingStatus status, LocalDateTime time) {
+        return findItemLastBookings(itemId, status, time, LIMIT_1)
                 .stream()
                 .findFirst();
     }
 
-    default Map<Long, Optional<Booking>> findAllLastBookingByTime(Collection<Long> ids, BookingStatus status,
-                                                                  LocalDateTime time) {
+    default Map<Long, Optional<Booking>> findItemsLastBooking(Collection<Long> ids, BookingStatus status,
+                                                              LocalDateTime time) {
         return ids.stream().collect(Collectors.toMap(
                 Function.identity(),
-                id -> findLastBookingByTime(id, status, time)));
+                id -> findItemLastBooking(id, status, time)));
     }
 
     @Query("SELECT b FROM Booking b " +
@@ -69,19 +69,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.start > :time " +
             "AND (b.status IS NULL OR b.status = :status) " +
             "ORDER BY b.start ASC")
-    Page<Booking> findAllNextBookingByTime(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
+    Page<Booking> findItemNextBooking(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
 
-    default Optional<Booking> findNextBookingByTime(Long itemId, BookingStatus status, LocalDateTime time) {
-        return findAllNextBookingByTime(itemId, status, time, LIMIT_1)
+    default Optional<Booking> findNextBooking(Long itemId, BookingStatus status, LocalDateTime time) {
+        return findItemNextBooking(itemId, status, time, LIMIT_1)
                 .stream()
                 .findFirst();
     }
 
-    default Map<Long, Optional<Booking>> findAllNextBookingByTime(Collection<Long> ids, BookingStatus status,
-                                                                  LocalDateTime time) {
+    default Map<Long, Optional<Booking>> findItemsNextBooking(Collection<Long> ids, BookingStatus status,
+                                                              LocalDateTime time) {
         return ids.stream().collect(Collectors.toMap(
                 Function.identity(),
-                id -> findNextBookingByTime(id, status, time)));
+                id -> findNextBooking(id, status, time)));
     }
 
     default Booking findByIdOrThrow(Long bookingId) {

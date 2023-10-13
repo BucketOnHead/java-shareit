@@ -70,10 +70,10 @@ public class ItemServiceImpl implements ItemService {
         if (ItemUtils.isOwner(item, userId)) {
             var now = LocalDateTime.now();
             var lastBooking = bookingRepository
-                    .findLastBookingByTime(itemId, BookingStatus.APPROVED, now)
+                    .findItemLastBooking(itemId, BookingStatus.APPROVED, now)
                     .orElse(null);
             var nextBooking = bookingRepository
-                    .findNextBookingByTime(itemId, BookingStatus.APPROVED, now)
+                    .findNextBooking(itemId, BookingStatus.APPROVED, now)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsDto(item, comments, lastBooking, nextBooking);
@@ -94,8 +94,9 @@ public class ItemServiceImpl implements ItemService {
         var now = LocalDateTime.now();
         var page = PageRequest.of(from / size, size);
         var items = itemRepository.findAllByOwnerId(userId, page);
-        var lastBookings = bookingRepository.findAllLastBookingByTime(ItemUtils.toIdsSet(items), BookingStatus.APPROVED, now);
-        var nextBookings = bookingRepository.findAllNextBookingByTime(ItemUtils.toIdsSet(items), BookingStatus.APPROVED, now);
+        var itemIds = ItemUtils.toIdsSet(items);
+        var lastBookings = bookingRepository.findItemsLastBooking(itemIds, BookingStatus.APPROVED, now);
+        var nextBookings = bookingRepository.findItemsNextBooking(itemIds, BookingStatus.APPROVED, now);
 
         var itemsDto = items.stream()
                 .map(item -> itemMapper.mapToItemDetailsDto(item,

@@ -37,8 +37,7 @@ public interface ItemDtoMapper {
     @Mapping(target = "available", source = "item.isAvailable")
     @Mapping(target = "lastBooking", source = "last")
     @Mapping(target = "nextBooking", source = "next")
-    ItemDetailsDto mapToItemDetailsDto(Item item, Iterable<Comment> comments,
-                                       Booking last, Booking next);
+    ItemDetailsDto mapToItemDetailsDto(Item item, Iterable<Comment> comments, Booking last, Booking next);
 
     @Mapping(target = "id", source = "item.id")
     @Mapping(target = "available", source = "item.isAvailable")
