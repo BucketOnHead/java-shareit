@@ -10,11 +10,11 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Pageable LIMIT_1 = PageRequest.of(0, 1);
@@ -57,12 +57,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 .findFirst();
     }
 
-    default Map<Long, Optional<Booking>> findAllLastBookingByTime(Iterable<Long> ids, BookingStatus status,
+    default Map<Long, Optional<Booking>> findAllLastBookingByTime(Collection<Long> ids, BookingStatus status,
                                                                   LocalDateTime time) {
-        return StreamSupport.stream(ids.spliterator(), false)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        id -> findLastBookingByTime(id, status, time)));
+        return ids.stream().collect(Collectors.toMap(
+                Function.identity(),
+                id -> findLastBookingByTime(id, status, time)));
     }
 
     @Query("SELECT b FROM Booking b " +
@@ -78,12 +77,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 .findFirst();
     }
 
-    default Map<Long, Optional<Booking>> findAllNextBookingByTime(Iterable<Long> ids, BookingStatus status,
+    default Map<Long, Optional<Booking>> findAllNextBookingByTime(Collection<Long> ids, BookingStatus status,
                                                                   LocalDateTime time) {
-        return StreamSupport.stream(ids.spliterator(), false)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        id -> findNextBookingByTime(id, status, time)));
+        return ids.stream().collect(Collectors.toMap(
+                Function.identity(),
+                id -> findNextBookingByTime(id, status, time)));
     }
 
     default Booking findByIdOrThrow(Long bookingId) {
