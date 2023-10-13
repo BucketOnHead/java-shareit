@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "bookings")
+@Table(name = "item_bookings")
 @Setter
 @Getter
 @ToString
@@ -21,7 +21,7 @@ public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "booking_id")
+    @Column(name = "item_booking_id")
     private Long id;
 
     @Column(name = "start_time", nullable = false)

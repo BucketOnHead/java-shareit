@@ -11,7 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "requests")
+@Table(name = "item_requests")
 @Setter
 @Getter
 @ToString
@@ -20,7 +20,7 @@ public class ItemRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "request_id")
+    @Column(name = "item_request_id")
     private Long id;
 
     @Column(length = 1000, nullable = false)
