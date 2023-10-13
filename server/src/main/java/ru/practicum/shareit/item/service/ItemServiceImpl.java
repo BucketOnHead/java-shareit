@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.utils.BookingUtils;
 import ru.practicum.shareit.item.dto.request.ItemCreationDto;
 import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.response.ItemDto;
@@ -24,7 +25,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
                     .findItemLastBooking(itemId, BookingStatus.APPROVED, now)
                     .orElse(null);
             var nextBooking = bookingRepository
-                    .findNextBooking(itemId, BookingStatus.APPROVED, now)
+                    .findItemNextBooking(itemId, BookingStatus.APPROVED, now)
                     .orElse(null);
 
             itemDto = itemMapper.mapToItemDetailsDto(item, comments, lastBooking, nextBooking);
@@ -91,18 +91,17 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDetailsDto> getItemsByUserId(Long userId, Integer from, Integer size) {
         userRepository.existsByIdOrThrow(userId);
 
-        var now = LocalDateTime.now();
         var page = PageRequest.of(from / size, size);
         var items = itemRepository.findAllByOwnerId(userId, page);
-        var itemIds = ItemUtils.toIdsSet(items);
-        var lastBookings = bookingRepository.findItemsLastBooking(itemIds, BookingStatus.APPROVED, now);
-        var nextBookings = bookingRepository.findItemsNextBooking(itemIds, BookingStatus.APPROVED, now);
 
-        var itemsDto = items.stream()
-                .map(item -> itemMapper.mapToItemDetailsDto(item,
-                        lastBookings.getOrDefault(item.getId(), null).orElse(null),
-                        nextBookings.getOrDefault(item.getId(), null).orElse(null)))
-                .collect(Collectors.toList());
+        var now = LocalDateTime.now();
+        var itemIds = ItemUtils.toIdsSet(items);
+        var lastBookings = bookingRepository.findItemsLastBookingV2(itemIds, BookingStatus.APPROVED, now);
+        var nextBookings = bookingRepository.findItemsNextBookingV2(itemIds, BookingStatus.APPROVED, now);
+
+        var lastBookingByItemId = BookingUtils.toBookingByItemId(lastBookings);
+        var nextBookingByItemId = BookingUtils.toBookingByItemId(nextBookings);
+        var itemsDto = itemMapper.mapToItemDetailsDto(items, lastBookingByItemId, nextBookingByItemId);
 
         log.info("Items page with from: {} and size: {}, returned, count: {}", from, size, itemsDto.size());
         log.debug("Items page returned: {}", itemsDto);
@@ -169,8 +168,8 @@ public class ItemServiceImpl implements ItemService {
 
     private boolean isOwner(Long itemId, Long userId) {
         var isOwner = itemRepository.existsByIdAndOwnerId(itemId, userId);
-
         log.trace("User with id: {} is {} owner of item with id: {}", userId, (isOwner ? "" : "not"), itemId);
+
         return isOwner;
     }
 }

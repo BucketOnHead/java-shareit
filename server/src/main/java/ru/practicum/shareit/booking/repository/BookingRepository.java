@@ -11,9 +11,8 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -52,16 +51,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Page<Booking> findItemLastBookings(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
 
     default Optional<Booking> findItemLastBooking(Long itemId, BookingStatus status, LocalDateTime time) {
-        return findItemLastBookings(itemId, status, time, LIMIT_1)
-                .stream()
-                .findFirst();
+        return findItemLastBookings(itemId, status, time, LIMIT_1).get().findFirst();
     }
 
-    default Map<Long, Optional<Booking>> findItemsLastBooking(Collection<Long> ids, BookingStatus status,
-                                                              LocalDateTime time) {
-        return ids.stream().collect(Collectors.toMap(
-                Function.identity(),
-                id -> findItemLastBooking(id, status, time)));
+    default List<Booking> findItemsLastBookingV2(Collection<Long> itemIds, BookingStatus status, LocalDateTime time) {
+        return itemIds.stream()
+                .map(id -> findItemLastBooking(id, status, time))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     @Query("SELECT b FROM Booking b " +
@@ -71,17 +69,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY b.start ASC")
     Page<Booking> findItemNextBooking(Long itemId, BookingStatus status, LocalDateTime time, Pageable page);
 
-    default Optional<Booking> findNextBooking(Long itemId, BookingStatus status, LocalDateTime time) {
+    default Optional<Booking> findItemNextBooking(Long itemId, BookingStatus status, LocalDateTime time) {
         return findItemNextBooking(itemId, status, time, LIMIT_1)
                 .stream()
                 .findFirst();
     }
 
-    default Map<Long, Optional<Booking>> findItemsNextBooking(Collection<Long> ids, BookingStatus status,
-                                                              LocalDateTime time) {
-        return ids.stream().collect(Collectors.toMap(
-                Function.identity(),
-                id -> findNextBooking(id, status, time)));
+    default List<Booking> findItemsNextBookingV2(Collection<Long> itemIds, BookingStatus status, LocalDateTime time) {
+        return itemIds.stream()
+                .map(id -> findItemNextBooking(id, status, time))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     default Booking findByIdOrThrow(Long bookingId) {

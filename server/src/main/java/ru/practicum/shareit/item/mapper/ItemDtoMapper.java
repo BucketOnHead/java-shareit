@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.mapper;
 
+import lombok.NonNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.model.Booking;
@@ -12,6 +13,9 @@ import ru.practicum.shareit.itemrequest.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring")
 public interface ItemDtoMapper {
@@ -45,6 +49,19 @@ public interface ItemDtoMapper {
     @Mapping(target = "nextBooking", source = "next")
     @Mapping(target = "comments", ignore = true)
     ItemDetailsDto mapToItemDetailsDto(Item item, Booking last, Booking next);
+
+    default List<ItemDetailsDto> mapToItemDetailsDto(@NonNull Iterable<Item> items,
+                                                     @NonNull Map<Long, Booking> lastBookingByItemId,
+                                                     @NonNull Map<Long, Booking> nextBookingByItemId) {
+        return StreamSupport.stream(items.spliterator(), false)
+                .map(item -> {
+                    var last = lastBookingByItemId.get(item.getId());
+                    var next = nextBookingByItemId.get(item.getId());
+
+                    return mapToItemDetailsDto(item, last, next);
+                })
+                .collect(Collectors.toList());
+    }
 
     @Mapping(target = "authorName", source = "comment.author.name")
     ItemDetailsDto.CommentDto mapToItemDetailsCommentDto(Comment comment);
