@@ -2,19 +2,16 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.user.dto.request.UserRequestDto;
-import ru.practicum.shareit.user.dto.response.UserResponseDto;
-import ru.practicum.shareit.user.logger.UserServiceLoggerHelper;
+import ru.practicum.shareit.user.dto.request.UserCreationDto;
+import ru.practicum.shareit.user.dto.response.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,53 +23,71 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto addUser(UserRequestDto userDto) {
-        User user = userMapper.mapToUser(userDto);
-        User savedUser = userRepository.save(user);
-        UserServiceLoggerHelper.userSaved(log, savedUser);
-        return userMapper.mapToUserResponseDto(savedUser);
+    public UserDto addUser(UserCreationDto userDto) {
+        var user = userMapper.mapToUser(userDto);
+        var savedUser = userRepository.save(user);
+
+        log.info("User with id: {} added", savedUser.getId());
+        log.debug("User added: {}", savedUser);
+
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
     @Transactional
-    public UserResponseDto updateUser(UserRequestDto userDto, Long userId) {
-        userRepository.validateUserExistsById(userId);
-        User updatedUser = getUpdatedUser(userId, userDto);
-        User savedUser = userRepository.save(updatedUser);
-        UserServiceLoggerHelper.userUpdated(log, savedUser);
-        return userMapper.mapToUserResponseDto(savedUser);
+    public UserDto updateUser(UserCreationDto userDto, Long userId) {
+        var user = userRepository.findByIdOrThrow(userId);
+        var updatedUser = updateUser(user, userDto);
+        var savedUser = userRepository.save(updatedUser);
+
+        log.info("User with id: {} updated", savedUser.getId());
+        log.debug("User updated: {}", savedUser);
+
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
-    public UserResponseDto getUserById(Long userId) {
-        userRepository.validateUserExistsById(userId);
-        User user = userRepository.getReferenceById(userId);
-        UserResponseDto userDto = userMapper.mapToUserResponseDto(user);
-        UserServiceLoggerHelper.userDtoByIdReturned(log, userDto);
+    public UserDto getUserById(Long userId) {
+        var user = userRepository.findByIdOrThrow(userId);
+        var userDto = userMapper.mapToUserDto(user);
+
+        log.info("User with id: {} returned", user.getId());
+        log.debug("User returned: {}", userDto);
+
         return userDto;
     }
 
     @Override
-    public List<UserResponseDto> getUsers(Integer from, Integer size) {
-        Page<User> users = userRepository.findAll(PageRequest.of(from, size));
-        List<UserResponseDto> usersDto = userMapper.mapToUserResponseDto(users);
-        UserServiceLoggerHelper.userDtoPageReturned(log, from, size, usersDto);
+    public List<UserDto> getUsers(Integer from, Integer size) {
+        var users = userRepository.findAll(PageRequest.of(from / size, size));
+        var usersDto = userMapper.mapToUserDto(users);
+
+        log.info("Users page with from: {} and size: {} returned, count: {}", from, size, usersDto.size());
+        log.debug("Users page returned: {}", usersDto);
+
         return usersDto;
     }
 
     @Override
     @Transactional
     public void deleteUserById(Long userId) {
-        userRepository.validateUserExistsById(userId);
+        userRepository.existsByIdOrThrow(userId);
         userRepository.deleteById(userId);
-        UserServiceLoggerHelper.userByIdDeleted(log, userId);
+        log.info("User with id: {} deleted", userId);
     }
 
-    private User getUpdatedUser(Long userId, UserRequestDto userDto) {
-        User user = userRepository.getReferenceById(userId);
+    private User updateUser(User user, UserCreationDto userDto) {
+        var name = userDto.getName();
+        if (name != null) {
+            user.setName(name);
+            log.trace("User name updated: {}", user);
+        }
 
-        Optional.ofNullable(userDto.getName()).ifPresent(user::setName);
-        Optional.ofNullable(userDto.getEmail()).ifPresent(user::setEmail);
+        var email = userDto.getEmail();
+        if (email != null) {
+            user.setEmail(email);
+            log.trace("User email updated: {}", user);
+        }
 
         return user;
     }

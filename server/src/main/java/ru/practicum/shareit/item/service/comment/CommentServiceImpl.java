@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
-import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
-import ru.practicum.shareit.item.exception.comment.IncorrectCommentException;
-import ru.practicum.shareit.item.logger.comment.CommentServiceLoggerHelper;
+import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
+import ru.practicum.shareit.item.dto.response.comment.CommentDto;
+import ru.practicum.shareit.item.exception.comment.CommentNotAllowedException;
 import ru.practicum.shareit.item.mapper.CommentDtoMapper;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.comment.CommentRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -30,29 +29,29 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public SimpleCommentResponseDto addComment(CommentRequestDto commentRequestDto, Long authorUserId, Long itemId) {
-        userRepository.validateUserExistsById(authorUserId);
-        itemRepository.validateItemExistsById(itemId);
-        checkUserBookingByUserIdAndItemId(authorUserId, itemId);
-
-        Comment comment = getComment(commentRequestDto, authorUserId, itemId);
-        Comment savedComment = commentRepository.save(comment);
-
-        CommentServiceLoggerHelper.commentSaved(log, savedComment);
-        return commentMapper.mapToSimpleCommentResponseDto(savedComment);
-    }
-
-    private void checkUserBookingByUserIdAndItemId(Long userId, Long itemId) {
-        LocalDateTime time = LocalDateTime.now();
-        if (!bookingRepository.existsByBookerIdAndItemIdAndEndTimeIsBefore(userId, itemId, time)) {
-            throw IncorrectCommentException.fromItemIdAndUserIdAndTime(itemId, userId, time);
+    public CommentDto addComment(CommentCreationDto commentDto, Long authorId, Long itemId) {
+        var now = LocalDateTime.now();
+        if (!isItemAvailableForCommenting(authorId, itemId, now)) {
+            throw new CommentNotAllowedException(itemId, authorId);
         }
+
+        var author = userRepository.findByIdOrThrow(authorId);
+        var item = itemRepository.findByIdOrThrow(itemId);
+        var comment = commentMapper.mapToComment(commentDto, author, item);
+        var savedComment = commentRepository.save(comment);
+
+        log.info("Comment with id: {} added", savedComment.getId());
+        log.debug("Comment added: {}", savedComment);
+
+        return commentMapper.mapToCommentDto(savedComment);
     }
 
-    private Comment getComment(CommentRequestDto commentRequestDto, Long authorId, Long itemId) {
-        return commentMapper.mapToComment(
-                commentRequestDto,
-                userRepository.getReferenceById(authorId),
-                itemRepository.getReferenceById(itemId));
+    private boolean isItemAvailableForCommenting(Long userId, Long itemId, LocalDateTime time) {
+        var status = BookingStatus.APPROVED;
+        var bool = bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndBefore(userId, itemId, status, time);
+
+        log.trace("User with id: {} can{} comment item with id: {} at moment: {}", userId, ((bool) ? "" : "not"),
+                itemId, time);
+        return bool;
     }
 }

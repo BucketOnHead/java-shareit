@@ -4,14 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
-import ru.practicum.shareit.item.dto.request.ItemRequestDto;
-import ru.practicum.shareit.item.dto.request.comment.CommentRequestDto;
-import ru.practicum.shareit.item.dto.response.ItemDetailsResponseDto;
-import ru.practicum.shareit.item.dto.response.SimpleItemResponseDto;
-import ru.practicum.shareit.item.dto.response.comment.SimpleCommentResponseDto;
-import ru.practicum.shareit.item.logger.ItemControllerLoggerHelper;
+import ru.practicum.shareit.item.dto.request.ItemCreationDto;
+import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
+import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
+import ru.practicum.shareit.item.dto.response.ItemDto;
+import ru.practicum.shareit.item.dto.response.comment.CommentDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/items")
@@ -22,60 +23,66 @@ public class ItemController {
     private final CommentService commentService;
 
     @PostMapping
-    public SimpleItemResponseDto addItem(
-            @RequestBody ItemRequestDto itemDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId
+    public ItemDto addItem(
+            @RequestBody ItemCreationDto itemDto,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.addItem(log, itemDto, ownerUserId);
-        return itemService.addItem(itemDto, ownerUserId);
+        log.info("Adding item for user with id: {}", userId);
+        log.debug("Adding item for user with id: {}, {}", userId, itemDto);
+
+        return itemService.addItem(itemDto, userId);
     }
 
-    @PatchMapping("/{itemId}")
-    public SimpleItemResponseDto updateItem(
-            @RequestBody ItemRequestDto itemDto,
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(
+            @RequestBody CommentCreationDto commentDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.updateItem(log, itemDto, itemId, currentUserId);
-        return itemService.updateItem(itemDto, itemId, currentUserId);
+        log.info("Adding comment for item with id: {} from user with id: {}", itemId, userId);
+        log.debug("Adding comment for item with id: {} from user with id: {}, {}", itemId, userId, commentDto);
+
+        return commentService.addComment(commentDto, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDetailsResponseDto getItemById(
+    public ItemDetailsDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long currentUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.getItemById(log, itemId, currentUserId);
-        return itemService.getItemById(itemId, currentUserId);
+        log.info("Getting item with id: {} for user with id: {}", itemId, userId);
+        return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping
-    public Iterable<ItemDetailsResponseDto> getItemsByOwnerUserId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerUserId,
+    public List<ItemDetailsDto> getItemsByUserId(
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        ItemControllerLoggerHelper.getItemsByOwnerUserId(log, ownerUserId, from, size);
-        return itemService.getItemsByOwnerUserId(ownerUserId, from, size);
+        log.info("Getting items for user with ID: {}, with pagination: (from: {}, size: {})", userId, from, size);
+        return itemService.getItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    public Iterable<SimpleItemResponseDto> searchItemsByNameOrDescriptionIgnoreCase(
+    public List<ItemDto> getItemsByText(
             @RequestParam String text,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        ItemControllerLoggerHelper.searchItemsByTextIgnoreCase(log, text, from, size);
-        return itemService.searchItemsByNameOrDescriptionIgnoreCase(text, from, size);
+        log.info("Getting items with text: {}, with pagination: (from: {}, size: {})", text, from, size);
+        return itemService.getItemsByText(text, from, size);
     }
 
-    @PostMapping("/{itemId}/comment")
-    public SimpleCommentResponseDto addComment(
-            @RequestBody CommentRequestDto commentDto,
+    @PatchMapping("/{itemId}")
+    public ItemDto updateItem(
+            @RequestBody ItemCreationDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long authorUserId
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
-        ItemControllerLoggerHelper.addComment(log, commentDto, itemId, authorUserId);
-        return commentService.addComment(commentDto, authorUserId, itemId);
+        log.info("Updating item with id: {} for user with id: {}", itemId, userId);
+        log.info("Updating item with id: {} for user with id: {}, {}", itemId, userId, itemDto);
+
+        return itemService.updateItem(itemDto, itemId, userId);
     }
 }

@@ -1,46 +1,40 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ru.practicum.shareit.request.model.ItemRequest;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.itemrequest.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "items")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 public class Item {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
-    private Long id;
+    Long id;
 
-    @Column(nullable = false, length = 200)
-    private String name;
+    @Column(length = 200, nullable = false)
+    String name;
 
-    @Column(nullable = false, length = 1000)
-    private String description;
+    @Column(length = 1000, nullable = false)
+    String description;
 
     @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable;
+    Boolean isAvailable;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id")
-    private User owner;
+    User owner;
 
     @ManyToOne
-    @JoinColumn(name = "request_id")
-    private ItemRequest itemRequest;
-
-    public boolean isOwner(Long userId) {
-        if (userId == null || owner == null || owner.getId() == null) {
-            return false;
-        }
-
-        return owner.getId().equals(userId);
-    }
+    @JoinColumn(name = "item_request_id")
+    ItemRequest itemRequest;
 }

@@ -8,15 +8,18 @@ import ru.practicum.shareit.user.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    /**
-     * Validates if a user exists by their ID.
-     *
-     * @param userId The ID of the user to validate.
-     * @throws UserNotFoundException If a user with the provided ID does not exist.
-     */
-    default void validateUserExistsById(Long userId) {
+    default void existsByIdOrThrow(Long userId) {
         if (!existsById(userId)) {
-            throw UserNotFoundException.getFromUserId(userId);
+            throw new UserNotFoundException(userId);
         }
+    }
+
+    default User findByIdOrThrow(Long userId) {
+        var optionalUser = findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
+
+        return optionalUser.get();
     }
 }

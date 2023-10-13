@@ -1,93 +1,87 @@
 package ru.practicum.shareit.exception.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.IncorrectDataException;
-import ru.practicum.shareit.exception.LogicException;
-
-import javax.validation.ConstraintViolationException;
-import java.util.stream.Collectors;
+import ru.practicum.shareit.booking.exception.*;
+import ru.practicum.shareit.item.exception.ItemAccessException;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.exception.comment.CommentNotAllowedException;
+import ru.practicum.shareit.itemrequest.exception.ItemRequestNotFoundException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler
+
+    @ExceptionHandler({
+            MissingRequestHeaderException.class,
+            CommentNotAllowedException.class,
+            BookingNotAwaitingApprovalException.class,
+            ItemUnavailableException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse missingRequestHeaderExceptionHandler(final MissingRequestHeaderException ex) {
-        log.error("[REQUEST HEADER ERROR]: {}", ex.getMessage());
-        return ErrorResponse.getFromException(ex);
+    public ApiError handleBadRequestException(Exception ex) {
+        log.error(ex.getMessage(), ex);
+        return ApiError.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .reason("Request cannot be understood by the server due to incorrect syntax")
+                .message(ex.getMessage())
+                .build();
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse methodArgumentNotValidExceptionHandler(final MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult()
-                .getFieldErrors().stream()
-                .map(fieldError -> String.format(
-                        "field '%s' %s, but it was '%s'",
-                        fieldError.getField(),
-                        fieldError.getDefaultMessage(),
-                        fieldError.getRejectedValue()))
-                .collect(Collectors.joining(", "));
-        log.error("[VALIDATION ERROR]: {}.", message);
-        return ErrorResponse.getFromExceptionAndMessage(ex, message);
+    @ExceptionHandler(ItemAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleForbiddenException(final RuntimeException ex) {
+        log.error(ex.getMessage(), ex);
+        return ApiError.builder()
+                .status(HttpStatus.FORBIDDEN)
+                .reason("Access denied")
+                .message(ex.getMessage())
+                .build();
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse constraintViolationExceptionHandle(final ConstraintViolationException ex) {
-        String message = ex.getConstraintViolations()
-                .stream()
-                .map(pathError -> String.format(
-                        "parameter '%s' %s, but it was '%s'",
-                        ((PathImpl) pathError.getPropertyPath()).getLeafNode().getName(),
-                        pathError.getMessage(),
-                        pathError.getInvalidValue()))
-                .collect(Collectors.joining(", "));
-        log.error("[VALIDATION ERROR]: {}.", message);
-        return ErrorResponse.getFromExceptionAndMessage(ex, message);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse incorrectDataHandler(final IncorrectDataException ex) {
-        log.error("[DATA ERROR]: {}.", ex.getMessage());
-        return ErrorResponse.getFromException(ex);
-    }
-
-    @ExceptionHandler
+    @ExceptionHandler({
+            BookingNotFoundException.class,
+            UserNotFoundException.class,
+            ItemNotFoundException.class,
+            ItemRequestNotFoundException.class,
+            SelfBookingAttemptException.class,
+            BookingAccessException.class
+    })
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse entityNotFoundExceptionHandler(final EntityNotFoundException ex) {
-        log.error("[SEARCH ERROR]: {}.", ex.getMessage());
-        return ErrorResponse.getFromException(ex);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse logicExceptionHandler(final LogicException ex) {
-        log.error("[LOGIC ERROR]: {}.", ex.getMessage());
-        return ErrorResponse.getFromException(ex);
+    public ApiError handleNotFoundException(final RuntimeException ex) {
+        log.error(ex.getMessage(), ex);
+        return ApiError.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .reason("Requested resource does not exist")
+                .message(ex.getMessage())
+                .build();
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse dataIntegrityViolationExceptionHandler(final DataIntegrityViolationException ex) {
-        log.error("[DATABASE ERROR]: {}.", ex.getMostSpecificCause().getMessage());
-        return ErrorResponse.getFromException(ex.getMostSpecificCause());
+    public ApiError handleConflictException(final DataIntegrityViolationException ex) {
+        log.error(ex.getMessage(), ex);
+        return ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .reason("Request conflicts with another request or with server configuration")
+                .message(ex.getMessage())
+                .build();
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse throwableHandler(final Throwable th) {
-        log.error("[UNEXPECTED ERROR]: {}.", th.getMessage());
-        return ErrorResponse.getFromException(th);
+    public ApiError handleInternServerErrorException(final Throwable th) {
+        log.error(th.getMessage(), th);
+        return ApiError.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .reason("Server has encountered an unexpected condition that does not allow it to execute request")
+                .message(th.getMessage())
+                .build();
     }
 }

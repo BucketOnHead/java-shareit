@@ -1,8 +1,7 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -11,36 +10,34 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "bookings")
+@Table(name = "item_bookings")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor
 public class Booking {
 
-    public enum Status {
-        WAITING, APPROVED, REJECTED, CANCELED
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "booking_id")
-    private Long id;
+    @Column(name = "item_booking_id")
+    Long id;
 
     @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    LocalDateTime start;
 
     @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    LocalDateTime end;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "item_id")
-    private Item item;
+    Item item;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "booker_id")
-    private User booker;
+    User booker;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
-    private Status status = Status.WAITING;
+    @Column(length = 50, nullable = false)
+    BookingStatus status = BookingStatus.WAITING;
 }

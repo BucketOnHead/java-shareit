@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
-import ru.practicum.shareit.item.dto.response.DetailedItemResponseDto;
-import ru.practicum.shareit.item.dto.response.ItemResponseDto;
+import ru.practicum.shareit.item.dto.response.DetailedItemDto;
+import ru.practicum.shareit.item.dto.response.ItemDto;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,49 +19,49 @@ public class ItemClient {
         this.client = WebClient.create(serverUrl);
     }
 
-    public ItemResponseDto addItem(CreateItemRequestDto itemDto, Long userId) {
+    public ItemDto addItem(CreateItemRequestDto itemDto, Long userId) {
         return client.post()
                 .uri("/items")
                 .bodyValue(itemDto)
                 .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
-                .bodyToMono(ItemResponseDto.class)
+                .bodyToMono(ItemDto.class)
                 .block();
     }
 
-    public ItemResponseDto updateItem(CreateItemRequestDto itemDto, Long itemId, Long userId) {
+    public ItemDto updateItem(CreateItemRequestDto itemDto, Long itemId, Long userId) {
         return client.patch()
                 .uri("/items/{id}", itemId)
                 .bodyValue(itemDto)
                 .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
-                .bodyToMono(ItemResponseDto.class)
+                .bodyToMono(ItemDto.class)
                 .block();
     }
 
-    public DetailedItemResponseDto getItemById(Long itemId, Long userId) {
+    public DetailedItemDto getItemById(Long itemId, Long userId) {
         return client.get()
                 .uri("/items/{id}", itemId)
                 .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
-                .bodyToMono(DetailedItemResponseDto.class)
+                .bodyToMono(DetailedItemDto.class)
                 .block();
     }
 
-    public List<DetailedItemResponseDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
+    public List<DetailedItemDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
         return client.get()
                 .uri("/items")
                 .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
                 .header("from", from.toString())
                 .header("size", size.toString())
                 .retrieve()
-                .bodyToFlux(DetailedItemResponseDto.class)
-                .sort(Comparator.comparingLong(DetailedItemResponseDto::getId))
+                .bodyToFlux(DetailedItemDto.class)
+                .sort(Comparator.comparingLong(DetailedItemDto::getId))
                 .collectList()
                 .block();
     }
 
-    public List<ItemResponseDto> searchItemsByNameOrDescription(String text, Integer from, Integer size) {
+    public List<ItemDto> searchItemsByNameOrDescription(String text, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/items/search")
                         .queryParam("text", text)
@@ -69,7 +69,7 @@ public class ItemClient {
                 .header("from", from.toString())
                 .header("size", size.toString())
                 .retrieve()
-                .bodyToFlux(ItemResponseDto.class)
+                .bodyToFlux(ItemDto.class)
                 .collectList()
                 .block();
     }
