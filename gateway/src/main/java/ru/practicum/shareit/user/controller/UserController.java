@@ -18,20 +18,23 @@ public class UserController {
 
     @PostMapping
     public UserDto addUser(
-            @RequestBody @Validated(Groups.OnCreate.class) UserCreationDto userDto) {
+            @RequestBody @Validated(Groups.OnCreate.class) UserCreationDto userDto
+    ) {
         return userClient.addUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(
             @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
-            @PathVariable Long userId) {
+            @PathVariable Long userId
+    ) {
         return userClient.updateUser(userDto, userId);
     }
 
     @GetMapping("/{userId}")
     public UserDto getUserById(
-            @PathVariable Long userId) {
+            @PathVariable Long userId
+    ) {
         return userClient.getUserById(userId);
     }
 
@@ -42,7 +45,8 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     public void deleteUserById(
-            @PathVariable Long userId) {
+            @PathVariable Long userId
+    ) {
         userClient.deleteUserById(userId);
     }
 }
