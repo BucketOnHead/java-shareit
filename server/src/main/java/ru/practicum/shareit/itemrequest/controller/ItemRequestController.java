@@ -3,9 +3,9 @@ package ru.practicum.shareit.itemrequest.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
+import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
-import ru.practicum.shareit.itemrequest.dto.request.ItemRequestCreationDto;
-import ru.practicum.shareit.itemrequest.dto.response.ItemRequestDto;
 import ru.practicum.shareit.itemrequest.service.ItemRequestService;
 
 import java.util.List;

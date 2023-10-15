@@ -3,12 +3,12 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.commondto.item.request.ItemCreationDto;
+import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
+import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
+import ru.practicum.shareit.commondto.item.response.ItemDto;
+import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
-import ru.practicum.shareit.item.dto.request.ItemCreationDto;
-import ru.practicum.shareit.item.dto.request.comment.CommentCreationDto;
-import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
-import ru.practicum.shareit.item.dto.response.ItemDto;
-import ru.practicum.shareit.item.dto.response.comment.CommentDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
 

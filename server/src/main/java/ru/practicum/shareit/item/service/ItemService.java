@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.dto.request.ItemCreationDto;
-import ru.practicum.shareit.item.dto.response.ItemDetailsDto;
-import ru.practicum.shareit.item.dto.response.ItemDto;
+import ru.practicum.shareit.commondto.item.request.ItemCreationDto;
+import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
+import ru.practicum.shareit.commondto.item.response.ItemDto;
 
 import java.util.List;
 

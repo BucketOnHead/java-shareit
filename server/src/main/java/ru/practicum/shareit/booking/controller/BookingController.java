@@ -3,9 +3,9 @@ package ru.practicum.shareit.booking.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.request.BookingCreationDto;
-import ru.practicum.shareit.booking.dto.response.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
+import ru.practicum.shareit.commondto.booking.response.BookingDto;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 
 import java.util.List;
