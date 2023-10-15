@@ -3,11 +3,11 @@ package ru.practicum.shareit.itemrequest.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
+import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
+import ru.practicum.shareit.commondto.validation.Groups;
 import ru.practicum.shareit.constants.HttpHeadersConstants;
 import ru.practicum.shareit.itemrequest.client.ItemRequestClient;
-import ru.practicum.shareit.itemrequest.dto.request.RequestItemRequestDto;
-import ru.practicum.shareit.itemrequest.dto.response.ItemRequestResponseDto;
-import ru.practicum.shareit.validation.group.CreationGroup;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -21,22 +21,22 @@ public class ItemRequestController {
     private final ItemRequestClient itemRequestClient;
 
     @PostMapping
-    public ItemRequestResponseDto addItemRequest(
-            @RequestBody @Validated(CreationGroup.class)  RequestItemRequestDto requestDto,
+    public ItemRequestDto addItemRequest(
+            @RequestBody @Validated(Groups.OnCreate.class) ItemRequestCreationDto requestDto,
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemRequestClient.addItemRequest(requestDto, userId);
     }
 
     @GetMapping
-    public List<ItemRequestResponseDto> getItemRequestsByRequesterId(
+    public List<ItemRequestDto> getItemRequestsByRequesterId(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemRequestClient.getItemRequestsByRequesterId(userId);
     }
 
     @GetMapping("/{itemRequestId}")
-    public ItemRequestResponseDto getItemRequestsById(
+    public ItemRequestDto getItemRequestsById(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @PathVariable Long itemRequestId
     ) {
@@ -44,7 +44,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getPageWithItemRequestsByRequesterId(
+    public List<ItemRequestDto> getPageWithItemRequestsByRequesterId(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size
