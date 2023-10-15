@@ -2,8 +2,9 @@ package ru.practicum.shareit.commondto.itemrequest.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.commondto.validation.Groups;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Setter
@@ -12,6 +13,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class ItemRequestCreationDto {
 
-    @NotNull
+    @NotBlank(groups = Groups.OnCreate.class)
     String description;
 }
