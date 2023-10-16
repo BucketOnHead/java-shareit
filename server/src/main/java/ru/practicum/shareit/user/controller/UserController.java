@@ -36,8 +36,8 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getUsers(
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam Integer from,
+            @RequestParam Integer size
     ) {
         log.info("Getting users page with from: {} and size: {}", from, size);
         return userService.getUsers(from, size);

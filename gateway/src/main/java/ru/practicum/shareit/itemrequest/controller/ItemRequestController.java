@@ -7,6 +7,7 @@ import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto
 import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
 import ru.practicum.shareit.commondto.validation.Groups;
 import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.consts.DefaultParams;
 import ru.practicum.shareit.itemrequest.client.ItemRequestClient;
 
 import javax.validation.constraints.Positive;
@@ -46,8 +47,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestDto> getPageWithItemRequestsByRequesterId(
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return itemRequestClient.getItemRequestsByRequesterId(userId, from, size);
     }

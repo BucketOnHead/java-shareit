@@ -57,8 +57,8 @@ public class ItemController {
     @GetMapping
     public List<ItemDetailsDto> getItemsByUserId(
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam Integer from,
+            @RequestParam Integer size
     ) {
         log.info("Getting items for user with ID: {}, with pagination: (from: {}, size: {})", userId, from, size);
         return itemService.getItemsByUserId(userId, from, size);
@@ -67,8 +67,8 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> getItemsByText(
             @RequestParam String text,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam Integer from,
+            @RequestParam Integer size
     ) {
         log.info("Getting items with text: {}, with pagination: (from: {}, size: {})", text, from, size);
         return itemService.getItemsByText(text, from, size);

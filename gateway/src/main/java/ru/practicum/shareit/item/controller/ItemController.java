@@ -10,6 +10,7 @@ import ru.practicum.shareit.commondto.item.response.ItemDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
 import ru.practicum.shareit.commondto.validation.Groups;
 import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.consts.DefaultParams;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.client.comment.CommentClient;
 
@@ -53,8 +54,8 @@ public class ItemController {
     @GetMapping
     public List<ItemDetailsDto> getItemsByOwnerId(
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return itemClient.getItemsByOwnerId(userId, from, size);
     }
@@ -62,8 +63,9 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> searchItemsByNameOrDescription(
             @RequestParam String text,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size) {
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
+    ) {
         return itemClient.searchItemsByNameOrDescription(text, from, size);
     }
 

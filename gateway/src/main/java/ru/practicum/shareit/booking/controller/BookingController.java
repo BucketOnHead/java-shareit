@@ -9,6 +9,7 @@ import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.commondto.booking.response.BookingDto;
 import ru.practicum.shareit.commondto.validation.Groups;
 import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.consts.DefaultParams;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -48,9 +49,9 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getAllByBookerId(
-            @RequestParam(defaultValue = "ALL") @BookingStateEnum String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size,
+            @RequestParam(defaultValue = DefaultParams.STATE) @BookingStateEnum String state,
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size,
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getAllByBookerId(userId, state, from, size);
@@ -58,9 +59,9 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllByBookerItems(
-            @RequestParam(defaultValue = "ALL") @BookingStateEnum String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size,
+            @RequestParam(defaultValue = DefaultParams.STATE) @BookingStateEnum String state,
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size,
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getAllByBookerItems(userId, state, from, size);

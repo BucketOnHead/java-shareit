@@ -6,8 +6,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.commondto.user.request.UserCreationDto;
 import ru.practicum.shareit.commondto.user.response.UserDto;
 import ru.practicum.shareit.commondto.validation.Groups;
+import ru.practicum.shareit.consts.DefaultParams;
 import ru.practicum.shareit.user.client.UserClient;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -39,8 +42,11 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userClient.getAllUsers();
+    public List<UserDto> getAllUsers(
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
+    ) {
+        return userClient.getAllUsers(from, size);
     }
 
     @DeleteMapping("/{userId}")

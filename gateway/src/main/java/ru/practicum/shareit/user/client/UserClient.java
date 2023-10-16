@@ -6,7 +6,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.user.request.UserCreationDto;
 import ru.practicum.shareit.commondto.user.response.UserDto;
 
-
 import java.util.List;
 
 @Service
@@ -44,9 +43,12 @@ public class UserClient {
     }
 
 
-    public List<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers(Integer from, Integer size) {
         return client.get()
-                .uri("/users")
+                .uri(builder -> builder.path("/users")
+                        .queryParam("from", from)
+                        .queryParam("size", size)
+                        .build())
                 .retrieve()
                 .bodyToFlux(UserDto.class)
                 .collectList()
