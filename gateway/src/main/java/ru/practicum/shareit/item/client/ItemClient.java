@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.item.request.ItemCreationDto;
 import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.commondto.item.response.ItemDto;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class ItemClient {
         return client.post()
                 .uri("/items")
                 .bodyValue(itemDto)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(ItemDto.class)
                 .block();
@@ -32,7 +32,7 @@ public class ItemClient {
         return client.patch()
                 .uri("/items/{id}", itemId)
                 .bodyValue(itemDto)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(ItemDto.class)
                 .block();
@@ -41,7 +41,7 @@ public class ItemClient {
     public ItemDetailsDto getItemById(Long itemId, Long userId) {
         return client.get()
                 .uri("/items/{id}", itemId)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(ItemDetailsDto.class)
                 .block();
@@ -50,7 +50,7 @@ public class ItemClient {
     public List<ItemDetailsDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
         return client.get()
                 .uri("/items")
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .header("from", from.toString())
                 .header("size", size.toString())
                 .retrieve()

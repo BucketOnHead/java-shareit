@@ -9,7 +9,7 @@ import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.commondto.item.response.ItemDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
 import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.client.comment.CommentClient;
 
@@ -28,7 +28,7 @@ public class ItemController {
     @PostMapping
     public ItemDto addItem(
             @RequestBody @Validated(Groups.OnCreate.class) ItemCreationDto itemDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long ownerId
     ) {
         return itemClient.addItem(itemDto, ownerId);
     }
@@ -37,7 +37,7 @@ public class ItemController {
     public ItemDto updateItem(
             @RequestBody @Validated(Groups.OnUpdate.class) ItemCreationDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemClient.updateItem(itemDto, itemId, userId);
     }
@@ -45,14 +45,14 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDetailsDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemClient.getItemById(itemId, userId);
     }
 
     @GetMapping
     public List<ItemDetailsDto> getItemsByOwnerId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size
     ) {
@@ -71,7 +71,7 @@ public class ItemController {
     public CommentDto addComment(
             @RequestBody @Validated(Groups.OnCreate.class) CommentCreationDto comment,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return commentClient.addComment(comment, userId, itemId);
     }

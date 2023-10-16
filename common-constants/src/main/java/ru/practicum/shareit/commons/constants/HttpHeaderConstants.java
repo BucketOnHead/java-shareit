@@ -7,7 +7,7 @@ import lombok.experimental.UtilityClass;
  * constants for commonly used HTTP header names.
  */
 @UtilityClass
-public class HttpHeadersConstants {
+public class HttpHeaderConstants {
 
     /**
      * Constant for the "X-Sharer-User-Id" HTTP header name.

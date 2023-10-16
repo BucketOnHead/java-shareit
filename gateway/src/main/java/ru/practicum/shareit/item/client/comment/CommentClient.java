@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 
 @Service
 public class CommentClient {
@@ -19,7 +19,7 @@ public class CommentClient {
         return client.post()
                 .uri("/items/{id}/comment", itemId)
                 .bodyValue(comment)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(CommentDto.class)
                 .block();

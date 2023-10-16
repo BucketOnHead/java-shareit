@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.validation.annotation.BookingStateEnum;
 import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.commondto.booking.response.BookingDto;
 import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -24,7 +24,7 @@ public class BookingController {
     @PostMapping
     public BookingDto addBooking(
             @RequestBody @Validated(Groups.OnCreate.class) BookingCreationDto bookingDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.addBooking(bookingDto, userId);
     }
@@ -33,7 +33,7 @@ public class BookingController {
     public BookingDto updateBookingStatus(
             @PathVariable Long bookingId,
             @RequestParam Boolean approved,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.updateBookingStatus(bookingId, approved, userId);
     }
@@ -41,7 +41,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingDto getBooking(
             @PathVariable Long bookingId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getBookingById(bookingId, userId);
     }
@@ -51,7 +51,7 @@ public class BookingController {
             @RequestParam(defaultValue = "ALL") @BookingStateEnum String state,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getAllByBookerId(userId, state, from, size);
     }
@@ -61,7 +61,7 @@ public class BookingController {
             @RequestParam(defaultValue = "ALL") @BookingStateEnum String state,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getAllByBookerItems(userId, state, from, size);
     }

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
 import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 import ru.practicum.shareit.itemrequest.client.ItemRequestClient;
 
 import javax.validation.constraints.Positive;
@@ -23,21 +23,21 @@ public class ItemRequestController {
     @PostMapping
     public ItemRequestDto addItemRequest(
             @RequestBody @Validated(Groups.OnCreate.class) ItemRequestCreationDto requestDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemRequestClient.addItemRequest(requestDto, userId);
     }
 
     @GetMapping
     public List<ItemRequestDto> getItemRequestsByRequesterId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemRequestClient.getItemRequestsByRequesterId(userId);
     }
 
     @GetMapping("/{itemRequestId}")
     public ItemRequestDto getItemRequestsById(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
             @PathVariable Long itemRequestId
     ) {
         return itemRequestClient.getItemRequestById(itemRequestId, userId);
@@ -45,7 +45,7 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> getPageWithItemRequestsByRequesterId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size
     ) {

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class ItemRequestClient {
     public ItemRequestDto addItemRequest(ItemRequestCreationDto requestDto, Long userId) {
         return client.post()
                 .uri("/requests")
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .bodyValue(requestDto)
                 .retrieve()
                 .bodyToMono(ItemRequestDto.class)
@@ -30,7 +30,7 @@ public class ItemRequestClient {
     public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId) {
         return client.get()
                 .uri("/requests")
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToFlux(ItemRequestDto.class)
                 .collectList()
@@ -40,7 +40,7 @@ public class ItemRequestClient {
     public ItemRequestDto getItemRequestById(Long itemRequestId, Long userId) {
         return client.get()
                 .uri("/requests/{id}", itemRequestId)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(ItemRequestDto.class)
                 .block();
@@ -52,7 +52,7 @@ public class ItemRequestClient {
                         .queryParam("from", from)
                         .queryParam("size", size)
                         .build())
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToFlux(ItemRequestDto.class)
                 .collectList()

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.commondto.booking.response.BookingDto;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class BookingClient {
         return client.post()
                 .uri("/bookings")
                 .bodyValue(bookingDto)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(BookingDto.class)
                 .block();
@@ -32,7 +32,7 @@ public class BookingClient {
                 .uri(builder -> builder.path("/bookings/{id}")
                         .queryParam("approved", approved)
                         .build(bookingId))
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(BookingDto.class)
                 .block();
@@ -41,7 +41,7 @@ public class BookingClient {
     public BookingDto getBookingById(Long bookingId, Long userId) {
         return client.get()
                 .uri("/bookings/{id}", bookingId)
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToMono(BookingDto.class)
                 .block();
@@ -54,7 +54,7 @@ public class BookingClient {
                         .queryParam("from", from)
                         .queryParam("size", size)
                         .build())
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToFlux(BookingDto.class)
                 .collectList()
@@ -69,7 +69,7 @@ public class BookingClient {
                         .queryParam("from", from)
                         .queryParam("size", size)
                         .build())
-                .header(HttpHeadersConstants.X_SHARER_USER_ID, userId.toString())
+                .header(HttpHeaderConstants.X_SHARER_USER_ID, userId.toString())
                 .retrieve()
                 .bodyToFlux(BookingDto.class)
                 .collectList()

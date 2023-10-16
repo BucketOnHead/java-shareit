@@ -8,7 +8,7 @@ import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
 import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.commondto.item.response.ItemDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
-import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
 
@@ -25,7 +25,7 @@ public class ItemController {
     @PostMapping
     public ItemDto addItem(
             @RequestBody ItemCreationDto itemDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Adding item for user with id: {}", userId);
         log.debug("Adding item for user with id: {}, {}", userId, itemDto);
@@ -37,7 +37,7 @@ public class ItemController {
     public CommentDto addComment(
             @RequestBody CommentCreationDto commentDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Adding comment for item with id: {} from user with id: {}", itemId, userId);
         log.debug("Adding comment for item with id: {} from user with id: {}, {}", itemId, userId, commentDto);
@@ -48,7 +48,7 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDetailsDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Getting item with id: {} for user with id: {}", itemId, userId);
         return itemService.getItemById(itemId, userId);
@@ -56,7 +56,7 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDetailsDto> getItemsByUserId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size
     ) {
@@ -78,7 +78,7 @@ public class ItemController {
     public ItemDto updateItem(
             @RequestBody ItemCreationDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Updating item with id: {} for user with id: {}", itemId, userId);
         log.info("Updating item with id: {} for user with id: {}, {}", itemId, userId, itemDto);
