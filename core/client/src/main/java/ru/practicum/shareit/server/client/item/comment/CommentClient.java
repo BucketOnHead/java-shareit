@@ -1,4 +1,4 @@
-package ru.practicum.server.client.item.comment;
+package ru.practicum.shareit.server.client.item.comment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.server.client.booking.BookingClient;
-import ru.practicum.server.client.item.ItemClient;
-import ru.practicum.server.client.item.comment.CommentClient;
-import ru.practicum.server.client.itemrequest.ItemRequestClient;
-import ru.practicum.server.client.user.UserClient;
+import ru.practicum.shareit.server.client.booking.BookingClient;
+import ru.practicum.shareit.server.client.item.ItemClient;
+import ru.practicum.shareit.server.client.item.comment.CommentClient;
+import ru.practicum.shareit.server.client.itemrequest.ItemRequestClient;
+import ru.practicum.shareit.server.client.user.UserClient;
 
 @Configuration
 public class WebClientConfig {

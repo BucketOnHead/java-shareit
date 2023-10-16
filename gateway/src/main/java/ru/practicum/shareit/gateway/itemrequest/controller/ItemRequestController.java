@@ -3,7 +3,7 @@ package ru.practicum.shareit.gateway.itemrequest.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.server.client.itemrequest.ItemRequestClient;
+import ru.practicum.shareit.server.client.itemrequest.ItemRequestClient;
 import ru.practicum.shareit.gateway.consts.DefaultParams;
 import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.server.dto.itemrequest.request.ItemRequestCreationDto;

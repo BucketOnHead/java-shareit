@@ -1,4 +1,4 @@
-package ru.practicum.server.client.booking;
+package ru.practicum.shareit.server.client.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
