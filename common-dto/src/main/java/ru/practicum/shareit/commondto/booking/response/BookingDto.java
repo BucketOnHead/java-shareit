@@ -2,7 +2,6 @@ package ru.practicum.shareit.commondto.booking.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.commondto.booking.BookingStatus;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +14,7 @@ public class BookingDto {
     Long id;
     LocalDateTime start;
     LocalDateTime end;
-    BookingStatus status;
+    String status;
     UserDto booker;
     ItemDto item;
 
