@@ -3,10 +3,10 @@ package ru.practicum.shareit.itemrequest.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
-import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
-import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.server.dto.itemrequest.request.ItemRequestCreationDto;
+import ru.practicum.shareit.server.dto.itemrequest.response.ItemRequestDto;
+import ru.practicum.shareit.server.dto.validation.Groups;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.consts.DefaultParams;
 import ru.practicum.shareit.itemrequest.client.ItemRequestClient;
 

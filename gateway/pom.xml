@@ -29,13 +29,30 @@
         </dependency>
         <dependency>
             <groupId>ru.practicum</groupId>
-            <artifactId>shareit-common-dto</artifactId>
-            <version>${shareit-common-dto.version}</version>
+            <artifactId>shareit-server-dto</artifactId>
+            <version>${shareit-server-dto.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.practicum</groupId>
-            <artifactId>shareit-commons-constants</artifactId>
-            <version>${shareit-commons-constants.version}</version>
+            <artifactId>shareit-server-constants</artifactId>
+            <version>${shareit-server-constants.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

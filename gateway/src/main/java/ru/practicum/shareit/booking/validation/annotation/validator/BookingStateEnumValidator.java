@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.validation.annotation.validator;
 
 import ru.practicum.shareit.booking.exception.IncorrectStateException;
 import ru.practicum.shareit.booking.validation.annotation.BookingStateEnum;
-import ru.practicum.shareit.commons.constants.booking.BookingState;
+import ru.practicum.shareit.server.constants.booking.BookingState;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

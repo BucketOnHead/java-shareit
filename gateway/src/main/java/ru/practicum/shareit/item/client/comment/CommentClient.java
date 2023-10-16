@@ -3,9 +3,9 @@ package ru.practicum.shareit.item.client.comment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
-import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
-import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.server.dto.item.request.comment.CommentCreationDto;
+import ru.practicum.shareit.server.dto.item.response.comment.CommentDto;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 @Service
 public class CommentClient {

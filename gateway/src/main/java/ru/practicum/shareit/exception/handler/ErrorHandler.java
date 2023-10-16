@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import ru.practicum.shareit.booking.exception.IncorrectStateException;
-import ru.practicum.shareit.commondto.error.ApiError;
+import ru.practicum.shareit.server.dto.error.ApiError;
 
 import javax.validation.ConstraintViolationException;
 import java.util.stream.Collectors;

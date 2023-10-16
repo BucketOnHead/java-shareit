@@ -5,10 +5,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.validation.annotation.BookingStateEnum;
-import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
-import ru.practicum.shareit.commondto.booking.response.BookingDto;
-import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.server.dto.booking.request.BookingCreationDto;
+import ru.practicum.shareit.server.dto.booking.response.BookingDto;
+import ru.practicum.shareit.server.dto.validation.Groups;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.consts.DefaultParams;
 
 import javax.validation.constraints.Positive;

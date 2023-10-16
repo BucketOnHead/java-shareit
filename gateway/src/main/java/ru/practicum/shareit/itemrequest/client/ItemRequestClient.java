@@ -3,9 +3,9 @@ package ru.practicum.shareit.itemrequest.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
-import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
-import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.server.dto.itemrequest.request.ItemRequestCreationDto;
+import ru.practicum.shareit.server.dto.itemrequest.response.ItemRequestDto;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 import java.util.List;
 

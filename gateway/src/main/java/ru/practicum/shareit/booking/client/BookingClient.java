@@ -3,9 +3,9 @@ package ru.practicum.shareit.booking.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
-import ru.practicum.shareit.commondto.booking.response.BookingDto;
-import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.server.dto.booking.request.BookingCreationDto;
+import ru.practicum.shareit.server.dto.booking.response.BookingDto;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 import java.util.List;
 

@@ -16,10 +16,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>common-dto</module>
+        <module>core</module>
         <module>gateway</module>
-        <module>server</module>
-        <module>common-constants</module>
     </modules>
     <name>ShareIt</name>
 
@@ -32,8 +30,8 @@
         <lombok.version>1.18.26</lombok.version>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <shareit-common-dto.version>0.0.1-SNAPSHOT</shareit-common-dto.version>
-        <shareit-commons-constants.version>0.0.1-SNAPSHOT</shareit-commons-constants.version>
+        <shareit-server-dto.version>0.0.1-SNAPSHOT</shareit-server-dto.version>
+        <shareit-server-constants.version>0.0.1-SNAPSHOT</shareit-server-constants.version>
         <spotbugs-maven-plugin.version>4.7.0.0</spotbugs-maven-plugin.version>
     </properties>
 

@@ -3,10 +3,10 @@ package ru.practicum.shareit.item.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.shareit.commondto.item.request.ItemCreationDto;
-import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
-import ru.practicum.shareit.commondto.item.response.ItemDto;
-import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.server.dto.item.request.ItemCreationDto;
+import ru.practicum.shareit.server.dto.item.response.ItemDetailsDto;
+import ru.practicum.shareit.server.dto.item.response.ItemDto;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 import java.util.List;
 

@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.shareit.commondto.user.request.UserCreationDto;
-import ru.practicum.shareit.commondto.user.response.UserDto;
+import ru.practicum.shareit.server.dto.user.request.UserCreationDto;
+import ru.practicum.shareit.server.dto.user.response.UserDto;
 
 import java.util.List;
 
