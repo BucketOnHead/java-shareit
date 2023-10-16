@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.commondto.booking.response.BookingDto;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 
 import java.util.List;
 

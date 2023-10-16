@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.validation.annotation.BookingStateEnum;
 import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.commondto.booking.response.BookingDto;
 import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;

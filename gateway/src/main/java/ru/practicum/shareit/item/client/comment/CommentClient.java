@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 
 @Service
 public class CommentClient {

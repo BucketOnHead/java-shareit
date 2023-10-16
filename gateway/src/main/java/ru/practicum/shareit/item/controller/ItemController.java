@@ -9,7 +9,7 @@ import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.commondto.item.response.ItemDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
 import ru.practicum.shareit.commondto.validation.Groups;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.client.comment.CommentClient;
 

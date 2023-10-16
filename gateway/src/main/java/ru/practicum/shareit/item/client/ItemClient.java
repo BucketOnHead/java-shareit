@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.item.request.ItemCreationDto;
 import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.commondto.item.response.ItemDto;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 
 import java.util.List;
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.constants;
+package ru.practicum.shareit.commons.constants;
 
 import lombok.experimental.UtilityClass;
 
@@ -7,7 +7,7 @@ import lombok.experimental.UtilityClass;
  * constants for commonly used HTTP header names.
  */
 @UtilityClass
-public final class HttpHeadersConstants {
+public class HttpHeadersConstants {
 
     /**
      * Constant for the "X-Sharer-User-Id" HTTP header name.

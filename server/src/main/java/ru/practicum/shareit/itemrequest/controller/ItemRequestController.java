@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 import ru.practicum.shareit.itemrequest.service.ItemRequestService;
 
 import java.util.List;

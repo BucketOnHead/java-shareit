@@ -8,7 +8,7 @@ import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
 import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.commondto.item.response.ItemDto;
 import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commons.constants.HttpHeadersConstants;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.comment.CommentService;
 
