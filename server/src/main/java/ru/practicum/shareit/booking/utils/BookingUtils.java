@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.utils;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.commons.constants.booking.BookingStatus;
 
 import java.util.Collections;
 import java.util.Map;

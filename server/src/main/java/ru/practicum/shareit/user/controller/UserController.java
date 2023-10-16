@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.request.UserCreationDto;
-import ru.practicum.shareit.user.dto.response.UserDto;
+import ru.practicum.shareit.commondto.user.request.UserCreationDto;
+import ru.practicum.shareit.commondto.user.response.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
@@ -36,8 +36,8 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getUsers(
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam Integer from,
+            @RequestParam Integer size
     ) {
         log.info("Getting users page with from: {} and size: {}", from, size);
         return userService.getUsers(from, size);

@@ -3,16 +3,16 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
+import ru.practicum.shareit.commondto.item.request.ItemCreationDto;
+import ru.practicum.shareit.commondto.item.request.comment.CommentCreationDto;
+import ru.practicum.shareit.commondto.item.response.ItemDetailsDto;
+import ru.practicum.shareit.commondto.item.response.ItemDto;
+import ru.practicum.shareit.commondto.item.response.comment.CommentDto;
+import ru.practicum.shareit.commondto.validation.Groups;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.consts.DefaultParams;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.client.comment.CommentClient;
-import ru.practicum.shareit.item.dto.request.CreateItemRequestDto;
-import ru.practicum.shareit.item.dto.request.comment.CreateCommentRequestDto;
-import ru.practicum.shareit.item.dto.response.DetailedItemDto;
-import ru.practicum.shareit.item.dto.response.ItemDto;
-import ru.practicum.shareit.item.dto.response.comment.CommentResponseDto;
-import ru.practicum.shareit.validation.group.CreationGroup;
-import ru.practicum.shareit.validation.group.UpdateGroup;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -28,34 +28,34 @@ public class ItemController {
 
     @PostMapping
     public ItemDto addItem(
-            @RequestBody @Validated(CreationGroup.class) CreateItemRequestDto itemDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long ownerId
+            @RequestBody @Validated(Groups.OnCreate.class) ItemCreationDto itemDto,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long ownerId
     ) {
         return itemClient.addItem(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
-            @RequestBody @Validated(UpdateGroup.class) CreateItemRequestDto itemDto,
+            @RequestBody @Validated(Groups.OnUpdate.class) ItemCreationDto itemDto,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemClient.updateItem(itemDto, itemId, userId);
     }
 
     @GetMapping("/{itemId}")
-    public DetailedItemDto getItemById(
+    public ItemDetailsDto getItemById(
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemClient.getItemById(itemId, userId);
     }
 
     @GetMapping
-    public List<DetailedItemDto> getItemsByOwnerId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size
+    public List<ItemDetailsDto> getItemsByOwnerId(
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return itemClient.getItemsByOwnerId(userId, from, size);
     }
@@ -63,16 +63,17 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> searchItemsByNameOrDescription(
             @RequestParam String text,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size) {
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
+    ) {
         return itemClient.searchItemsByNameOrDescription(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentResponseDto addComment(
-            @RequestBody @Validated(CreationGroup.class) CreateCommentRequestDto comment,
+    public CommentDto addComment(
+            @RequestBody @Validated(Groups.OnCreate.class) CommentCreationDto comment,
             @PathVariable Long itemId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return commentClient.addComment(comment, userId, itemId);
     }

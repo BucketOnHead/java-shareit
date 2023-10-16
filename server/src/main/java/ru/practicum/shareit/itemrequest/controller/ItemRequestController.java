@@ -3,9 +3,9 @@ package ru.practicum.shareit.itemrequest.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
-import ru.practicum.shareit.itemrequest.dto.request.ItemRequestCreationDto;
-import ru.practicum.shareit.itemrequest.dto.response.ItemRequestDto;
+import ru.practicum.shareit.commondto.itemrequest.request.ItemRequestCreationDto;
+import ru.practicum.shareit.commondto.itemrequest.response.ItemRequestDto;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
 import ru.practicum.shareit.itemrequest.service.ItemRequestService;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class ItemRequestController {
     @PostMapping
     public ItemRequestDto addItemRequest(
             @RequestBody ItemRequestCreationDto requestDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Adding item request from user with id: {}", userId);
         log.debug("Adding item request from user with id: {}, {}", userId, requestDto);
@@ -31,7 +31,7 @@ public class ItemRequestController {
     @GetMapping("/{requestId}")
     public ItemRequestDto getItemRequestById(
             @PathVariable Long requestId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Getting item request with id: {} by user with id: {}", requestId, userId);
         return itemRequestService.getItemRequestById(requestId, userId);
@@ -39,7 +39,7 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestDto> getItemRequestsByRequesterId(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         log.info("Getting item requests for requester with id: {}", userId);
         return itemRequestService.getItemRequestsByRequesterId(userId);
@@ -47,7 +47,7 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> getItemRequests(
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam Integer from,
             @RequestParam Integer size
     ) {

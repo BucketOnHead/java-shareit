@@ -3,18 +3,9 @@ package ru.practicum.shareit.booking.exception;
 import javax.validation.ConstraintDeclarationException;
 
 public class IncorrectStateException extends ConstraintDeclarationException {
-    private static final String UNKNOWN_STATE;
+    private static final long serialVersionUID = -1597651445288260040L;
 
-    static {
-        UNKNOWN_STATE = "Unknown state: %s";
-    }
-
-    public IncorrectStateException(String message) {
-        super(message);
-    }
-
-    public static IncorrectStateException fromString(String state) {
-        String message = String.format(UNKNOWN_STATE, state);
-        return new IncorrectStateException(message);
+    public IncorrectStateException(String state) {
+        super(String.format("Unknown state: %s", state));
     }
 }

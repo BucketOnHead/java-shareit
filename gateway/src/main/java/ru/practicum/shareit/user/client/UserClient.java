@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.shareit.user.dto.request.CreateUserRequestDto;
-import ru.practicum.shareit.user.dto.response.UserResponseDto;
+import ru.practicum.shareit.commondto.user.request.UserCreationDto;
+import ru.practicum.shareit.commondto.user.response.UserDto;
 
 import java.util.List;
 
@@ -16,38 +16,41 @@ public class UserClient {
         this.client = WebClient.create(serverUrl);
     }
 
-    public UserResponseDto addUser(CreateUserRequestDto userDto) {
+    public UserDto addUser(UserCreationDto userDto) {
         return client.post()
                 .uri("/users")
                 .bodyValue(userDto)
                 .retrieve()
-                .bodyToMono(UserResponseDto.class)
+                .bodyToMono(UserDto.class)
                 .block();
     }
 
-    public UserResponseDto updateUser(CreateUserRequestDto userDto, Long userId) {
+    public UserDto updateUser(UserCreationDto userDto, Long userId) {
         return client.patch()
                 .uri("/users/{id}", userId)
                 .bodyValue(userDto)
                 .retrieve()
-                .bodyToMono(UserResponseDto.class)
+                .bodyToMono(UserDto.class)
                 .block();
     }
 
-    public UserResponseDto getUserById(Long userId) {
+    public UserDto getUserById(Long userId) {
         return client.get()
                 .uri("/users/{id}", userId)
                 .retrieve()
-                .bodyToMono(UserResponseDto.class)
+                .bodyToMono(UserDto.class)
                 .block();
     }
 
 
-    public List<UserResponseDto> getAllUsers() {
+    public List<UserDto> getAllUsers(Integer from, Integer size) {
         return client.get()
-                .uri("/users")
+                .uri(builder -> builder.path("/users")
+                        .queryParam("from", from)
+                        .queryParam("size", size)
+                        .build())
                 .retrieve()
-                .bodyToFlux(UserResponseDto.class)
+                .bodyToFlux(UserDto.class)
                 .collectList()
                 .block();
     }

@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.client.BookingClient;
-import ru.practicum.shareit.booking.dto.request.BookItemRequestDto;
-import ru.practicum.shareit.booking.dto.response.BookingResponseDto;
 import ru.practicum.shareit.booking.validation.annotation.BookingStateEnum;
-import ru.practicum.shareit.constants.HttpHeadersConstants;
-import ru.practicum.shareit.validation.group.CreationGroup;
+import ru.practicum.shareit.commondto.booking.request.BookingCreationDto;
+import ru.practicum.shareit.commondto.booking.response.BookingDto;
+import ru.practicum.shareit.commondto.validation.Groups;
+import ru.practicum.shareit.commons.constants.HttpHeaderConstants;
+import ru.practicum.shareit.consts.DefaultParams;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -22,46 +23,46 @@ public class BookingController {
     private final BookingClient bookingClient;
 
     @PostMapping
-    public BookingResponseDto addBooking(
-            @RequestBody @Validated(CreationGroup.class) BookItemRequestDto bookingDto,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+    public BookingDto addBooking(
+            @RequestBody @Validated(Groups.OnCreate.class) BookingCreationDto bookingDto,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.addBooking(bookingDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingResponseDto updateBookingStatus(
+    public BookingDto updateBookingStatus(
             @PathVariable Long bookingId,
             @RequestParam Boolean approved,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.updateBookingStatus(bookingId, approved, userId);
     }
 
     @GetMapping("/{bookingId}")
-    public BookingResponseDto getBooking(
+    public BookingDto getBooking(
             @PathVariable Long bookingId,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getBookingById(bookingId, userId);
     }
 
     @GetMapping
-    public List<BookingResponseDto> getAllByBookerId(
-            @RequestParam(defaultValue = "ALL") @BookingStateEnum String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+    public List<BookingDto> getAllByBookerId(
+            @RequestParam(defaultValue = DefaultParams.STATE) @BookingStateEnum String state,
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getAllByBookerId(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public List<BookingResponseDto> getAllByBookerItems(
-            @RequestParam(defaultValue = "ALL") @BookingStateEnum String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size,
-            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId
+    public List<BookingDto> getAllByBookerItems(
+            @RequestParam(defaultValue = DefaultParams.STATE) @BookingStateEnum String state,
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size,
+            @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getAllByBookerItems(userId, state, from, size);
     }

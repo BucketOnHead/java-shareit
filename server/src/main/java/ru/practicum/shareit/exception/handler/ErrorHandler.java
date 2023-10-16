@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.booking.exception.*;
+import ru.practicum.shareit.commondto.error.ApiError;
 import ru.practicum.shareit.item.exception.ItemAccessException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.exception.comment.CommentNotAllowedException;
@@ -28,7 +29,7 @@ public class ErrorHandler {
     public ApiError handleBadRequestException(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ApiError.builder()
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.BAD_REQUEST.name())
                 .reason("Request cannot be understood by the server due to incorrect syntax")
                 .message(ex.getMessage())
                 .build();
@@ -39,7 +40,7 @@ public class ErrorHandler {
     public ApiError handleForbiddenException(final RuntimeException ex) {
         log.error(ex.getMessage(), ex);
         return ApiError.builder()
-                .status(HttpStatus.FORBIDDEN)
+                .status(HttpStatus.FORBIDDEN.name())
                 .reason("Access denied")
                 .message(ex.getMessage())
                 .build();
@@ -57,7 +58,7 @@ public class ErrorHandler {
     public ApiError handleNotFoundException(final RuntimeException ex) {
         log.error(ex.getMessage(), ex);
         return ApiError.builder()
-                .status(HttpStatus.NOT_FOUND)
+                .status(HttpStatus.NOT_FOUND.name())
                 .reason("Requested resource does not exist")
                 .message(ex.getMessage())
                 .build();
@@ -68,7 +69,7 @@ public class ErrorHandler {
     public ApiError handleConflictException(final DataIntegrityViolationException ex) {
         log.error(ex.getMessage(), ex);
         return ApiError.builder()
-                .status(HttpStatus.CONFLICT)
+                .status(HttpStatus.CONFLICT.name())
                 .reason("Request conflicts with another request or with server configuration")
                 .message(ex.getMessage())
                 .build();
@@ -79,7 +80,7 @@ public class ErrorHandler {
     public ApiError handleInternServerErrorException(final Throwable th) {
         log.error(th.getMessage(), th);
         return ApiError.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
                 .reason("Server has encountered an unexpected condition that does not allow it to execute request")
                 .message(th.getMessage())
                 .build();

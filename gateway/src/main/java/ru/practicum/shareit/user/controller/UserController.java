@@ -3,12 +3,14 @@ package ru.practicum.shareit.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.commondto.user.request.UserCreationDto;
+import ru.practicum.shareit.commondto.user.response.UserDto;
+import ru.practicum.shareit.commondto.validation.Groups;
+import ru.practicum.shareit.consts.DefaultParams;
 import ru.practicum.shareit.user.client.UserClient;
-import ru.practicum.shareit.user.dto.request.CreateUserRequestDto;
-import ru.practicum.shareit.user.dto.response.UserResponseDto;
-import ru.practicum.shareit.validation.group.CreationGroup;
-import ru.practicum.shareit.validation.group.UpdateGroup;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -18,32 +20,39 @@ public class UserController {
     private final UserClient userClient;
 
     @PostMapping
-    public UserResponseDto addUser(
-            @RequestBody @Validated(CreationGroup.class) CreateUserRequestDto userDto) {
+    public UserDto addUser(
+            @RequestBody @Validated(Groups.OnCreate.class) UserCreationDto userDto
+    ) {
         return userClient.addUser(userDto);
     }
 
     @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(
-            @RequestBody @Validated(UpdateGroup.class) CreateUserRequestDto userDto,
-            @PathVariable Long userId) {
+    public UserDto updateUser(
+            @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
+            @PathVariable Long userId
+    ) {
         return userClient.updateUser(userDto, userId);
     }
 
     @GetMapping("/{userId}")
-    public UserResponseDto getUserById(
-            @PathVariable Long userId) {
+    public UserDto getUserById(
+            @PathVariable Long userId
+    ) {
         return userClient.getUserById(userId);
     }
 
     @GetMapping
-    public List<UserResponseDto> getAllUsers() {
-        return userClient.getAllUsers();
+    public List<UserDto> getAllUsers(
+            @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
+    ) {
+        return userClient.getAllUsers(from, size);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUserById(
-            @PathVariable Long userId) {
+            @PathVariable Long userId
+    ) {
         userClient.deleteUserById(userId);
     }
 }
