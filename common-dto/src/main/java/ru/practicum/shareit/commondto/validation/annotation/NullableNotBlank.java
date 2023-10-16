@@ -4,7 +4,6 @@ import ru.practicum.shareit.commondto.validation.annotation.validator.NullableNo
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
-import javax.validation.constraints.NotBlank;
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD,
@@ -19,14 +18,11 @@ import java.lang.annotation.*;
 @Repeatable(NullableNotBlank.List.class)
 @Documented
 public @interface NullableNotBlank {
-    String message() default "{ru.practicum.shareit.commondto.validation.annotation.NullableNotBlank.message}";
+    String message() default "{javax.validation.constraints.NotBlank.message}";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-    @NotBlank
-    boolean nullable() default true;
 
     @Target({ElementType.METHOD,
             ElementType.FIELD,

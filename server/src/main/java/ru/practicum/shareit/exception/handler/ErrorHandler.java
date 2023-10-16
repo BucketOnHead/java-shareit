@@ -29,7 +29,7 @@ public class ErrorHandler {
     public ApiError handleBadRequestException(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ApiError.builder()
-                .status(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .status(HttpStatus.BAD_REQUEST.name())
                 .reason("Request cannot be understood by the server due to incorrect syntax")
                 .message(ex.getMessage())
                 .build();
