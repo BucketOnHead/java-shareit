@@ -12,6 +12,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>ShareIt Gateway</name>
 
+    <properties>
+        <shareit-server-client.version>0.0.1-SNAPSHOT</shareit-server-client.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -24,18 +28,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
             <groupId>ru.practicum</groupId>
-            <artifactId>shareit-server-dto</artifactId>
-            <version>${shareit-server-dto.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.practicum</groupId>
-            <artifactId>shareit-server-constants</artifactId>
-            <version>${shareit-server-constants.version}</version>
+            <artifactId>shareit-server-client</artifactId>
+            <version>${shareit-server-client.version}</version>
         </dependency>
     </dependencies>
 

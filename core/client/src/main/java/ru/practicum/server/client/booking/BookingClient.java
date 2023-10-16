@@ -1,21 +1,18 @@
-package ru.practicum.shareit.gateway.booking.client;
+package ru.practicum.server.client.booking;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.server.dto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.server.dto.booking.response.BookingDto;
-import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BookingClient {
     private final WebClient client;
-
-    public BookingClient(@Value("${shareit-server.url}") String serverUrl) {
-        this.client = WebClient.create(serverUrl);
-    }
 
     public BookingDto addBooking(BookingCreationDto bookingDto, Long userId) {
         return client.post()

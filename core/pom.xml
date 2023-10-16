@@ -13,6 +13,7 @@
     <name>ShareIt Core</name>
 
     <modules>
+        <module>client</module>
         <module>consts</module>
         <module>dto</module>
         <module>server</module>

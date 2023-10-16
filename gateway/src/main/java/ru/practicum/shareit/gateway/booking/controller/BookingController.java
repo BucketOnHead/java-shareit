@@ -3,7 +3,7 @@ package ru.practicum.shareit.gateway.booking.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.gateway.booking.client.BookingClient;
+import ru.practicum.server.client.booking.BookingClient;
 import ru.practicum.shareit.gateway.booking.validation.annotation.BookingStateEnum;
 import ru.practicum.shareit.server.dto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.server.dto.booking.response.BookingDto;

@@ -1,6 +1,6 @@
-package ru.practicum.shareit.gateway.user.client;
+package ru.practicum.server.client.user;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.server.dto.user.request.UserCreationDto;
@@ -9,12 +9,9 @@ import ru.practicum.shareit.server.dto.user.response.UserDto;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserClient {
     private final WebClient client;
-
-    public UserClient(@Value("${shareit-server.url}") String serverUrl) {
-        this.client = WebClient.create(serverUrl);
-    }
 
     public UserDto addUser(UserCreationDto userDto) {
         return client.post()

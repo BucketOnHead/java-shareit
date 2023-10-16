@@ -3,7 +3,8 @@ package ru.practicum.shareit.gateway.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.gateway.item.client.comment.CommentClient;
+import ru.practicum.server.client.item.ItemClient;
+import ru.practicum.server.client.item.comment.CommentClient;
 import ru.practicum.shareit.server.dto.item.request.ItemCreationDto;
 import ru.practicum.shareit.server.dto.item.request.comment.CommentCreationDto;
 import ru.practicum.shareit.server.dto.item.response.ItemDetailsDto;
@@ -12,7 +13,6 @@ import ru.practicum.shareit.server.dto.item.response.comment.CommentDto;
 import ru.practicum.shareit.server.dto.validation.Groups;
 import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.gateway.consts.DefaultParams;
-import ru.practicum.shareit.gateway.item.client.ItemClient;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;

@@ -3,11 +3,11 @@ package ru.practicum.shareit.gateway.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.server.client.user.UserClient;
 import ru.practicum.shareit.server.dto.user.request.UserCreationDto;
 import ru.practicum.shareit.server.dto.user.response.UserDto;
 import ru.practicum.shareit.server.dto.validation.Groups;
 import ru.practicum.shareit.gateway.consts.DefaultParams;
-import ru.practicum.shareit.gateway.user.client.UserClient;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;

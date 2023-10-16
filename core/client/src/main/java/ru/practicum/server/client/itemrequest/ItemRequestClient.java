@@ -1,21 +1,19 @@
-package ru.practicum.shareit.gateway.itemrequest.client;
+package ru.practicum.server.client.itemrequest;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.server.dto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.server.dto.itemrequest.response.ItemRequestDto;
-import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ItemRequestClient {
     private final WebClient client;
 
-    public ItemRequestClient(@Value("${shareit-server.url}") String serverUrl) {
-        this.client = WebClient.create(serverUrl);
-    }
 
     public ItemRequestDto addItemRequest(ItemRequestCreationDto requestDto, Long userId) {
         return client.post()

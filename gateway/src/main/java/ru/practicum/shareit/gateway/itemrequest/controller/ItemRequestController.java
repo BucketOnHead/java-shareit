@@ -3,12 +3,12 @@ package ru.practicum.shareit.gateway.itemrequest.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.server.client.itemrequest.ItemRequestClient;
 import ru.practicum.shareit.gateway.consts.DefaultParams;
-import ru.practicum.shareit.gateway.itemrequest.client.ItemRequestClient;
+import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.server.dto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.server.dto.itemrequest.response.ItemRequestDto;
 import ru.practicum.shareit.server.dto.validation.Groups;
-import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
