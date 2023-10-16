@@ -1,7 +1,7 @@
 package ru.practicum.shareit.exception.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,22 +9,22 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import ru.practicum.shareit.booking.exception.IncorrectStateException;
 
-import javax.validation.ConstraintDeclarationException;
 import javax.validation.ConstraintViolationException;
 import java.util.stream.Collectors;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse missingRequestHeaderExceptionHandler(final MissingRequestHeaderException ex) {
@@ -64,48 +64,23 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse constraintDeclarationExceptionHandler(final ConstraintDeclarationException ex) {
+    public ErrorResponse constraintDeclarationExceptionHandler(final IncorrectStateException ex) {
         log.error("[DATA ERROR]: {}.", ex.getMessage());
         return ErrorResponse.getFromException(ex);
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse httpClientErrorExceptionNotFoundHandler(final WebClientResponseException.NotFound ex) {
-        ErrorResponse errorResponse;
-        try {
-            errorResponse = ErrorResponse.getFromJson(ex.getResponseBodyAsString(UTF_8));
-        } catch (JsonProcessingException jsonEx) {
-            errorResponse = ErrorResponse.getFromException(ex);
-        }
-        log.error("[SEARCH ERROR]: {}.", errorResponse.getError());
-        return errorResponse;
-    }
+    public ResponseEntity<Object> handleWebClientException(final WebClientResponseException ex) {
+        var responseBody = ex.getResponseBodyAsString();
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse httpClientErrorExceptionBadRequestHandler(final WebClientResponseException.BadRequest ex) {
-        ErrorResponse errorResponse;
+        var objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         try {
-            errorResponse = ErrorResponse.getFromJson(ex.getResponseBodyAsString(UTF_8));
-        } catch (JsonProcessingException jsonEx) {
-            errorResponse = ErrorResponse.getFromException(ex);
+            ApiError apiError = objectMapper.readValue(responseBody, ApiError.class);
+            return ResponseEntity.status(ex.getStatusCode()).body(apiError);
+        } catch (Exception jsonEx) {
+            return ResponseEntity.status(ex.getStatusCode()).body("Failed to receive message");
         }
-        log.error("[SEARCH ERROR]: {}.", errorResponse.getError());
-        return errorResponse;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse httpClientErrorExceptionConflictHandler(final WebClientResponseException.Conflict ex) {
-        ErrorResponse errorResponse;
-        try {
-            errorResponse = ErrorResponse.getFromJson(ex.getResponseBodyAsString(UTF_8));
-        } catch (JsonProcessingException jsonEx) {
-            errorResponse = ErrorResponse.getFromException(ex);
-        }
-        log.error("[DATABASE ERROR]: {}.", errorResponse.getError());
-        return errorResponse;
     }
 
     @ExceptionHandler
@@ -135,10 +110,6 @@ public class ErrorHandler {
 
         public static ErrorResponse getFromExceptionAndMessage(Throwable th, String message) {
             return new ErrorResponse(message, th.getClass().getSimpleName());
-        }
-
-        public static ErrorResponse getFromJson(String json) throws JsonProcessingException {
-            return objectMapper.readValue(json, ErrorResponse.class);
         }
     }
 }

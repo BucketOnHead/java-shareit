@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.validation.annotation;
 
-import ru.practicum.shareit.booking.validation.annotation.validator.BookingStateEnumConstraintValidator;
+import ru.practicum.shareit.booking.validation.annotation.validator.BookingStateEnumValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 
 @Documented
-@Constraint(validatedBy = BookingStateEnumConstraintValidator.class)
+@Constraint(validatedBy = BookingStateEnumValidator.class)
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BookingStateEnum {

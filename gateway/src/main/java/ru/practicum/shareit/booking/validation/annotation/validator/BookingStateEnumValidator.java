@@ -1,22 +1,22 @@
 package ru.practicum.shareit.booking.validation.annotation.validator;
 
-import ru.practicum.shareit.booking.dto.State;
 import ru.practicum.shareit.booking.exception.IncorrectStateException;
 import ru.practicum.shareit.booking.validation.annotation.BookingStateEnum;
+import ru.practicum.shareit.commons.constants.booking.BookingState;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class BookingStateEnumConstraintValidator
-        implements ConstraintValidator<BookingStateEnum, String> {
+public class BookingStateEnumValidator implements
+        ConstraintValidator<BookingStateEnum, String> {
 
     @Override
-    public boolean isValid(String possibleState, ConstraintValidatorContext context) {
+    public boolean isValid(String state, ConstraintValidatorContext context) {
         try {
-            State.valueOf(possibleState);
+            BookingState.valueOf(state);
             return true;
         } catch (IllegalArgumentException ex) {
-            throw IncorrectStateException.fromString(possibleState);
+            throw new IncorrectStateException(state);
         }
     }
 }

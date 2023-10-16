@@ -32,5 +32,10 @@
             <artifactId>shareit-common-dto</artifactId>
             <version>${shareit-common-dto.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ru.practicum</groupId>
+            <artifactId>shareit-commons-constants</artifactId>
+            <version>${shareit-commons-constants.version}</version>
+        </dependency>
     </dependencies>
 </project>
