@@ -32,8 +32,31 @@ import java.util.List;
 public class UserController {
     private final UserClient userClient;
 
+    @Operation(summary = "Добавление нового пользователя")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь добавлен",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "409",
+            description = "Конфликт с базой данных",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_CONFLICT)
+            )
+    )
     @PostMapping
     public UserDto addUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные добавляемого пользователя")
             @RequestBody @Validated(Groups.OnCreate.class) UserCreationDto userDto
     ) {
         return userClient.addUser(userDto);
