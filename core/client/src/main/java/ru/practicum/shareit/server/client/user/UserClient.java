@@ -40,7 +40,7 @@ public class UserClient {
     }
 
 
-    public List<UserDto> getAllUsers(Integer from, Integer size) {
+    public List<UserDto> getUsers(Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/users")
                         .queryParam("from", from)

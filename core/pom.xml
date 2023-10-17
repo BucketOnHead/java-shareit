@@ -23,6 +23,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <shareit-server-constants.version>0.0.1-SNAPSHOT</shareit-server-constants.version>
         <springdoc-openapi-ui.version>1.6.14</springdoc-openapi-ui.version>
     </properties>
 

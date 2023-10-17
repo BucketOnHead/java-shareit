@@ -1,20 +1,33 @@
 package ru.practicum.shareit.gateway.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.gateway.consts.DefaultParams;
 import ru.practicum.shareit.server.client.user.UserClient;
+import ru.practicum.shareit.server.constants.OpenApiConsts;
+import ru.practicum.shareit.server.dto.error.ApiError;
 import ru.practicum.shareit.server.dto.user.request.UserCreationDto;
 import ru.practicum.shareit.server.dto.user.response.UserDto;
 import ru.practicum.shareit.server.dto.validation.Groups;
-import ru.practicum.shareit.gateway.consts.DefaultParams;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
+@Tag(name = "Пользователи", description = "API для работы с пользователями")
 @RestController
 @RequestMapping("/users")
+@Validated
 @RequiredArgsConstructor
 public class UserController {
     private final UserClient userClient;
@@ -41,12 +54,37 @@ public class UserController {
         return userClient.getUserById(userId);
     }
 
+    @Operation(
+            summary = "Получение информации о пользователях",
+            description = "Возвращает информацию обо всех пользователях\n\n" +
+                    "В случае, если не найдено ни одного пользователя, возвращает пустой список"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователи найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = UserDto.class))
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USERS_BAD_REQUEST)
+            )
+    )
     @GetMapping
-    public List<UserDto> getAllUsers(
+    public List<UserDto> getUsers(
+            @Parameter(description = OpenApiConsts.FROM_DESC, example = OpenApiConsts.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+
+            @Parameter(description = OpenApiConsts.SIZE_DESC, example = OpenApiConsts.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
-        return userClient.getAllUsers(from, size);
+        return userClient.getUsers(from, size);
     }
 
     @DeleteMapping("/{userId}")
