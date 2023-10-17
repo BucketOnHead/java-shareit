@@ -70,8 +70,39 @@ public class UserController {
         return userClient.updateUser(userDto, userId);
     }
 
+    @Operation(
+            summary = "Получение информации о пользователе по его идентификатору",
+            description = "В случае, если пользователь не найден возвращает код 404"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UserDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+            )
+    )
     @GetMapping("/{userId}")
     public UserDto getUserById(
+            @Parameter(description = "Идентификатор пользователя")
             @PathVariable Long userId
     ) {
         return userClient.getUserById(userId);

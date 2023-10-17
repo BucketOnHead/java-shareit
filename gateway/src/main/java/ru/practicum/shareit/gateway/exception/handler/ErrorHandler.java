@@ -12,6 +12,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import ru.practicum.shareit.gateway.booking.exception.IncorrectStateException;
 import ru.practicum.shareit.gateway.exception.handler.util.ErrorUtils;
@@ -30,9 +31,12 @@ public class ErrorHandler {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({
+            MethodArgumentTypeMismatchException.class,
+            MissingRequestHeaderException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError missingRequestHeaderExceptionHandler(final MissingRequestHeaderException ex) {
+    public ApiError missingRequestHeaderExceptionHandler(final RuntimeException ex) {
         log.info(ex.getMessage(), ex);
         return ApiError.builder()
                 .status(HttpStatus.BAD_REQUEST.name())

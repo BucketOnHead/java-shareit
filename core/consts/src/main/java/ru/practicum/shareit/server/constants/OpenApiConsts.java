@@ -69,5 +69,19 @@ public class OpenApiConsts {
                 "\"message\":\"User email must be unique\"," +
                 "\"timestamp\":\"2023-10-17T19:27:41.322698\"" +
                 "}";
+
+        public static final String GET_USER_BAD_REQUEST = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Bad Request\"," +
+                "\"message\":\"Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; nested exception is java.lang.NumberFormatException: For input string: \\\"abc\\\"\"," +
+                "\"timestamp\":\"2023-10-17T21:19:10.690945\"" +
+                "}";
+
+        public static final String GET_USER_NOT_FOUND = "{" +
+                "\"status\":\"NOT_FOUND\"," +
+                "\"reason\":\"Requested resource does not exist\"," +
+                "\"message\":\"User with id: 1 not found\"," +
+                "\"timestamp\":\"2023-10-17T21:25:18.098461\"" +
+                "}";
     }
 }
