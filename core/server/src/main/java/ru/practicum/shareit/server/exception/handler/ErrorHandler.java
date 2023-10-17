@@ -7,17 +7,27 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.server.dto.error.ApiError;
 import ru.practicum.shareit.server.booking.exception.*;
+import ru.practicum.shareit.server.dto.error.ApiError;
+import ru.practicum.shareit.server.exception.handler.util.ErrorUtils;
 import ru.practicum.shareit.server.item.exception.ItemAccessException;
 import ru.practicum.shareit.server.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.server.item.exception.comment.CommentNotAllowedException;
 import ru.practicum.shareit.server.itemrequest.exception.ItemRequestNotFoundException;
 import ru.practicum.shareit.server.user.exception.UserNotFoundException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+
+    private static final Map<String, String> CONSTRAINS_MESSAGE = new HashMap<>();
+
+    static {
+        CONSTRAINS_MESSAGE.put("UQ_USER_EMAIL", "User email must be unique");
+    }
 
     @ExceptionHandler({
             MissingRequestHeaderException.class,
@@ -67,11 +77,17 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConflictException(final DataIntegrityViolationException ex) {
+        String message = ErrorUtils.getMessage(ex, CONSTRAINS_MESSAGE);
+        if (message == null) {
+            message = "Incorrect database request";
+            log.warn("Custom message not found", ex);
+        }
+
         log.error(ex.getMessage(), ex);
         return ApiError.builder()
                 .status(HttpStatus.CONFLICT.name())
                 .reason("Request conflicts with another request or with server configuration")
-                .message(ex.getMessage())
+                .message(message)
                 .build();
     }
 
