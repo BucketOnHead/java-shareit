@@ -16,8 +16,8 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>core</module>
         <module>gateway</module>
-        <module>server</module>
     </modules>
     <name>ShareIt</name>
 
@@ -27,60 +27,13 @@
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <java.version>11</java.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
-        <lombok.version>1.18.24</lombok.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok.version>1.18.26</lombok.version>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <shareit-server-constants.version>0.0.1-SNAPSHOT</shareit-server-constants.version>
+        <shareit-server-dto.version>0.0.1-SNAPSHOT</shareit-server-dto.version>
         <spotbugs-maven-plugin.version>4.7.0.0</spotbugs-maven-plugin.version>
-        <spring-boot-starter-data-jpa.version>2.7.5</spring-boot-starter-data-jpa.version>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>${spring-boot-starter-data-jpa.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-    </dependencies>
 
     <build>
         <resources>
@@ -89,44 +42,6 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${mapstruct.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>${lombok-mapstruct-binding.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
