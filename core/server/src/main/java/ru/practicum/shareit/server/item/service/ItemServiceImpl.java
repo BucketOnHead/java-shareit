@@ -4,14 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.server.booking.repository.BookingRepository;
 import ru.practicum.shareit.server.booking.utils.BookingUtils;
+import ru.practicum.shareit.server.constants.booking.BookingStatus;
 import ru.practicum.shareit.server.dto.item.request.ItemCreationDto;
 import ru.practicum.shareit.server.dto.item.response.ItemDetailsDto;
 import ru.practicum.shareit.server.dto.item.response.ItemDto;
-import ru.practicum.shareit.server.constants.booking.BookingStatus;
 import ru.practicum.shareit.server.item.exception.ItemAccessException;
 import ru.practicum.shareit.server.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.server.item.model.Item;
@@ -91,7 +93,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDetailsDto> getItemsByUserId(Long userId, Integer from, Integer size) {
         userRepository.existsByIdOrThrow(userId);
 
-        var page = PageRequest.of(from / size, size);
+        var page = PageRequest.of(from / size, size, Sort.by(Direction.ASC, "id"));
         var items = itemRepository.findAllByOwnerId(userId, page);
 
         var now = LocalDateTime.now();
