@@ -17,19 +17,15 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class UserCreationDto {
 
-    @Schema(
-            description = OpenApiConsts.User.NAME,
+    @Schema(description = OpenApiConsts.User.NAME,
             example = OpenApiConsts.User.NAME_EG,
-            maxLength = 50
-    )
+            maxLength = 50)
     @NotNull(groups = Groups.OnCreate.class)
     String name;
 
-    @Schema(
-            description = OpenApiConsts.User.EMAIL,
+    @Schema(description = OpenApiConsts.User.EMAIL,
             example = OpenApiConsts.User.EMAIL_EG,
-            maxLength = 100
-    )
+            maxLength = 100)
     @NotNull(groups = Groups.OnCreate.class)
     @Email(groups = {Groups.OnCreate.class, Groups.OnUpdate.class})
     String email;
