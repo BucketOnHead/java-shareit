@@ -38,9 +38,43 @@ public class ItemController {
     private final ItemClient itemClient;
     private final CommentClient commentClient;
 
+    @Operation(
+            summary = "Добавление новой вещи",
+            description = "Добавление новой вещи, владельцем которой будет пользовать " +
+                    "с идентификатором из заголовка"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Вещь добавлена",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ItemDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.ITEM_REQUEST_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
+            )
+    )
     @PostMapping
     public ItemDto addItem(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные новой вещи")
             @RequestBody @Validated(Groups.OnCreate.class) ItemCreationDto itemDto,
+
+            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long ownerId
     ) {
         return itemClient.addItem(itemDto, ownerId);
