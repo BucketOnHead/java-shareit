@@ -21,6 +21,7 @@ import ru.practicum.shareit.server.dto.error.ApiError;
 import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
+@Hidden
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
@@ -32,11 +33,11 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({
-            MethodArgumentTypeMismatchException.class,
-            MissingRequestHeaderException.class
+            MissingRequestHeaderException.class,
+            MethodArgumentTypeMismatchException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError missingRequestHeaderExceptionHandler(final RuntimeException ex) {
+    public ApiError handleBadRequestException(final RuntimeException ex) {
         log.info(ex.getMessage(), ex);
         return ApiError.builder()
                 .status(HttpStatus.BAD_REQUEST.name())
@@ -91,7 +92,6 @@ public class ErrorHandler {
         }
     }
 
-    @Hidden
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleThrowable(final Throwable th) {

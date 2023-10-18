@@ -86,7 +86,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_BAD_REQUEST)
+                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
             )
     )
     @ApiResponse(
@@ -119,15 +119,6 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = UserDto.class)
-            )
-    )
-    @ApiResponse(
-            responseCode = "400",
-            description = "Запрос составлен некорректно",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_BAD_REQUEST)
             )
     )
     @ApiResponse(
@@ -184,15 +175,6 @@ public class UserController {
     @ApiResponse(
             responseCode = "200",
             description = "Пользователь удалён"
-    )
-    @ApiResponse(
-            responseCode = "400",
-            description = "Запрос составлен некорректно",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_BAD_REQUEST)
-            )
     )
     @ApiResponse(
             responseCode = "404",
