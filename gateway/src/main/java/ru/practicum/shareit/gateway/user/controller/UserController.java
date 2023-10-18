@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Получение информации о пользователе по его идентификатору",
+            summary = "Получение информации о пользователе по идентификатору",
             description = "В случае, если пользователь не найден возвращает код 404"
     )
     @ApiResponse(
@@ -104,7 +104,7 @@ public class UserController {
     )
     @GetMapping("/{userId}")
     public UserDto getUserById(
-            @Parameter(description = "Идентификатор пользователя")
+            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_EG)
             @PathVariable Long userId
     ) {
         return userClient.getUserById(userId);
@@ -143,8 +143,32 @@ public class UserController {
         return userClient.getUsers(from, size);
     }
 
+    @Operation(summary = "Удаление пользователя по идентификатору")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь удалён"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+            )
+    )
     @DeleteMapping("/{userId}")
     public void deleteUserById(
+            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_EG)
             @PathVariable Long userId
     ) {
         userClient.deleteUserById(userId);

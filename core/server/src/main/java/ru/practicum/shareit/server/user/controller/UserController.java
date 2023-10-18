@@ -2,6 +2,7 @@ package ru.practicum.shareit.server.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.dto.user.request.UserCreationDto;
 import ru.practicum.shareit.server.dto.user.response.UserDto;

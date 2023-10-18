@@ -13,7 +13,7 @@ import ru.practicum.shareit.server.constants.OpenApiConsts;
 @NoArgsConstructor
 public class UserDto {
 
-    @Schema(description = OpenApiConsts.USER_ID, example = OpenApiConsts.USER_ID_EG)
+    @Schema(description = OpenApiConsts.USER_ID_DESC, example = OpenApiConsts.USER_ID_EG)
     Long id;
 
     @Schema(description = OpenApiConsts.USER_NAME_DESC, example = OpenApiConsts.USER_NAME_EG)

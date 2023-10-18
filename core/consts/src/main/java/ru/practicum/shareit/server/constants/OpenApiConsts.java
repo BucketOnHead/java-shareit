@@ -13,11 +13,12 @@ public class OpenApiConsts {
     // param
     public static final String FROM_DESC = "Количество элементов, которые нужно пропустить для формирования текущего набора";
     public static final String SIZE_DESC = "Количество элементов в наборе";
+    public static final String USER_ID_PARAM_DESC = "Идентификатор пользователя";
     public static final String FROM_EG = "10";
     public static final String SIZE_EG = "20";
 
     // user
-    public static final String USER_ID = "Идентификатор";
+    public static final String USER_ID_DESC = "Идентификатор";
     public static final String USER_NAME_DESC = "Имя";
     public static final String USER_EMAIL_DESC = "Адрес электронной почты";
     public static final String USER_ID_EG = "1";
