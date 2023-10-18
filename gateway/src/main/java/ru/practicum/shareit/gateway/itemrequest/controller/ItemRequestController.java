@@ -90,6 +90,15 @@ public class ItemRequestController {
                     array = @ArraySchema(schema = @Schema(implementation = ItemRequestDto.class))
             )
     )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
+            )
+    )
     @GetMapping
     public List<ItemRequestDto> getItemRequestsByRequesterId(
             @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
@@ -112,7 +121,7 @@ public class ItemRequestController {
     )
     @ApiResponse(
             responseCode = "404",
-            description = "Запрос/пользователь не найден",
+            description = "Необходимые ресурсы не найдены",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
