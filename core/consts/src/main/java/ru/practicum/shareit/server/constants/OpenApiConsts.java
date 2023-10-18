@@ -3,43 +3,48 @@ package ru.practicum.shareit.server.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * DESC = description
+ * name = description
  * <p>
  * EG (exempli gratia) = example
  */
 @UtilityClass
 public class OpenApiConsts {
 
-    // param
-    public static final String FROM_DESC = "Количество элементов, которые нужно пропустить для формирования текущего набора";
-    public static final String SIZE_DESC = "Количество элементов в наборе";
-    public static final String USER_ID_PARAM_DESC = "Идентификатор пользователя";
-    public static final String FROM_EG = "10";
-    public static final String SIZE_EG = "20";
-    public static final String USER_ID_PARAM_EG = "1";
+    @UtilityClass
+    public static class Param {
+        public static final String FROM = "Количество элементов, которые нужно пропустить для формирования текущего набора";
+        public static final String SIZE = "Количество элементов в наборе";
+        public static final String USER_ID = "Идентификатор пользователя";
+        public static final String FROM_EG = "10";
+        public static final String SIZE_EG = "20";
+        public static final String USER_ID_EG = "1";
+    }
 
-    // user
-    public static final String USER_ID_DESC = "Идентификатор";
-    public static final String USER_NAME_DESC = "Имя";
-    public static final String USER_EMAIL_DESC = "Адрес электронной почты";
-    public static final String USER_ID_EG = "1";
-    public static final String USER_NAME_EG = "Вася Уточкин";
-    public static final String USER_EMAIL_EG = "vasya.utochkin@example.org";
+    @UtilityClass
+    public static class User {
+        public static final String ID = "Идентификатор";
+        public static final String NAME = "Имя";
+        public static final String EMAIL = "Адрес электронной почты";
+        public static final String ID_EG = "1";
+        public static final String NAME_EG = "Вася Уточкин";
+        public static final String EMAIL_EG = "vasya.utochkin@example.org";
+    }
 
-    // api error
-    public static final String API_ERROR_STATUS_DESC = "статус HTTP-ответа";
-    public static final String API_ERROR_REASON_DESC = "Общее описание ошибки";
-    public static final String API_ERROR_MESSAGE_DESC = "Сообщение об ошибке";
-    public static final String API_ERROR_TIMESTAMP_DESC = "Дата и время когда произошла ошибка";
-    public static final String API_ERROR_ERRORS_DESC = "Сопутствующие ошибки или иная информация(вложенные ошибки, стектрейсы и пр.)";
-
-    public static final String API_ERROR_ERRORS_EG = "[" +
-            "\"parameter 'size' must be greater than 0, but it was '0'\"," +
-            "\"parameter 'from' must be greater than or equal to 0, but it was '-1'\"" +
-            "]";
-    public static final String API_ERROR_STATUS_EG = "BAD_REQUEST";
-    public static final String API_ERROR_REASON_EG = "Request cannot be understood by the server due to incorrect syntax";
-    public static final String API_ERROR_MESSAGE_EG = "Unknown state: ABC";
+    @UtilityClass
+    public static class ApiError {
+        public static final String STATUS = "статус HTTP-ответа";
+        public static final String REASON = "Общее описание ошибки";
+        public static final String MESSAGE = "Сообщение об ошибке";
+        public static final String TIMESTAMP = "Дата и время когда произошла ошибка";
+        public static final String ERRORS = "Сопутствующие ошибки или иная информация(вложенные ошибки, стектрейсы и пр.)";
+        public static final String STATUS_EG = "BAD_REQUEST";
+        public static final String REASON_EG = "Request cannot be understood by the server due to incorrect syntax";
+        public static final String MESSAGE_EG = "Unknown state: ABC";
+        public static final String ERRORS_EG = "[" +
+                "\"parameter 'size' must be greater than 0, but it was '0'\"," +
+                "\"parameter 'from' must be greater than or equal to 0, but it was '-1'\"" +
+                "]";
+    }
 
     @UtilityClass
     public static class Response {
@@ -70,13 +75,6 @@ public class OpenApiConsts {
                 "\"reason\":\"Request conflicts with another request or with server configuration\"," +
                 "\"message\":\"User email must be unique\"," +
                 "\"timestamp\":\"2023-10-17T19:27:41.322698\"" +
-                "}";
-
-        public static final String GET_USER_BAD_REQUEST = "{" +
-                "\"status\":\"BAD_REQUEST\"," +
-                "\"reason\":\"Bad Request\"," +
-                "\"message\":\"Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; nested exception is java.lang.NumberFormatException: For input string: \\\"abc\\\"\"," +
-                "\"timestamp\":\"2023-10-17T21:19:10.690945\"" +
                 "}";
 
         public static final String GET_USER_NOT_FOUND = "{" +

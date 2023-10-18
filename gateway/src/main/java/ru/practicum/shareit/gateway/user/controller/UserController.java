@@ -90,7 +90,7 @@ public class UserController {
     )
     @GetMapping("/{userId}")
     public UserDto getUserById(
-            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
+            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
             @PathVariable Long userId
     ) {
         return userClient.getUserById(userId);
@@ -120,10 +120,10 @@ public class UserController {
     )
     @GetMapping
     public List<UserDto> getUsers(
-            @Parameter(description = OpenApiConsts.FROM_DESC, example = OpenApiConsts.FROM_EG)
+            @Parameter(description = OpenApiConsts.Param.FROM, example = OpenApiConsts.Param.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
 
-            @Parameter(description = OpenApiConsts.SIZE_DESC, example = OpenApiConsts.SIZE_EG)
+            @Parameter(description = OpenApiConsts.Param.SIZE, example = OpenApiConsts.Param.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return userClient.getUsers(from, size);
@@ -165,7 +165,7 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления пользователя")
             @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
 
-            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
+            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
             @PathVariable Long userId
     ) {
         return userClient.updateUser(userDto, userId);
@@ -187,7 +187,7 @@ public class UserController {
     )
     @DeleteMapping("/{userId}")
     public void deleteUserById(
-            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
+            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
             @PathVariable Long userId
     ) {
         userClient.deleteUserById(userId);

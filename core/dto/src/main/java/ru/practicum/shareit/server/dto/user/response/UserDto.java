@@ -13,12 +13,12 @@ import ru.practicum.shareit.server.constants.OpenApiConsts;
 @NoArgsConstructor
 public class UserDto {
 
-    @Schema(description = OpenApiConsts.USER_ID_DESC, example = OpenApiConsts.USER_ID_EG)
+    @Schema(description = OpenApiConsts.User.ID, example = OpenApiConsts.User.ID_EG)
     Long id;
 
-    @Schema(description = OpenApiConsts.USER_NAME_DESC, example = OpenApiConsts.USER_NAME_EG)
+    @Schema(description = OpenApiConsts.User.NAME, example = OpenApiConsts.User.NAME_EG)
     String name;
 
-    @Schema(description = OpenApiConsts.USER_EMAIL_DESC, example = OpenApiConsts.USER_EMAIL_EG)
+    @Schema(description = OpenApiConsts.User.EMAIL, example = OpenApiConsts.User.EMAIL_EG)
     String email;
 }

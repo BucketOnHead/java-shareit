@@ -21,24 +21,24 @@ import java.util.List;
 @Getter
 public class ApiError {
 
-    @Schema(description = OpenApiConsts.API_ERROR_STATUS_DESC, example = OpenApiConsts.API_ERROR_STATUS_EG)
+    @Schema(description = OpenApiConsts.ApiError.STATUS, example = OpenApiConsts.ApiError.STATUS_EG)
     String status;
 
-    @Schema(description = OpenApiConsts.API_ERROR_REASON_DESC, example = OpenApiConsts.API_ERROR_REASON_EG)
+    @Schema(description = OpenApiConsts.ApiError.REASON, example = OpenApiConsts.ApiError.REASON_EG)
     String reason;
 
-    @Schema(description = OpenApiConsts.API_ERROR_MESSAGE_DESC, example = OpenApiConsts.API_ERROR_MESSAGE_EG)
+    @Schema(description = OpenApiConsts.ApiError.MESSAGE, example = OpenApiConsts.ApiError.MESSAGE_EG)
     String message;
 
     @ArraySchema(arraySchema = @Schema(
-            description = OpenApiConsts.API_ERROR_ERRORS_DESC,
-            example = OpenApiConsts.API_ERROR_ERRORS_EG,
+            description = OpenApiConsts.ApiError.ERRORS,
+            example = OpenApiConsts.ApiError.ERRORS_EG,
             nullable = true
     ))
     @JsonInclude(Include.NON_NULL)
     List<String> errors;
 
-    @Schema(description = OpenApiConsts.API_ERROR_TIMESTAMP_DESC)
+    @Schema(description = OpenApiConsts.ApiError.TIMESTAMP)
     @Builder.Default
     LocalDateTime timestamp = LocalDateTime.now();
 }
