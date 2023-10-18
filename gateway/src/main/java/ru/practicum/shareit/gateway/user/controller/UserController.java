@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.gateway.consts.DefaultParams;
 import ru.practicum.shareit.server.client.user.UserClient;
 import ru.practicum.shareit.server.constants.OpenApiConsts;
+import ru.practicum.shareit.server.constants.OpenApiConsts.Param;
 import ru.practicum.shareit.server.dto.error.ApiError;
 import ru.practicum.shareit.server.dto.user.request.UserCreationDto;
 import ru.practicum.shareit.server.dto.user.response.UserDto;
@@ -90,7 +91,7 @@ public class UserController {
     )
     @GetMapping("/{userId}")
     public UserDto getUserById(
-            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @PathVariable Long userId
     ) {
         return userClient.getUserById(userId);
@@ -120,10 +121,10 @@ public class UserController {
     )
     @GetMapping
     public List<UserDto> getUsers(
-            @Parameter(description = OpenApiConsts.Param.FROM, example = OpenApiConsts.Param.FROM_EG)
+            @Parameter(description = Param.FROM, example = Param.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
 
-            @Parameter(description = OpenApiConsts.Param.SIZE, example = OpenApiConsts.Param.SIZE_EG)
+            @Parameter(description = Param.SIZE, example = Param.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return userClient.getUsers(from, size);
@@ -165,7 +166,7 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления пользователя")
             @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
 
-            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @PathVariable Long userId
     ) {
         return userClient.updateUser(userDto, userId);
@@ -187,7 +188,7 @@ public class UserController {
     )
     @DeleteMapping("/{userId}")
     public void deleteUserById(
-            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @PathVariable Long userId
     ) {
         userClient.deleteUserById(userId);
