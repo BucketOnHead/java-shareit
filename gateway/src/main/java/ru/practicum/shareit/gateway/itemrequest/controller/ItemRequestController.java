@@ -139,12 +139,39 @@ public class ItemRequestController {
         return itemRequestClient.getItemRequestById(itemRequestId, userId);
     }
 
+    @Operation(
+            summary = "Получение списка запросов вещей",
+            description = "Получение списка запросов вещей, созданных другими пользователями\n\n" +
+                    "Запросы сортируются от более новых к более старым"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Запросы вещей найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = ItemRequestDto.class))
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
+            )
+    )
     @GetMapping("/all")
-    public List<ItemRequestDto> getPageWithItemRequestsByRequesterId(
+    public List<ItemRequestDto> getItemRequests(
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
+
+            @Parameter(description = Param.FROM, example = Param.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+
+            @Parameter(description = Param.SIZE, example = Param.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
-        return itemRequestClient.getItemRequestsByRequesterId(userId, from, size);
+        return itemRequestClient.getItemRequests(userId, from, size);
     }
 }
