@@ -47,7 +47,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
+                    examples = @ExampleObject(OpenApiConsts.Response.POST_USER_BAD_REQUEST)
             )
     )
     @ApiResponse(
@@ -56,7 +56,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_CONFLICT)
+                    examples = @ExampleObject(OpenApiConsts.Response.POST_USER_CONFLICT)
             )
     )
     @PostMapping
@@ -85,7 +85,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
             )
     )
     @GetMapping("/{userId}")
@@ -115,7 +115,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USERS_BAD_REQUEST)
+                    examples = @ExampleObject(OpenApiConsts.Response.GET_USERS_BAD_REQUEST)
             )
     )
     @GetMapping
@@ -148,7 +148,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
+                    examples = @ExampleObject(OpenApiConsts.Response.POST_USER_BAD_REQUEST)
             )
     )
     @ApiResponse(
@@ -157,7 +157,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
             )
     )
     @PatchMapping("/{userId}")
@@ -182,7 +182,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
             )
     )
     @DeleteMapping("/{userId}")

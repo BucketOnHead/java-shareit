@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,8 @@ import ru.practicum.shareit.gateway.consts.DefaultParams;
 import ru.practicum.shareit.server.client.itemrequest.ItemRequestClient;
 import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.server.constants.OpenApiConsts;
+import ru.practicum.shareit.server.constants.OpenApiConsts.Param;
+import ru.practicum.shareit.server.dto.error.ApiError;
 import ru.practicum.shareit.server.dto.itemrequest.request.ItemRequestCreationDto;
 import ru.practicum.shareit.server.dto.itemrequest.response.ItemRequestDto;
 import ru.practicum.shareit.server.dto.validation.Groups;
@@ -31,9 +34,44 @@ import java.util.List;
 public class ItemRequestController {
     private final ItemRequestClient itemRequestClient;
 
+    @Operation(
+            summary = "Добавление запроса вещи от пользователя",
+            description = "Основная часть запроса - описание, в " +
+                    "котором пользователь описывает, какая вещь ему нужна"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Запрос на вещь добавлен",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ItemRequestDto.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.POST_ITEM_REQUEST_OK)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.POST_ITEM_REQUEST_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
+            )
+    )
     @PostMapping
     public ItemRequestDto addItemRequest(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные запроса вещи")
             @RequestBody @Validated(Groups.OnCreate.class) ItemRequestCreationDto requestDto,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemRequestClient.addItemRequest(requestDto, userId);
@@ -54,19 +92,48 @@ public class ItemRequestController {
     )
     @GetMapping
     public List<ItemRequestDto> getItemRequestsByRequesterId(
-            @Parameter(
-                    name = HttpHeaderConstants.X_SHARER_USER_ID,
-                    description = OpenApiConsts.Param.USER_ID,
-                    example = OpenApiConsts.Param.USER_ID_EG
-            )
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemRequestClient.getItemRequestsByRequesterId(userId);
     }
 
+    @Operation(
+            summary = "Получение данных запроса вещи по идентификатору",
+            description = "Получение запроса вещи по его идентификатору вместе с данными об ответах"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Запрос вещи найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ItemRequestDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Запрос/пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Запрос не найден",
+                                    value = OpenApiConsts.Response.ITEM_REQUEST_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Пользователь не найден",
+                                    value = OpenApiConsts.Response.USER_NOT_FOUND
+                            )
+                    }
+            )
+    )
     @GetMapping("/{itemRequestId}")
     public ItemRequestDto getItemRequestsById(
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
+
+            @Parameter(description = Param.ITEM_REQUEST_ID, example = Param.ITEM_REQUEST_ID_EG)
             @PathVariable Long itemRequestId
     ) {
         return itemRequestClient.getItemRequestById(itemRequestId, userId);

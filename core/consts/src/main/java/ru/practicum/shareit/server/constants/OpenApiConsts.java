@@ -15,9 +15,11 @@ public class OpenApiConsts {
         public static final String FROM = "Количество элементов, которые нужно пропустить для формирования текущего набора";
         public static final String SIZE = "Количество элементов в наборе";
         public static final String USER_ID = "Идентификатор пользователя";
+        public static final String ITEM_REQUEST_ID = "Идентификатор запроса вещи";
         public static final String FROM_EG = "10";
         public static final String SIZE_EG = "20";
         public static final String USER_ID_EG = "1";
+        public static final String ITEM_REQUEST_ID_EG = "1";
     }
 
     @UtilityClass
@@ -101,11 +103,35 @@ public class OpenApiConsts {
                 "\"timestamp\":\"2023-10-17T19:27:41.322698\"" +
                 "}";
 
-        public static final String GET_USER_NOT_FOUND = "{" +
+        public static final String USER_NOT_FOUND = "{" +
                 "\"status\":\"NOT_FOUND\"," +
                 "\"reason\":\"Requested resource does not exist\"," +
                 "\"message\":\"User with id: 1 not found\"," +
                 "\"timestamp\":\"2023-10-17T21:25:18.098461\"" +
+                "}";
+
+        public static final String POST_ITEM_REQUEST_BAD_REQUEST = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Bad Request\"," +
+                "\"message\":\"Field(s) failed validation\"," +
+                "\"errors\":[" +
+                "\"field 'description' should not be empty, but it was 'null'\"" +
+                "]," +
+                "\"timestamp\":\"2023-10-18T14:42:50.201833\"" +
+                "}";
+
+        public static final String POST_ITEM_REQUEST_OK = "{" +
+                "\"id\":1," +
+                "\"description\":\"Хотел бы воспользоваться щёткой для обуви\"," +
+                "\"created\":\"2023-10-18T14:49:08.869138\"," +
+                "\"items\":null" +
+                "}";
+
+        public static final String ITEM_REQUEST_NOT_FOUND = "{" +
+                "\"status\":\"NOT_FOUND\"," +
+                "\"reason\":\"Requested resource does not exist\"," +
+                "\"message\":\"Item request with id: 99 not found\"," +
+                "\"timestamp\":\"2023-10-18T15:20:42.426754\"" +
                 "}";
     }
 }
