@@ -31,6 +31,30 @@ public class OpenApiConsts {
     }
 
     @UtilityClass
+    public static class Item {
+        public static final String ID = "Идентификатор";
+        public static final String NAME = "Название";
+        public static final String DESCRIPTION = "Описание";
+        public static final String IS_AVAILABLE = "Доступность";
+        public static final String REQUEST_ID = "Идентификатор запроса";
+        public static final String ID_EG = "4";
+        public static final String NAME_EG = "Щётка для обуви";
+        public static final String DESCRIPTION_EG = "Стандартная щётка для обуви";
+        public static final String IS_AVAILABLE_EG = "true";
+        public static final String REQUEST_ID_EG = ItemRequest.ID_EG;
+    }
+
+    @UtilityClass
+    public static class ItemRequest {
+        public static final String ID = "Идентификатор";
+        public static final String DESCRIPTION = "Описание";
+        public static final String CREATED = "Дата и время создания";
+        public static final String ITEMS = "Вещи, добавленные по запросу";
+        public static final String ID_EG = "1";
+        public static final String DESCRIPTION_EG = "Хотел бы воспользоваться щёткой для обуви";
+    }
+
+    @UtilityClass
     public static class ApiError {
         public static final String STATUS = "статус HTTP-ответа";
         public static final String REASON = "Общее описание ошибки";
