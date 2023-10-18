@@ -116,7 +116,7 @@ public class UserController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(OpenApiConsts.Response.GET_USERS_BAD_REQUEST)
+                    examples = @ExampleObject(OpenApiConsts.Response.GET_PAGINATION_BAD_REQUEST)
             )
     )
     @GetMapping

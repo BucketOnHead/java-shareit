@@ -54,7 +54,7 @@ public class ItemRequestController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(OpenApiConsts.Response.POST_ITEM_REQUEST_BAD_REQUEST)
+                    examples = @ExampleObject(OpenApiConsts.Response.ITEM_REQUEST_BAD_REQUEST)
             )
     )
     @ApiResponse(

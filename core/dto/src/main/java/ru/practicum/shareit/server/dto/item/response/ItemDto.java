@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.server.constants.OpenApiConsts;
 
-@Schema(description = "Вещь")
+@Schema(description = "Данные вещи")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter

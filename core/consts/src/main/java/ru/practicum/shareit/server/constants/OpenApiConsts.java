@@ -57,6 +57,23 @@ public class OpenApiConsts {
     }
 
     @UtilityClass
+    public static class Booking {
+        public static final String ID = "Идентификатор";
+        public static final String ID_EG = "5";
+    }
+
+    @UtilityClass
+    public static class Comment {
+        public static final String ID = "Идентификатор";
+        public static final String TEXT = "Текст комментария";
+        public static final String AUTHOR_NAME = "Имя автора";
+        public static final String CREATED = "Дата и время создания";
+        public static final String ID_EG = "7";
+        public static final String TEXT_EG = "Все прошло хорошо, рекомендую!";
+        public static final String AUTHOR_NAME_EG = User.NAME_EG;
+    }
+
+    @UtilityClass
     public static class ApiError {
         public static final String STATUS = "статус HTTP-ответа";
         public static final String REASON = "Общее описание ошибки";
@@ -75,7 +92,7 @@ public class OpenApiConsts {
     @UtilityClass
     public static class Response {
 
-        public static final String GET_USERS_BAD_REQUEST = "{" +
+        public static final String GET_PAGINATION_BAD_REQUEST = "{" +
                 "\"status\":\"BAD_REQUEST\"," +
                 "\"reason\":\"Bad Request\"," +
                 "\"message\":\"Parameter(s) failed validation\"," +
@@ -110,7 +127,7 @@ public class OpenApiConsts {
                 "\"timestamp\":\"2023-10-17T21:25:18.098461\"" +
                 "}";
 
-        public static final String POST_ITEM_REQUEST_BAD_REQUEST = "{" +
+        public static final String ITEM_REQUEST_BAD_REQUEST = "{" +
                 "\"status\":\"BAD_REQUEST\"," +
                 "\"reason\":\"Bad Request\"," +
                 "\"message\":\"Field(s) failed validation\"," +

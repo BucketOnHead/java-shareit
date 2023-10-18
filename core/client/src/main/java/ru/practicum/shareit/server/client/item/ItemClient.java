@@ -44,7 +44,7 @@ public class ItemClient {
                 .block();
     }
 
-    public List<ItemDetailsDto> getItemsByOwnerId(Long userId, Integer from, Integer size) {
+    public List<ItemDetailsDto> getItemsByUserId(Long userId, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/items")
                         .queryParam("from", from)
