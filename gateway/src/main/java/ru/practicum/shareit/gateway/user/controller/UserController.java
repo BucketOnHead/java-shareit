@@ -68,48 +68,6 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Обновить данные пользователя",
-            description = "Для обновления пользователя используется тоже дто, что и для создания, " +
-                    "все параметры НЕОБЯЗАТЕЛЬНЫ, email при указании должен быть правильно формата"
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Пользователь обновлен",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = UserDto.class)
-            )
-    )
-    @ApiResponse(
-            responseCode = "400",
-            description = "Запрос составлен некорректно",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
-            )
-    )
-    @ApiResponse(
-            responseCode = "404",
-            description = "Пользователь не найден",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class),
-                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
-            )
-    )
-    @PatchMapping("/{userId}")
-    public UserDto updateUser(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления пользователя")
-            @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
-
-            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
-            @PathVariable Long userId
-    ) {
-        return userClient.updateUser(userDto, userId);
-    }
-
-    @Operation(
             summary = "Получение информации о пользователе по идентификатору",
             description = "В случае, если пользователь не найден возвращает код 404"
     )
@@ -169,6 +127,48 @@ public class UserController {
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return userClient.getUsers(from, size);
+    }
+
+    @Operation(
+            summary = "Обновить данные пользователя",
+            description = "Для обновления пользователя используется тоже дто, что и для создания, " +
+                    "все параметры НЕОБЯЗАТЕЛЬНЫ, email при указании должен быть правильно формата"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь обновлен",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UserDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+            )
+    )
+    @PatchMapping("/{userId}")
+    public UserDto updateUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления пользователя")
+            @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
+
+            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
+            @PathVariable Long userId
+    ) {
+        return userClient.updateUser(userDto, userId);
     }
 
     @Operation(summary = "Удаление пользователя по идентификатору")
