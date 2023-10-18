@@ -35,7 +35,7 @@ public class UserController {
     @Operation(summary = "Добавление нового пользователя")
     @ApiResponse(
             responseCode = "200",
-            description = "Пользователь найден",
+            description = "Пользователь добавлен",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = UserDto.class)
@@ -74,7 +74,7 @@ public class UserController {
     )
     @ApiResponse(
             responseCode = "200",
-            description = "Пользователь найден",
+            description = "Пользователь обновлен",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = UserDto.class)
