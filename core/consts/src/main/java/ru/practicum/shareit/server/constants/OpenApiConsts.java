@@ -16,6 +16,7 @@ public class OpenApiConsts {
     public static final String USER_ID_PARAM_DESC = "Идентификатор пользователя";
     public static final String FROM_EG = "10";
     public static final String SIZE_EG = "20";
+    public static final String USER_ID_PARAM_EG = "1";
 
     // user
     public static final String USER_ID_DESC = "Идентификатор";

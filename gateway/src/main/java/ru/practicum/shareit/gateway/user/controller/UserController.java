@@ -35,8 +35,11 @@ public class UserController {
     @Operation(summary = "Добавление нового пользователя")
     @ApiResponse(
             responseCode = "200",
-            description = "Пользователь добавлен",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            description = "Пользователь найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UserDto.class)
+            )
     )
     @ApiResponse(
             responseCode = "400",
@@ -64,9 +67,43 @@ public class UserController {
         return userClient.addUser(userDto);
     }
 
+    @Operation(
+            summary = "Обновить данные пользователя",
+            description = "Для обновления пользователя используется тоже дто, что и для создания, " +
+                    "все параметры НЕОБЯЗАТЕЛЬНЫ, email при указании должен быть правильно формата"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UserDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(value = OpenApiConsts.Response.GET_USER_NOT_FOUND)
+            )
+    )
     @PatchMapping("/{userId}")
     public UserDto updateUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновления пользователя")
             @RequestBody @Validated(Groups.OnUpdate.class) UserCreationDto userDto,
+
+            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
             @PathVariable Long userId
     ) {
         return userClient.updateUser(userDto, userId);
@@ -104,7 +141,7 @@ public class UserController {
     )
     @GetMapping("/{userId}")
     public UserDto getUserById(
-            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_EG)
+            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
             @PathVariable Long userId
     ) {
         return userClient.getUserById(userId);
@@ -168,7 +205,7 @@ public class UserController {
     )
     @DeleteMapping("/{userId}")
     public void deleteUserById(
-            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_EG)
+            @Parameter(description = OpenApiConsts.USER_ID_PARAM_DESC, example = OpenApiConsts.USER_ID_PARAM_EG)
             @PathVariable Long userId
     ) {
         userClient.deleteUserById(userId);
