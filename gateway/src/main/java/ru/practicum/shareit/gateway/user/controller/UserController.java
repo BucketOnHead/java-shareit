@@ -43,6 +43,7 @@ public class UserController {
             description = "Запрос составлен некорректно",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
                     examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_BAD_REQUEST)
             )
     )
@@ -51,6 +52,7 @@ public class UserController {
             description = "Конфликт с базой данных",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
                     examples = @ExampleObject(value = OpenApiConsts.Response.POST_USER_CONFLICT)
             )
     )

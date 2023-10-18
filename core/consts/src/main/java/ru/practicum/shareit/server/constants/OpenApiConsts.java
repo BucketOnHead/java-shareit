@@ -11,8 +11,8 @@ import lombok.experimental.UtilityClass;
 public class OpenApiConsts {
 
     // param
-    public static final String FROM_DESC = "количество элементов, которые нужно пропустить для формирования текущего набора";
-    public static final String SIZE_DESC = "количество элементов в наборе";
+    public static final String FROM_DESC = "Количество элементов, которые нужно пропустить для формирования текущего набора";
+    public static final String SIZE_DESC = "Количество элементов в наборе";
     public static final String FROM_EG = "10";
     public static final String SIZE_EG = "20";
 
