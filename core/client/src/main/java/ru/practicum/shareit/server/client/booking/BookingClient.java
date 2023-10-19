@@ -44,7 +44,7 @@ public class BookingClient {
                 .block();
     }
 
-    public List<BookingDto> getAllByBookerId(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getBookingsByBookerId(Long userId, String state, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/bookings")
                         .queryParam("state", state)
@@ -59,7 +59,7 @@ public class BookingClient {
 
     }
 
-    public List<BookingDto> getAllByBookerItems(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getBookingsByOwnerId(Long userId, String state, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/bookings/owner")
                         .queryParam("state", state)

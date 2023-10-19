@@ -17,6 +17,7 @@ public class OpenApiConsts {
         public static final String USER_ID = "Идентификатор пользователя";
         public static final String ITEM_REQUEST_ID = "Идентификатор запроса вещи";
         public static final String ITEM_ID = "Идентификатор вещи";
+        public static final String STATE = "Состояние бронирования";
         public static final String FROM_EG = "10";
         public static final String SIZE_EG = "20";
         public static final String USER_ID_EG = User.ID_EG;
