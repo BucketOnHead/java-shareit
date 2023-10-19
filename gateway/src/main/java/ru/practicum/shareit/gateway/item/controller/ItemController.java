@@ -90,9 +90,35 @@ public class ItemController {
         return itemClient.updateItem(itemDto, itemId, userId);
     }
 
+    @Operation(
+            summary = "Получение информации о вещи",
+            description = "Получение информации о вещи вместе с комментариями\n\n" +
+                    "Если пользователь является владельцем этой вещи, то к данным " +
+                    "добавляется информация о предыдущем и следующем бронированиях"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Вещь найдена",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ItemDetailsDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Вещь не найдена",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.ITEM_NOT_FOUND)
+            )
+    )
     @GetMapping("/{itemId}")
     public ItemDetailsDto getItemById(
+            @Parameter(description = Param.ITEM_ID, example = Param.ITEM_ID_EG)
             @PathVariable Long itemId,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemClient.getItemById(itemId, userId);
