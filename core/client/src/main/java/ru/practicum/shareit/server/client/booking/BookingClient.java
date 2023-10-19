@@ -24,7 +24,7 @@ public class BookingClient {
                 .block();
     }
 
-    public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
+    public BookingDto approveOrRejectBooking(Long bookingId, Boolean approved, Long userId) {
         return client.patch()
                 .uri(builder -> builder.path("/bookings/{id}")
                         .queryParam("approved", approved)

@@ -100,14 +100,71 @@ public class BookingController {
         return bookingClient.addBooking(bookingDto, userId);
     }
 
-    
+    @Operation(
+            summary = "Подтверждение или отклонение запроса на бронирование",
+            description = "Может быть выполнено только владельцем вещи. " +
+                    "Затем статус бронирования становится либо APPROVED, либо REJECTED"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Статус бронирования обновлен",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BookingDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Бронирование не ожидает обновление статуса",
+                                    value = OpenApiConsts.Response.BOOKING_NOT_WAITING
+                            ),
+                            @ExampleObject(
+                                    name = "Ошибка в запросе",
+                                    value = OpenApiConsts.Response.BOOKING_AVAILABLE_BAD_REQUEST
+                            )
+                    }
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Необходимые ресурсы не найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Бронирование не найдено",
+                                    value = OpenApiConsts.Response.BOOKING_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Доступ не найден",
+                                    value = OpenApiConsts.Response.BOOKING_ACCESS_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Пользователь не найден",
+                                    value = OpenApiConsts.Response.USER_NOT_FOUND
+                            )
+                    }
+            )
+    )
     @PatchMapping("/{bookingId}")
-    public BookingDto updateBookingStatus(
+    public BookingDto approveOrRejectBooking(
+            @Parameter(description = Param.BOOKING_ID, example = Param.BOOKING_ID_EG)
             @PathVariable Long bookingId,
+
+            @Parameter(description = "Подтверждение или отклонение", example = "true")
             @RequestParam Boolean approved,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
-        return bookingClient.updateBookingStatus(bookingId, approved, userId);
+        return bookingClient.approveOrRejectBooking(bookingId, approved, userId);
     }
 
     @Operation(

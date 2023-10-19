@@ -221,5 +221,19 @@ public class OpenApiConsts {
                 "\"message\":\"User with id: 5 cannot request booking with id: 1\"," +
                 "\"timestamp\":\"2023-10-19T14:44:33.880761\"" +
                 "}";
+
+        public static final String BOOKING_NOT_WAITING = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Request cannot be understood by the server due to incorrect syntax\"," +
+                "\"message\":\"Booking with id: 1 not awaiting approval\"," +
+                "\"timestamp\":\"2023-10-19T14:56:11.384947\"" +
+                "}";
+
+        public static final String BOOKING_AVAILABLE_BAD_REQUEST = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Bad Request\"," +
+                "\"message\":\"Required request parameter 'approved' for method parameter type Boolean is not present\"," +
+                "\"timestamp\":\"2023-10-19T15:09:34.155192\"" +
+                "}";
     }
 }
