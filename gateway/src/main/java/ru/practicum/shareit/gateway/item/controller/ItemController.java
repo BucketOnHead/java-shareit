@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.client.item.ItemClient;
 import ru.practicum.shareit.server.client.item.comment.CommentClient;
 import ru.practicum.shareit.server.constants.OpenApiConsts;
+import ru.practicum.shareit.server.constants.OpenApiConsts.Param;
 import ru.practicum.shareit.server.dto.error.ApiError;
 import ru.practicum.shareit.server.dto.item.request.ItemCreationDto;
 import ru.practicum.shareit.server.dto.item.request.comment.CommentCreationDto;
@@ -74,7 +75,7 @@ public class ItemController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные новой вещи")
             @RequestBody @Validated(Groups.OnCreate.class) ItemCreationDto itemDto,
 
-            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long ownerId
     ) {
         return itemClient.addItem(itemDto, ownerId);
@@ -130,13 +131,13 @@ public class ItemController {
     )
     @GetMapping
     public List<ItemDetailsDto> getItemsByUserId(
-            @Parameter(description = OpenApiConsts.Param.USER_ID, example = OpenApiConsts.Param.USER_ID_EG)
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId,
 
-            @Parameter(description = OpenApiConsts.Param.FROM, example = OpenApiConsts.Param.FROM_EG)
+            @Parameter(description = Param.FROM, example = Param.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
 
-            @Parameter(description = OpenApiConsts.Param.SIZE, example = OpenApiConsts.Param.SIZE_EG)
+            @Parameter(description = Param.SIZE, example = Param.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
         return itemClient.getItemsByUserId(userId, from, size);
@@ -151,10 +152,65 @@ public class ItemController {
         return itemClient.searchItemsByNameOrDescription(text, from, size);
     }
 
+    @Operation(
+            summary = "Добавление комментария (отзыва) к вещи",
+            description = "После того, как бронирование вещи завершено, " +
+                    "пользователь может оставить комментарий (отзыв) к ней"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Комментарий добавлен",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = CommentDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Нельзя оставить комментарий",
+                                    description = "Не найдено подтвержденного бронирования или оно ещё не завершено",
+                                    value = OpenApiConsts.Response.COMMENT_BAD_REQUEST
+                            ),
+                            @ExampleObject(
+                                    name = "Ошибка валидации",
+                                    value = OpenApiConsts.Response.ITEM_REQUEST_BAD_REQUEST
+                            )
+                    }
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Необходимые ресурсы не найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Пользователь не найден",
+                                    value = OpenApiConsts.Response.USER_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Вещь не найдена",
+                                    value = OpenApiConsts.Response.ITEM_NOT_FOUND
+                            )
+                    }
+            )
+    )
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные комментария (отзыва)")
             @RequestBody @Validated(Groups.OnCreate.class) CommentCreationDto comment,
+
+            @Parameter(description = Param.ITEM_ID, example = Param.ITEM_ID_EG)
             @PathVariable Long itemId,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return commentClient.addComment(comment, userId, itemId);

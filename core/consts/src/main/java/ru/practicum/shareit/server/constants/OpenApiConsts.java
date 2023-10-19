@@ -16,10 +16,12 @@ public class OpenApiConsts {
         public static final String SIZE = "Количество элементов в наборе";
         public static final String USER_ID = "Идентификатор пользователя";
         public static final String ITEM_REQUEST_ID = "Идентификатор запроса вещи";
+        public static final String ITEM_ID = "Идентификатор вещи";
         public static final String FROM_EG = "10";
         public static final String SIZE_EG = "20";
-        public static final String USER_ID_EG = "1";
-        public static final String ITEM_REQUEST_ID_EG = "1";
+        public static final String USER_ID_EG = User.ID_EG;
+        public static final String ITEM_REQUEST_ID_EG = ItemRequest.ID_EG;
+        public static final String ITEM_ID_EG = Item.ID_EG;
     }
 
     @UtilityClass
@@ -149,6 +151,20 @@ public class OpenApiConsts {
                 "\"reason\":\"Requested resource does not exist\"," +
                 "\"message\":\"Item request with id: 99 not found\"," +
                 "\"timestamp\":\"2023-10-18T15:20:42.426754\"" +
+                "}";
+
+        public static final String COMMENT_BAD_REQUEST = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Request cannot be understood by the server due to incorrect syntax\"," +
+                "\"message\":\"Unable to leave comment for item with id: 1: no approved booking for user with id: 4 or booking is not yet finished\"," +
+                "\"timestamp\":\"2023-10-19T09:57:46.77556\"" +
+                "}";
+
+        public static final String ITEM_NOT_FOUND = "{" +
+                "\"status\":\"NOT_FOUND\"," +
+                "\"reason\":\"Requested resource does not exist\"," +
+                "\"message\":\"Item not found with id: 99\"," +
+                "\"timestamp\":\"2023-10-19T10:11:42.797793\"" +
                 "}";
     }
 }
