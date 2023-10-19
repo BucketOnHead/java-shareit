@@ -24,7 +24,7 @@ public class BookingClient {
                 .block();
     }
 
-    public BookingDto updateBookingStatus(Long bookingId, Boolean approved, Long userId) {
+    public BookingDto approveOrRejectBooking(Long bookingId, Boolean approved, Long userId) {
         return client.patch()
                 .uri(builder -> builder.path("/bookings/{id}")
                         .queryParam("approved", approved)
@@ -44,7 +44,7 @@ public class BookingClient {
                 .block();
     }
 
-    public List<BookingDto> getAllByBookerId(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getBookingsByBookerId(Long userId, String state, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/bookings")
                         .queryParam("state", state)
@@ -59,7 +59,7 @@ public class BookingClient {
 
     }
 
-    public List<BookingDto> getAllByBookerItems(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getBookingsByOwnerId(Long userId, String state, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/bookings/owner")
                         .queryParam("state", state)

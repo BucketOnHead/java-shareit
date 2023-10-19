@@ -44,7 +44,7 @@ public class ItemRequestClient {
                 .block();
     }
 
-    public List<ItemRequestDto> getItemRequestsByRequesterId(Long userId, Integer from, Integer size) {
+    public List<ItemRequestDto> getItemRequests(Long userId, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/requests/all")
                         .queryParam("from", from)

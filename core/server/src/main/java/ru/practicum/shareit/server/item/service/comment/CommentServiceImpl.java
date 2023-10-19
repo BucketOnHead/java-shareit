@@ -30,13 +30,14 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto addComment(CommentCreationDto commentDto, Long authorId, Long itemId) {
+        var author = userRepository.findByIdOrThrow(authorId);
+        var item = itemRepository.findByIdOrThrow(itemId);
+
         var now = LocalDateTime.now();
         if (!isItemAvailableForCommenting(authorId, itemId, now)) {
             throw new CommentNotAllowedException(itemId, authorId);
         }
 
-        var author = userRepository.findByIdOrThrow(authorId);
-        var item = itemRepository.findByIdOrThrow(itemId);
         var comment = commentMapper.mapToComment(commentDto, author, item);
         var savedComment = commentRepository.save(comment);
 

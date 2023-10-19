@@ -3,14 +3,17 @@ package ru.practicum.shareit.gateway.exception.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import ru.practicum.shareit.gateway.booking.exception.IncorrectStateException;
 import ru.practicum.shareit.gateway.exception.handler.util.ErrorUtils;
@@ -19,6 +22,7 @@ import ru.practicum.shareit.server.dto.error.ApiError;
 import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
+@Hidden
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
@@ -29,9 +33,13 @@ public class ErrorHandler {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({
+            MissingRequestHeaderException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError missingRequestHeaderExceptionHandler(final MissingRequestHeaderException ex) {
+    public ApiError handleBadRequestException(final Exception ex) {
         log.info(ex.getMessage(), ex);
         return ApiError.builder()
                 .status(HttpStatus.BAD_REQUEST.name())
