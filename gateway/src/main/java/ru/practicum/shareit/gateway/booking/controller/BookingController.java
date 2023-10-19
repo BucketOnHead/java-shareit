@@ -250,11 +250,38 @@ public class BookingController {
         return bookingClient.getBookingsByBookerId(userId, state, from, size);
     }
 
+    @Operation(summary = "Получение всех бронирований вещей пользователя")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Бронирования найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = BookingDto.class))
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Пользователь не найден",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BookingDto.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.USER_NOT_FOUND)
+            )
+    )
     @GetMapping("/owner")
     public List<BookingDto> getBookingsByOwnerId(
+            @Parameter(description = Param.STATE, schema = @Schema(
+                    implementation = BookingState.class,
+                    defaultValue = "ALL"))
             @RequestParam(defaultValue = DefaultParams.STATE) @BookingStateEnum String state,
+
+            @Parameter(description = Param.FROM, example = Param.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+
+            @Parameter(description = Param.SIZE, example = Param.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getBookingsByOwnerId(userId, state, from, size);
