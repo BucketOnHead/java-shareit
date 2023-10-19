@@ -22,6 +22,14 @@ public class UserClient {
                 .block();
     }
 
+    public UserDto getUserById(Long userId) {
+        return client.get()
+                .uri("/users/{id}", userId)
+                .retrieve()
+                .bodyToMono(UserDto.class)
+                .block();
+    }
+
     public UserDto updateUser(UserCreationDto userDto, Long userId) {
         return client.patch()
                 .uri("/users/{id}", userId)
@@ -31,16 +39,7 @@ public class UserClient {
                 .block();
     }
 
-    public UserDto getUserById(Long userId) {
-        return client.get()
-                .uri("/users/{id}", userId)
-                .retrieve()
-                .bodyToMono(UserDto.class)
-                .block();
-    }
-
-
-    public List<UserDto> getAllUsers(Integer from, Integer size) {
+    public List<UserDto> getUsers(Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/users")
                         .queryParam("from", from)

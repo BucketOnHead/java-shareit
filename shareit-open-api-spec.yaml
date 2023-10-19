@@ -1,0 +1,1429 @@
+openapi: 3.0.1
+info:
+  title: '"ShareIt" API'
+  description: 'RESTful platform for item exchange: find, share, rent'
+  contact:
+    name: Ivan Marakanov (BucketOnHead)
+    url: https://github.com/BucketOnHead
+    email: marakanovivan@gmail.com
+  version: '1.0'
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+tags:
+  - name: Пользователи
+    description: API для работы с пользователями
+  - name: Бронирование
+    description: API для работы с бронированием
+  - name: Запрос вещи
+    description: API для работы с запросами вещей
+  - name: Вещи
+    description: API для работы с вещами
+paths:
+  /users:
+    get:
+      tags:
+        - Пользователи
+      summary: Получение информации о пользователях
+      description: |-
+        Возвращает информацию обо всех пользователях
+
+        В случае, если не найдено ни одного пользователя, возвращает пустой список
+      operationId: getUsers
+      parameters:
+        - name: from
+          in: query
+          description: Количество элементов, которые нужно пропустить для формирования текущего набора
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+          example: 10
+        - name: size
+          in: query
+          description: Количество элементов в наборе
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 20
+      responses:
+        '200':
+          description: Пользователи найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Parameter(s) failed validation
+                errors:
+                  - parameter 'size' must be greater than 0, but it was '0'
+                  - parameter 'from' must be greater than or equal to 0, but it was '-1'
+                timestamp: '2023-10-17T16:59:11.237789'
+    post:
+      tags:
+        - Пользователи
+      summary: Добавление нового пользователя
+      operationId: addUser
+      requestBody:
+        description: Данные добавляемого пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Пользователь добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Field(s) failed validation
+                errors:
+                  - field 'email' must have the format of an email address, but it was 'vasyaexample.com'
+                timestamp: '2023-10-17T19:12:12.08784'
+        '409':
+          description: Конфликт с базой данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: CONFLICT
+                reason: Request conflicts with another request or with server configuration
+                message: User email must be unique
+                timestamp: '2023-10-17T19:27:41.322698'
+  /requests:
+    get:
+      tags:
+        - Запрос вещи
+      summary: Получение списка запросов вещей от пользователя
+      description: |-
+        Получение всех запросов пользователя вместе с данными об ответах на них
+
+        В случае, если запросы не найден возвращает пустой список
+      operationId: getItemRequestsByRequesterId
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Запросы вещей от пользователя найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemRequestDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+    post:
+      tags:
+        - Запрос вещи
+      summary: Добавление запроса вещи от пользователя
+      description: Основная часть запроса - описание, в котором пользователь описывает, какая вещь ему нужна
+      operationId: addItemRequest
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Данные запроса вещи
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemRequestCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Запрос на вещь добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemRequestDto'
+              example:
+                id: 1
+                description: Хотел бы воспользоваться щёткой для обуви
+                created: '2023-10-18T14:49:08.869138'
+                items: null
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Field(s) failed validation
+                errors:
+                  - field 'description' should not be empty, but it was 'null'
+                timestamp: '2023-10-18T14:42:50.201833'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+  /items:
+    get:
+      tags:
+        - Вещи
+      summary: Получение информации о вещах пользователя
+      description: Получение всех вещей пользователя вместе с информацией о последнем и следующем бронированиях
+      operationId: getItemsByUserId
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: from
+          in: query
+          description: Количество элементов, которые нужно пропустить для формирования текущего набора
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+          example: 10
+        - name: size
+          in: query
+          description: Количество элементов в наборе
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 20
+      responses:
+        '200':
+          description: Вещи пользователя найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemDetailsDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Parameter(s) failed validation
+                errors:
+                  - parameter 'size' must be greater than 0, but it was '0'
+                  - parameter 'from' must be greater than or equal to 0, but it was '-1'
+                timestamp: '2023-10-17T16:59:11.237789'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+    post:
+      tags:
+        - Вещи
+      summary: Добавление новой вещи
+      description: Добавление новой вещи, владельцем которой будет пользовать с идентификатором из заголовка
+      operationId: addItem
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Данные новой вещи
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Вещь добавлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Field(s) failed validation
+                errors:
+                  - field 'description' should not be empty, but it was 'null'
+                timestamp: '2023-10-18T14:42:50.201833'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+  /items/{itemId}/comment:
+    post:
+      tags:
+        - Вещи
+      summary: Добавление комментария (отзыва) к вещи
+      description: После того, как бронирование вещи завершено, пользователь может оставить комментарий (отзыв) к ней
+      operationId: addComment
+      parameters:
+        - name: itemId
+          in: path
+          description: Идентификатор вещи
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 4
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Данные комментария (отзыва)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Комментарий добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Нельзя оставить комментарий:
+                  description: Не найдено подтвержденного бронирования или оно ещё не завершено
+                  value:
+                    status: BAD_REQUEST
+                    reason: Request cannot be understood by the server due to incorrect syntax
+                    message: 'Unable to leave comment for item with id: 1: no approved booking for user with id: 4 or booking is not yet finished'
+                    timestamp: '2023-10-19T09:57:46.77556'
+                Ошибка валидации:
+                  description: Ошибка валидации
+                  value:
+                    status: BAD_REQUEST
+                    reason: Bad Request
+                    message: Field(s) failed validation
+                    errors:
+                      - field 'description' should not be empty, but it was 'null'
+                    timestamp: '2023-10-18T14:42:50.201833'
+        '404':
+          description: Необходимые ресурсы не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Пользователь не найден:
+                  description: Пользователь не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 not found'
+                    timestamp: '2023-10-17T21:25:18.098461'
+                Вещь не найдена:
+                  description: Вещь не найдена
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'Item not found with id: 99'
+                    timestamp: '2023-10-19T10:11:42.797793'
+  /bookings:
+    get:
+      tags:
+        - Бронирование
+      summary: Получение всех бронирований от пользователя
+      operationId: getBookingsByBookerId
+      parameters:
+        - name: state
+          in: query
+          description: Состояние бронирования
+          required: false
+          schema:
+            $ref: '#/components/schemas/BookingState'
+        - name: from
+          in: query
+          description: Количество элементов, которые нужно пропустить для формирования текущего набора
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+          example: 10
+        - name: size
+          in: query
+          description: Количество элементов в наборе
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 20
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Бронирования найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+    post:
+      tags:
+        - Бронирование
+      summary: Добавление бронирования
+      description: |-
+        Добавляет новое бронирование, при условии, что вещь доступна.
+
+        Запрещается бронировать свою же вещь
+      operationId: addBooking
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Информация о бронировании
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Бронирование добавлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Вещь не готова к бронированию:
+                  description: Вещь не готова к бронированию
+                  value:
+                    status: BAD_REQUEST
+                    reason: Request cannot be understood by the server due to incorrect syntax
+                    message: 'Item with id: 2 not available for booking'
+                    timestamp: '2023-10-19T14:29:43.586513'
+                Некорректный запрос:
+                  description: Некорректный запрос
+                  value:
+                    status: BAD_REQUEST
+                    reason: Bad Request
+                    message: Field(s) failed validation
+                    errors:
+                      - field 'end' не должно равняться null, but it was 'null'
+                      - field 'start' не должно равняться null, but it was 'null'
+                    timestamp: '2023-10-19T14:32:41.237296'
+        '404':
+          description: Необходимые ресурсы не найдены или нарушена логика
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Пользователь бронирует свою же вещь:
+                  description: Пользователь бронирует свою же вещь
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 cannot book their item with id: 1'
+                    timestamp: '2023-10-19T14:26:41.520621'
+                Запрос не найден:
+                  description: Запрос не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'Item request with id: 99 not found'
+                    timestamp: '2023-10-18T15:20:42.426754'
+                Пользователь не найден:
+                  description: Пользователь не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 not found'
+                    timestamp: '2023-10-17T21:25:18.098461'
+  /users/{userId}:
+    get:
+      tags:
+        - Пользователи
+      summary: Получение информации о пользователе по идентификатору
+      description: В случае, если пользователь не найден возвращает код 404
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+    delete:
+      tags:
+        - Пользователи
+      summary: Удаление пользователя по идентификатору
+      operationId: deleteUserById
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Пользователь удалён
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+    patch:
+      tags:
+        - Пользователи
+      summary: Обновить данные пользователя
+      description: Для обновления пользователя используется тоже дто, что и для создания, все параметры НЕОБЯЗАТЕЛЬНЫ, email при указании должен быть правильного формата
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Данные для обновления пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Пользователь обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Field(s) failed validation
+                errors:
+                  - field 'email' must have the format of an email address, but it was 'vasyaexample.com'
+                timestamp: '2023-10-17T19:12:12.08784'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+  /items/{itemId}:
+    get:
+      tags:
+        - Вещи
+      summary: Получение информации о вещи
+      description: |-
+        Получение информации о вещи вместе с комментариями
+
+        Если пользователь является владельцем этой вещи, то к данным добавляется информация о предыдущем и следующем бронированиях
+      operationId: getItemById
+      parameters:
+        - name: itemId
+          in: path
+          description: Идентификатор вещи
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 4
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Вещь найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetailsDto'
+        '404':
+          description: Вещь не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'Item not found with id: 99'
+                timestamp: '2023-10-19T10:11:42.797793'
+    patch:
+      tags:
+        - Вещи
+      summary: Обновление вещи
+      description: |-
+        Для обновления вещи используется тоже дто, что и для создания, все параметры НЕ ОБЯЗАТЕЛЬНЫ
+
+        Обновить вещь может только ее владелец
+      operationId: updateItem
+      parameters:
+        - name: itemId
+          in: path
+          description: Идентификатор вещи
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 4
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Данные для обновление
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreationDto'
+        required: true
+      responses:
+        '200':
+          description: Вещь обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Parameter(s) failed validation
+                errors:
+                  - parameter 'size' must be greater than 0, but it was '0'
+                  - parameter 'from' must be greater than or equal to 0, but it was '-1'
+                timestamp: '2023-10-17T16:59:11.237789'
+        '403':
+          description: Пользователь не является владельцем вещи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: FORBIDDEN
+                reason: Access denied
+                message: 'User with id: 8 is not owner of item with id: 1'
+                timestamp: '2023-10-19T11:12:52.394164'
+        '404':
+          description: Необходимые ресурсы не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Пользователь не найден:
+                  description: Пользователь не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 not found'
+                    timestamp: '2023-10-17T21:25:18.098461'
+                Вещь не найдена:
+                  description: Вещь не найдена
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'Item not found with id: 99'
+                    timestamp: '2023-10-19T10:11:42.797793'
+  /bookings/{bookingId}:
+    get:
+      tags:
+        - Бронирование
+      summary: Получение бронирования по идентификатору
+      description: Получить информацию может только инициатор бронирования или владелец вещи, к которой относится это бронирование
+      operationId: getBookingById
+      parameters:
+        - name: bookingId
+          in: path
+          description: Идентификатор бронирования
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 5
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Бронирование найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '404':
+          description: Необходимые ресурсы не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Бронирование не найдено:
+                  description: Бронирование не найдено
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'Booking with id: 99 not found'
+                    timestamp: '2023-10-19T14:43:26.168397'
+                Доступ не найден:
+                  description: Доступ не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 5 cannot request booking with id: 1'
+                    timestamp: '2023-10-19T14:44:33.880761'
+                Пользователь не найден:
+                  description: Пользователь не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 not found'
+                    timestamp: '2023-10-17T21:25:18.098461'
+    patch:
+      tags:
+        - Бронирование
+      summary: Подтверждение или отклонение запроса на бронирование
+      description: Может быть выполнено только владельцем вещи. Затем статус бронирования становится либо APPROVED, либо REJECTED
+      operationId: approveOrRejectBooking
+      parameters:
+        - name: bookingId
+          in: path
+          description: Идентификатор бронирования
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 5
+        - name: approved
+          in: query
+          description: Подтверждение или отклонение
+          required: true
+          schema:
+            type: boolean
+          example: true
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Статус бронирования обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Бронирование не ожидает обновление статуса:
+                  description: Бронирование не ожидает обновление статуса
+                  value:
+                    status: BAD_REQUEST
+                    reason: Request cannot be understood by the server due to incorrect syntax
+                    message: 'Booking with id: 1 not awaiting approval'
+                    timestamp: '2023-10-19T14:56:11.384947'
+                Ошибка в запросе:
+                  description: Ошибка в запросе
+                  value:
+                    status: BAD_REQUEST
+                    reason: Bad Request
+                    message: Required request parameter 'approved' for method parameter type Boolean is not present
+                    timestamp: '2023-10-19T15:09:34.155192'
+        '404':
+          description: Необходимые ресурсы не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Бронирование не найдено:
+                  description: Бронирование не найдено
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'Booking with id: 99 not found'
+                    timestamp: '2023-10-19T14:43:26.168397'
+                Доступ не найден:
+                  description: Доступ не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 5 cannot request booking with id: 1'
+                    timestamp: '2023-10-19T14:44:33.880761'
+                Пользователь не найден:
+                  description: Пользователь не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 not found'
+                    timestamp: '2023-10-17T21:25:18.098461'
+  /requests/{itemRequestId}:
+    get:
+      tags:
+        - Запрос вещи
+      summary: Получение данных запроса вещи по идентификатору
+      description: Получение запроса вещи по его идентификатору вместе с данными об ответах
+      operationId: getItemRequestsById
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: itemRequestId
+          in: path
+          description: Идентификатор запроса вещи
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Запрос вещи найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemRequestDto'
+        '404':
+          description: Необходимые ресурсы не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                Запрос не найден:
+                  description: Запрос не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'Item request with id: 99 not found'
+                    timestamp: '2023-10-18T15:20:42.426754'
+                Пользователь не найден:
+                  description: Пользователь не найден
+                  value:
+                    status: NOT_FOUND
+                    reason: Requested resource does not exist
+                    message: 'User with id: 1 not found'
+                    timestamp: '2023-10-17T21:25:18.098461'
+  /requests/all:
+    get:
+      tags:
+        - Запрос вещи
+      summary: Получение списка запросов вещей
+      description: |-
+        Получение списка запросов вещей, созданных другими пользователями
+
+        Запросы сортируются от более новых к более старым
+      operationId: getItemRequests
+      parameters:
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: from
+          in: query
+          description: Количество элементов, которые нужно пропустить для формирования текущего набора
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+          example: 10
+        - name: size
+          in: query
+          description: Количество элементов в наборе
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 20
+      responses:
+        '200':
+          description: Запросы вещей найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemRequestDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+  /items/search:
+    get:
+      tags:
+        - Вещи
+      summary: Получение вещей по тексту
+      description: Поиск вещей по тексту в названии или описании, не учитывающий регистр букв
+      operationId: getItemsByText
+      parameters:
+        - name: text
+          in: query
+          description: Тест для поиска вещей
+          required: true
+          schema:
+            type: string
+          example: дрель
+        - name: from
+          in: query
+          description: Количество элементов, которые нужно пропустить для формирования текущего набора
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+          example: 10
+        - name: size
+          in: query
+          description: Количество элементов в наборе
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 20
+      responses:
+        '200':
+          description: Вещи найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemDto'
+        '400':
+          description: Запрос составлен некорректно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                status: BAD_REQUEST
+                reason: Bad Request
+                message: Parameter(s) failed validation
+                errors:
+                  - parameter 'size' must be greater than 0, but it was '0'
+                  - parameter 'from' must be greater than or equal to 0, but it was '-1'
+                timestamp: '2023-10-17T16:59:11.237789'
+  /bookings/owner:
+    get:
+      tags:
+        - Бронирование
+      summary: Получение всех бронирований вещей пользователя
+      operationId: getBookingsByOwnerId
+      parameters:
+        - name: state
+          in: query
+          description: Состояние бронирования
+          required: false
+          schema:
+            $ref: '#/components/schemas/BookingState'
+        - name: from
+          in: query
+          description: Количество элементов, которые нужно пропустить для формирования текущего набора
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+            default: 0
+          example: 10
+        - name: size
+          in: query
+          description: Количество элементов в наборе
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          example: 20
+        - name: X-Sharer-User-Id
+          in: header
+          description: Идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Бронирования найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+              example:
+                status: NOT_FOUND
+                reason: Requested resource does not exist
+                message: 'User with id: 1 not found'
+                timestamp: '2023-10-17T21:25:18.098461'
+components:
+  schemas:
+    UserCreationDto:
+      required:
+        - email
+        - name
+      type: object
+      properties:
+        name:
+          maxLength: 50
+          type: string
+          description: Имя
+          example: Вася Уточкин
+        email:
+          maxLength: 100
+          type: string
+          description: Адрес электронной почты
+          example: vasya.utochkin@example.org
+      description: Данные для добавления/обновления пользователя
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор
+          format: int64
+          example: 1
+      description: Данные о пользователе
+    ApiError:
+      type: object
+      properties:
+        status:
+          type: string
+          description: статус HTTP-ответа
+          example: BAD_REQUEST
+        reason:
+          type: string
+          description: Общее описание ошибки
+          example: Request cannot be understood by the server due to incorrect syntax
+        message:
+          type: string
+          description: Сообщение об ошибке
+          example: 'Unknown state: ABC'
+        errors:
+          type: array
+          description: Сопутствующие ошибки или иная информация(вложенные ошибки, стектрейсы и пр.)
+          nullable: true
+          example:
+            - parameter 'size' must be greater than 0, but it was '0'
+            - parameter 'from' must be greater than or equal to 0, but it was '-1'
+          items:
+            type: string
+        timestamp:
+          type: string
+          description: Дата и время когда произошла ошибка
+          format: date-time
+      description: Сведения об ошибке
+    ItemRequestCreationDto:
+      required:
+        - description
+      type: object
+      properties:
+        description:
+          type: string
+          description: Описание
+          example: Хотел бы воспользоваться щёткой для обуви
+      description: Данные запроса вещи
+    ItemDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор
+          format: int64
+          example: 4
+        name:
+          type: string
+          description: Название
+          example: Щётка для обуви
+      description: Данные о веще
+    ItemRequestDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор
+          format: int64
+          example: 1
+        description:
+          type: string
+          description: Описание
+          example: Хотел бы воспользоваться щёткой для обуви
+        created:
+          type: string
+          description: Дата и время создания
+          format: date-time
+        items:
+          type: array
+          description: Вещи, добавленные по запросу
+          items:
+            $ref: '#/components/schemas/ItemDto'
+      description: Запрос вещи
+    ItemCreationDto:
+      required:
+        - available
+        - description
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название
+          example: Щётка для обуви
+        description:
+          type: string
+          description: Описание
+          example: Стандартная щётка для обуви
+        available:
+          type: boolean
+          description: Доступность
+          example: true
+        requestId:
+          type: integer
+          description: Идентификатор запроса
+          format: int64
+          example: 1
+      description: Информация о вещи
+    CommentCreationDto:
+      required:
+        - text
+      type: object
+      properties:
+        text:
+          type: string
+          description: Текст комментария
+          example: Все прошло хорошо, рекомендую!
+      description: Данные комментария (отзыва)
+    CommentDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор
+          format: int64
+          example: 7
+        authorName:
+          type: string
+          description: Имя автора
+          example: Вася Уточкин
+        text:
+          type: string
+          description: Текст комментария
+          example: Все прошло хорошо, рекомендую!
+        created:
+          type: string
+          description: Дата и время создания
+          format: date-time
+      description: Информация об отзывах
+    BookingCreationDto:
+      required:
+        - end
+        - itemId
+        - start
+      type: object
+      properties:
+        itemId:
+          type: integer
+          description: Идентификатор вещи
+          format: int64
+          example: 4
+        start:
+          type: string
+          description: Дата и время начала бронирования
+          format: date-time
+        end:
+          type: string
+          description: Дата и время конца бронирования
+          format: date-time
+      description: Данные для обновления/добавления бронирования
+    BookingDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор
+          format: int64
+          example: 5
+        start:
+          type: string
+          description: Дата и время начала бронирования
+          format: date-time
+        end:
+          type: string
+          description: Дата и время конца бронирования
+          format: date-time
+        status:
+          type: string
+          description: Статус
+          example: WAITING
+          enum:
+            - WAITING
+            - APPROVED
+            - REJECTED
+        booker:
+          $ref: '#/components/schemas/UserDto'
+        item:
+          $ref: '#/components/schemas/ItemDto'
+      description: Информация о бронировании
+    ItemDetailsDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор
+          format: int64
+          example: 4
+        name:
+          type: string
+          description: Название
+          example: Щётка для обуви
+        description:
+          type: string
+          description: Описание
+          example: Стандартная щётка для обуви
+        available:
+          type: boolean
+          description: Доступность
+          example: true
+        lastBooking:
+          $ref: '#/components/schemas/BookingDto'
+        nextBooking:
+          $ref: '#/components/schemas/BookingDto'
+        comments:
+          type: array
+          description: Отзывы
+          items:
+            $ref: '#/components/schemas/CommentDto'
+      description: Расширенные данные о вещи
+    BookingState:
+      type: string
+      description: Стадии бронирования
+      enum:
+        - ALL
+        - CURRENT
+        - PAST
+        - FUTURE
+        - WAITING
+        - REJECTED
