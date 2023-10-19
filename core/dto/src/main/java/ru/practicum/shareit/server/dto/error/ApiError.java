@@ -33,8 +33,7 @@ public class ApiError {
     @ArraySchema(arraySchema = @Schema(
             description = OpenApiConsts.ApiError.ERRORS,
             example = OpenApiConsts.ApiError.ERRORS_EG,
-            nullable = true
-    ))
+            nullable = true))
     @JsonInclude(Include.NON_NULL)
     List<String> errors;
 
