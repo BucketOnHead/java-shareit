@@ -57,7 +57,7 @@ public class ItemClient {
                 .block();
     }
 
-    public List<ItemDto> searchItemsByNameOrDescription(String text, Integer from, Integer size) {
+    public List<ItemDto> getItemsByText(String text, Integer from, Integer size) {
         return client.get()
                 .uri(builder -> builder.path("/items/search")
                         .queryParam("text", text)

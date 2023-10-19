@@ -166,5 +166,12 @@ public class OpenApiConsts {
                 "\"message\":\"Item not found with id: 99\"," +
                 "\"timestamp\":\"2023-10-19T10:11:42.797793\"" +
                 "}";
+
+        public static final String ITEM_FORBIDDEN = "{" +
+                "\"status\":\"FORBIDDEN\"," +
+                "\"reason\":\"Access denied\"," +
+                "\"message\":\"User with id: 8 is not owner of item with id: 1\"," +
+                "\"timestamp\":\"2023-10-19T11:12:52.394164\"" +
+                "}";
     }
 }

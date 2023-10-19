@@ -81,10 +81,65 @@ public class ItemController {
         return itemClient.addItem(itemDto, ownerId);
     }
 
+    @Operation(
+            summary = "Обновление вещи",
+            description = "Для обновления вещи используется тоже дто, что и для создания, " +
+                    "все параметры НЕ ОБЯЗАТЕЛЬНЫ\n\n" +
+                    "Обновить вещь может только ее владелец"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Вещь обновлена",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ItemDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.GET_PAGINATION_BAD_REQUEST)
+            )
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Пользователь не является владельцем вещи",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.ITEM_FORBIDDEN)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Необходимые ресурсы не найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Пользователь не найден",
+                                    value = OpenApiConsts.Response.USER_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Вещь не найдена",
+                                    value = OpenApiConsts.Response.ITEM_NOT_FOUND
+                            )
+                    }
+            )
+    )
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Данные для обновление")
             @RequestBody @Validated(Groups.OnUpdate.class) ItemCreationDto itemDto,
+
+            @Parameter(description = Param.ITEM_ID, example = Param.ITEM_ID_EG)
             @PathVariable Long itemId,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return itemClient.updateItem(itemDto, itemId, userId);
@@ -169,13 +224,39 @@ public class ItemController {
         return itemClient.getItemsByUserId(userId, from, size);
     }
 
+    @Operation(
+            summary = "Получение вещей по тексту",
+            description = "Поиск вещей по тексту в названии или описании, не учитывающий регистр букв"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Вещи найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = ItemDto.class))
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = @ExampleObject(OpenApiConsts.Response.GET_PAGINATION_BAD_REQUEST)
+            )
+    )
     @GetMapping("/search")
-    public List<ItemDto> searchItemsByNameOrDescription(
+    public List<ItemDto> getItemsByText(
+            @Parameter(description = "Тест для поиска вещей", example = "дрель")
             @RequestParam String text,
+
+            @Parameter(description = Param.FROM, example = Param.FROM_EG)
             @RequestParam(defaultValue = DefaultParams.FROM) @PositiveOrZero Integer from,
+
+            @Parameter(description = Param.SIZE, example = Param.SIZE_EG)
             @RequestParam(defaultValue = DefaultParams.SIZE) @Positive Integer size
     ) {
-        return itemClient.searchItemsByNameOrDescription(text, from, size);
+        return itemClient.getItemsByText(text, from, size);
     }
 
     @Operation(
