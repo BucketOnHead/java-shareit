@@ -20,7 +20,7 @@
 
 ## API проекта
 
-API проекта описан в следующем файле: [shareit-open-api-spec.yaml](shareit-open-api-spec.yaml?raw=true)
+API проекта описан в следующем файле: [shareit-open-api-spec.yaml](shareit-open-api-spec.yaml)
 
 ## Инструкция по установке
 
