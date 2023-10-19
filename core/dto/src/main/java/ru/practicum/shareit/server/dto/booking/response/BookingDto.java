@@ -59,7 +59,7 @@ public class BookingDto {
     @NoArgsConstructor
     public static class UserDto {
 
-        @Schema(description = OpenApiConsts.User.ID)
+        @Schema(description = OpenApiConsts.User.ID, example = OpenApiConsts.User.ID_EG)
         Long id;
     }
 }

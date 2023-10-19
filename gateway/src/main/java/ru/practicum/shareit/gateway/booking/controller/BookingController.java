@@ -100,6 +100,7 @@ public class BookingController {
         return bookingClient.addBooking(bookingDto, userId);
     }
 
+    
     @PatchMapping("/{bookingId}")
     public BookingDto updateBookingStatus(
             @PathVariable Long bookingId,
@@ -109,9 +110,47 @@ public class BookingController {
         return bookingClient.updateBookingStatus(bookingId, approved, userId);
     }
 
+    @Operation(
+            summary = "Получение бронирования по идентификатору",
+            description = "Получить информацию может только инициатор бронирования " +
+                    "или владелец вещи, к которой относится это бронирование"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Бронирование найдено",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BookingDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Необходимые ресурсы не найдены",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Бронирование не найдено",
+                                    value = OpenApiConsts.Response.BOOKING_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Доступ не найден",
+                                    value = OpenApiConsts.Response.BOOKING_ACCESS_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Пользователь не найден",
+                                    value = OpenApiConsts.Response.USER_NOT_FOUND
+                            )
+                    }
+            )
+    )
     @GetMapping("/{bookingId}")
-    public BookingDto getBooking(
+    public BookingDto getBookingById(
+            @Parameter(description = Param.BOOKING_ID, example = Param.BOOKING_ID_EG)
             @PathVariable Long bookingId,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.getBookingById(bookingId, userId);

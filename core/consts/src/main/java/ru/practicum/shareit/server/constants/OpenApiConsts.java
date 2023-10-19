@@ -18,11 +18,13 @@ public class OpenApiConsts {
         public static final String ITEM_REQUEST_ID = "Идентификатор запроса вещи";
         public static final String ITEM_ID = "Идентификатор вещи";
         public static final String STATE = "Состояние бронирования";
+        public static final String BOOKING_ID = "Идентификатор бронирования";
         public static final String FROM_EG = "10";
         public static final String SIZE_EG = "20";
         public static final String USER_ID_EG = User.ID_EG;
         public static final String ITEM_REQUEST_ID_EG = ItemRequest.ID_EG;
         public static final String ITEM_ID_EG = Item.ID_EG;
+        public static final String BOOKING_ID_EG = Booking.ID_EG;
     }
 
     @UtilityClass
@@ -204,6 +206,20 @@ public class OpenApiConsts {
                 "\"field 'start' не должно равняться null, but it was 'null'\"" +
                 "]," +
                 "\"timestamp\":\"2023-10-19T14:32:41.237296\"" +
+                "}";
+
+        public static final String BOOKING_NOT_FOUND = "{" +
+                "\"status\":\"NOT_FOUND\"," +
+                "\"reason\":\"Requested resource does not exist\"," +
+                "\"message\":\"Booking with id: 99 not found\"," +
+                "\"timestamp\":\"2023-10-19T14:43:26.168397\"" +
+                "}";
+
+        public static final String BOOKING_ACCESS_NOT_FOUND = "{" +
+                "\"status\":\"NOT_FOUND\"," +
+                "\"reason\":\"Requested resource does not exist\"," +
+                "\"message\":\"User with id: 5 cannot request booking with id: 1\"," +
+                "\"timestamp\":\"2023-10-19T14:44:33.880761\"" +
                 "}";
     }
 }
