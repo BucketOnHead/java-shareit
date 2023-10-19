@@ -62,7 +62,13 @@ public class OpenApiConsts {
     @UtilityClass
     public static class Booking {
         public static final String ID = "Идентификатор";
+        public static final String START = "Дата и время начала бронирования";
+        public static final String END = "Дата и время конца бронирования";
+        public static final String STATUS = "Статус";
+        public static final String BOOKER = "Инициатор бронирования";
+        public static final String ITEM = "Вещь для бронирования";
         public static final String ID_EG = "5";
+        public static final String STATUS_EG = "WAITING";
     }
 
     @UtilityClass
@@ -173,6 +179,31 @@ public class OpenApiConsts {
                 "\"reason\":\"Access denied\"," +
                 "\"message\":\"User with id: 8 is not owner of item with id: 1\"," +
                 "\"timestamp\":\"2023-10-19T11:12:52.394164\"" +
+                "}";
+
+        public static final String BOOKING_SELF_BOOK_NOT_FOUND = "{" +
+                "\"status\":\"NOT_FOUND\"," +
+                "\"reason\":\"Requested resource does not exist\"," +
+                "\"message\":\"User with id: 1 cannot book their item with id: 1\"," +
+                "\"timestamp\":\"2023-10-19T14:26:41.520621\"" +
+                "}";
+
+        public static final String BOOK_ITEM_NOT_AVAILABLE = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Request cannot be understood by the server due to incorrect syntax\"," +
+                "\"message\":\"Item with id: 2 not available for booking\"," +
+                "\"timestamp\":\"2023-10-19T14:29:43.586513\"" +
+                "}";
+
+        public static final String BOOKING_BAD_REQUEST = "{" +
+                "\"status\":\"BAD_REQUEST\"," +
+                "\"reason\":\"Bad Request\"," +
+                "\"message\":\"Field(s) failed validation\"," +
+                "\"errors\":[" +
+                "\"field 'end' не должно равняться null, but it was 'null'\"," +
+                "\"field 'start' не должно равняться null, but it was 'null'\"" +
+                "]," +
+                "\"timestamp\":\"2023-10-19T14:32:41.237296\"" +
                 "}";
     }
 }

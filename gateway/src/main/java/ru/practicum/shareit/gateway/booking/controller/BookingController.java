@@ -2,7 +2,6 @@ package ru.practicum.shareit.gateway.booking.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,6 +19,7 @@ import ru.practicum.shareit.server.constants.OpenApiConsts.Param;
 import ru.practicum.shareit.server.constants.booking.BookingState;
 import ru.practicum.shareit.server.dto.booking.request.BookingCreationDto;
 import ru.practicum.shareit.server.dto.booking.response.BookingDto;
+import ru.practicum.shareit.server.dto.error.ApiError;
 import ru.practicum.shareit.server.dto.validation.Groups;
 import ru.practicum.shareit.server.constants.HttpHeaderConstants;
 import ru.practicum.shareit.gateway.consts.DefaultParams;
@@ -36,9 +36,65 @@ import java.util.List;
 public class BookingController {
     private final BookingClient bookingClient;
 
+    @Operation(
+            summary = "Добавление бронирования",
+            description = "Добавляет новое бронирование, при условии, что вещь доступна.\n\n" +
+                    "Запрещается бронировать свою же вещь"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Бронирование добавлено",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BookingDto.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Запрос составлен некорректно",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Вещь не готова к бронированию",
+                                    value = OpenApiConsts.Response.BOOK_ITEM_NOT_AVAILABLE
+                            ),
+                            @ExampleObject(
+                                    name = "Некорректный запрос",
+                                    value = OpenApiConsts.Response.BOOKING_BAD_REQUEST
+                            )
+                    }
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Необходимые ресурсы не найдены или нарушена логика",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class),
+                    examples = {
+                            @ExampleObject(
+                                    name = "Пользователь бронирует свою же вещь",
+                                    value = OpenApiConsts.Response.BOOKING_SELF_BOOK_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Запрос не найден",
+                                    value = OpenApiConsts.Response.ITEM_REQUEST_NOT_FOUND
+                            ),
+                            @ExampleObject(
+                                    name = "Пользователь не найден",
+                                    value = OpenApiConsts.Response.USER_NOT_FOUND
+                            )
+                    }
+            )
+    )
     @PostMapping
     public BookingDto addBooking(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Информация о бронировании")
             @RequestBody @Validated(Groups.OnCreate.class) BookingCreationDto bookingDto,
+
+            @Parameter(description = Param.USER_ID, example = Param.USER_ID_EG)
             @RequestHeader(HttpHeaderConstants.X_SHARER_USER_ID) Long userId
     ) {
         return bookingClient.addBooking(bookingDto, userId);
