@@ -20,7 +20,27 @@
 
 ## API проекта
 
-API проекта описан в следующем файле: [shareit-open-api-spec.yaml](shareit-open-api-spec.yaml)
+### Не устанавливая проект
+
+Для того чтобы ознакомиться с API проекта:
+
+1. Скопируйте ссылку:
+
+```
+https://raw.githubusercontent.com/BucketOnHead/java-shareit/main/shareit-open-api-spec.yaml
+```
+
+2. Перейдите по ссылке: https://editor-next.swagger.io/ (если ссылка не работает, найдите в браузере `swagger editor`)
+
+3. Выберете на сайте `File` > `Import URL` и вставьте скопированную ссылку 
+
+### Если проект установлен
+
+Если вы уже установили проект, то после запуска сервиса `gateway` вы можете ознакомиться с API проекта по ссылке:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
 
 ## Инструкция по установке
 
